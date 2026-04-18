@@ -1569,26 +1569,118 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 
 <script>
 // ══════════════════════════════════════════════════
-//  DB
+//  SUPABASE + DB LAYER
 // ══════════════════════════════════════════════════
-const DB={
+const SUPABASE_URL='https://kgbewrxrfxihtvqpduis.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnYmV3cnhyZnhpaHR2cXBkdWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDEyNzAsImV4cCI6MjA5MjAxNzI3MH0.2a92RkbuczQWZIPq5zs3Vo4KuPBpYkoK31FL8ztYo6s';
+
+function getSession(){try{return JSON.parse(localStorage.getItem('vn_session')||'null');}catch(e){return null;}}
+function getAuthHeaders(){
+  const s=getSession();
+  return {'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+(s?.access_token||SUPABASE_ANON_KEY)};
+}
+function getUserId(){const s=getSession();return s?.user?.id||null;}
+
+async function sbSelect(table,filters=''){
+  const uid=getUserId();if(!uid)return[];
+  const url=`${SUPABASE_URL}/rest/v1/${table}?user_id=eq.${uid}&${filters}&order=id.asc`;
+  const r=await fetch(url,{headers:{...getAuthHeaders(),'Accept':'application/json'}});
+  if(!r.ok)return[];return await r.json();
+}
+async function sbSelectProfile(){
+  const uid=getUserId();if(!uid)return null;
+  const r=await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${uid}`,{headers:{...getAuthHeaders(),'Accept':'application/json'}});
+  if(!r.ok)return null;const d=await r.json();return d[0]||null;
+}
+async function sbUpsert(table,rows){
+  const url=`${SUPABASE_URL}/rest/v1/${table}`;
+  const r=await fetch(url,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(Array.isArray(rows)?rows:[rows])});
+  if(!r.ok){console.error('sbUpsert',table,await r.text());return null;}return await r.json();
+}
+async function sbDeleteIds(table,ids){
+  if(!ids?.length)return;
+  await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=in.(${ids.join(',')})`,{method:'DELETE',headers:getAuthHeaders()});
+}
+
+// ── Data mappers ──
+const toTutor=r=>({id:r.id,name:r.name,phone:r.phone||'',address:r.address||'',city:r.city||'',alertText:r.alert_text||'',alertActive:!!r.alert_active,quickEntry:!!r.quick_entry});
+const fromTutor=(t,uid)=>{const o={user_id:uid,name:t.name,phone:t.phone||'',address:t.address||'',city:t.city||'',alert_text:t.alertText||'',alert_active:!!t.alertActive,quick_entry:!!t.quickEntry};if(t.id)o.id=t.id;return o;};
+const toPet=r=>(({id:r.id,tutorId:r.tutor_id,name:r.name,species:r.species||'',breed:r.breed||'',dob:r.dob||'',chip:r.chip||'',castrated:!!r.castrated,deceased:!!r.deceased,alertText:r.alert_text||'',alertActive:!!r.alert_active,quickEntry:!!r.quick_entry}));
+const fromPet=(p,uid)=>{const o={user_id:uid,tutor_id:p.tutorId,name:p.name,species:p.species||'',breed:p.breed||'',dob:p.dob||'',chip:p.chip||'',castrated:!!p.castrated,deceased:!!p.deceased,alert_text:p.alertText||'',alert_active:!!p.alertActive,quick_entry:!!p.quickEntry};if(p.id)o.id=p.id;return o;};
+const toVisit=r=>(({id:r.id,petId:r.pet_id,vetId:r.vet_id,date:new Date(r.visit_date).getTime(),temp:r.temp||'',peso:r.peso||'',fc:r.fc||'',fr:r.fr||'',presion:r.presion||'',notes:r.notes||'',vacc:r.vacc||null,organs:r.organs||[],symptoms:r.symptoms||[],diagPresuntivo:r.diag_presuntivo||'',diagDefinitivo:r.diag_definitivo||'',confMethod:r.conf_method||'',confStatus:r.conf_status||'',attachments:r.attachments||[],quick:!!r.quick}));
+const fromVisit=(v,uid)=>{const o={user_id:uid,pet_id:v.petId,vet_id:v.vetId||null,visit_date:new Date(v.date).toISOString(),temp:v.temp||'',peso:v.peso||'',fc:v.fc||'',fr:v.fr||'',presion:v.presion||'',notes:v.notes||'',vacc:v.vacc||null,organs:v.organs||[],symptoms:v.symptoms||[],diag_presuntivo:v.diagPresuntivo||'',diag_definitivo:v.diagDefinitivo||'',conf_method:v.confMethod||'',conf_status:v.confStatus||'',attachments:v.attachments||[],quick:!!v.quick};if(v.id)o.id=v.id;return o;};
+const toReminder=r=>(({id:r.id,petId:r.pet_id,tutorId:r.tutor_id,type:r.type||'manual',label:r.label||'',dueDate:new Date(r.due_date).getTime()}));
+const fromReminder=(r,uid)=>{const o={user_id:uid,pet_id:r.petId||null,tutor_id:r.tutorId||null,type:r.type||'manual',label:r.label||'',due_date:new Date(r.dueDate).toISOString()};if(r.id)o.id=r.id;return o;};
+const toAppt=r=>(({id:r.id,petId:r.pet_id,tutorId:r.tutor_id,date:r.appt_date,time:r.appt_time||'',procedure:r.procedure||''}));
+const fromAppt=(a,uid)=>{const o={user_id:uid,pet_id:a.petId||null,tutor_id:a.tutorId||null,appt_date:a.date,appt_time:a.time||'',procedure:a.procedure||''};if(a.id)o.id=a.id;return o;};
+const toVet=r=>(({id:r.id,name:r.name,phone:r.phone||'',license:r.license||'',photo:r.photo||null,isActive:!!r.is_active}));
+const fromVet=(v,uid)=>{const o={user_id:uid,name:v.name,phone:v.phone||'',license:v.license||'',photo:v.photo||null,is_active:!!v.isActive};if(v.id)o.id=v.id;return o;};
+
+// ── Cache (for instant UI reads) ──
+const CACHE={
   get(k){try{return JSON.parse(localStorage.getItem('va_'+k)||'null');}catch(e){return null;}},
   set(k,v){localStorage.setItem('va_'+k,JSON.stringify(v));},
   id(){const n=(this.get('seq')||0)+1;this.set('seq',n);return n;}
 };
-const getTutors=()=>DB.get('tutors')||[];
-const saveTutors=t=>DB.set('tutors',t);
-const getPets=()=>DB.get('pets')||[];
-const savePets=p=>DB.set('pets',p);
-const getVisits=()=>DB.get('visits')||[];
-const saveVisits=v=>DB.set('visits',v);
-const getReminders=()=>DB.get('reminders')||[];
-const saveReminders=r=>DB.set('reminders',r);
-const getSettings=()=>DB.get('settings')||{};
-const getVets=()=>DB.get('vets')||[];
-const saveVets=v=>DB.set('vets',v);
-const getAppts=()=>DB.get('appts')||[];
-const saveAppts=a=>DB.set('appts',a);
+
+// ── Sync from Supabase on load ──
+async function syncFromSupabase(){
+  const uid=getUserId();if(!uid)return;
+  try{
+    const [tutors,pets,visits,rems,appts,vets,profile]=await Promise.all([
+      sbSelect('tutors'),sbSelect('pets'),
+      sbSelect('visits','order=visit_date.asc'),
+      sbSelect('reminders'),sbSelect('appointments'),
+      sbSelect('vets'),sbSelectProfile()
+    ]);
+    if(tutors.length||!CACHE.get('tutors'))CACHE.set('tutors',tutors.map(toTutor));
+    if(pets.length||!CACHE.get('pets'))CACHE.set('pets',pets.map(toPet));
+    if(visits.length||!CACHE.get('visits'))CACHE.set('visits',visits.map(toVisit));
+    if(rems.length||!CACHE.get('reminders'))CACHE.set('reminders',rems.map(toReminder));
+    if(appts.length||!CACHE.get('appts'))CACHE.set('appts',appts.map(toAppt));
+    if(vets.length||!CACHE.get('vets'))CACHE.set('vets',vets.map(toVet));
+    if(profile){
+      const s=CACHE.get('settings')||{};
+      if(profile.clinic_name)s.clinic=profile.clinic_name;
+      if(profile.clinic_phone)s.clinicPhone=profile.clinic_phone;
+      if(profile.clinic_addr)s.clinicAddr=profile.clinic_addr;
+      if(profile.clinic_photo)s.clinicPhoto=profile.clinic_photo;
+      const av=vets.find(v=>v.is_active);if(av)s.activeVetId=av.id;
+      CACHE.set('settings',s);
+    }
+    loadSettings();renderRightPanel();
+    showToast('Datos sincronizados ✓');
+  }catch(e){console.error('Sync error',e);}
+}
+
+// ── Async Supabase writes ──
+const _sbSave=async(table,rows,mapper)=>{
+  const uid=getUserId();if(!uid||!rows.length)return;
+  await sbUpsert(table,rows.map(r=>mapper(r,uid)));
+};
+
+// ── DB accessors ──
+const DB={get(k){return CACHE.get(k);},set(k,v){CACHE.set(k,v);},id(){return CACHE.id();}};
+
+const getTutors=()=>CACHE.get('tutors')||[];
+const saveTutors=t=>{CACHE.set('tutors',t);_sbSave('tutors',t,fromTutor);};
+
+const getPets=()=>CACHE.get('pets')||[];
+const savePets=p=>{CACHE.set('pets',p);_sbSave('pets',p,fromPet);};
+
+const getVisits=()=>CACHE.get('visits')||[];
+const saveVisits=v=>{CACHE.set('visits',v);_sbSave('visits',v,fromVisit);};
+
+const getReminders=()=>CACHE.get('reminders')||[];
+const saveReminders=r=>{CACHE.set('reminders',r);_sbSave('reminders',r,fromReminder);};
+
+const getSettings=()=>CACHE.get('settings')||{};
+
+const getVets=()=>CACHE.get('vets')||[];
+const saveVets=v=>{CACHE.set('vets',v);_sbSave('vets',v,fromVet);};
+
+const getAppts=()=>CACHE.get('appts')||[];
+const saveAppts=a=>{CACHE.set('appts',a);_sbSave('appointments',a,fromAppt);};
 
 // ══════════════════════════════════════════════════
 //  STATE
@@ -1667,7 +1759,11 @@ function loadSettings(){
 function saveSettings(){
   const s=getSettings();
   s.clinic=v('cfg-clinic');s.city=v('cfg-city');
-  DB.set('settings',s);loadSettings();closeModal('m-settings');showToast('Configuración guardada ✓');
+  CACHE.set('settings',s);
+  // persist clinic to Supabase profile
+  const uid=getUserId();
+  if(uid)sbUpsert('profiles',{id:uid,clinic_name:s.clinic||'',city:s.city||''});
+  loadSettings();closeModal('m-settings');showToast('Configuración guardada ✓');
 }
 function showMainMenu(){
   const s=getSettings();
@@ -1705,7 +1801,10 @@ function saveClinic(){
   s.clinic=document.getElementById('clinic-name-fi').value.trim();
   s.clinicPhone=document.getElementById('clinic-phone-fi').value.trim();
   s.clinicAddr=document.getElementById('clinic-addr-fi').value.trim();
-  DB.set('settings',s);loadSettings();closeModal('m-clinic');showToast('Clínica guardada ✓');
+  CACHE.set('settings',s);
+  const uid=getUserId();
+  if(uid)sbUpsert('profiles',{id:uid,clinic_name:s.clinic,clinic_phone:s.clinicPhone,clinic_addr:s.clinicAddr});
+  loadSettings();closeModal('m-clinic');showToast('Clínica guardada ✓');
 }
 function triggerClinicPhoto(){document.getElementById('clinic-photo-input').click();}
 function triggerClinicPhotoModal(){document.getElementById('clinic-photo-modal-input').click();}
@@ -1716,7 +1815,8 @@ function handleClinicPhotoFrom(input,targetId){
   const r=new FileReader();
   r.onload=e=>{
     const data=e.target.result;
-    const s=getSettings();s.clinicPhoto=data;DB.set('settings',s);
+    const s=getSettings();s.clinicPhoto=data;CACHE.set('settings',s);
+    const uid=getUserId();if(uid)sbUpsert('profiles',{id:uid,clinic_photo:data});
     const el=document.getElementById(targetId);
     if(el)el.innerHTML=`<img src="${data}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
     loadSettings();showToast('Foto guardada ✓');
@@ -1737,7 +1837,18 @@ function renderVetsList(){
     <div class="vet-active-chk ${s.activeVetId===vt.id?'on':''}" onclick="setActiveVet(${vt.id})">${s.activeVetId===vt.id?'✓':''}</div>
   </div>`).join('');
 }
-function setActiveVet(id){const s=getSettings();s.activeVetId=id;DB.set('settings',s);renderVetsList();showToast('Veterinario activo actualizado');}
+function setActiveVet(id){
+  const s=getSettings();s.activeVetId=id;CACHE.set('settings',s);
+  // mark in DB: set all is_active false, then this one true
+  const uid=getUserId();
+  if(uid){
+    const vets=getVets();
+    vets.forEach(v=>{v.isActive=(v.id===id);});
+    CACHE.set('vets',vets);
+    _sbSave('vets',vets,fromVet);
+  }
+  renderVetsList();showToast('Veterinario activo actualizado');
+}
 function openAddVetModal(){
   editingVetId=null;vetPhotoData=null;
   document.getElementById('m-addvet-title').textContent='Nuevo veterinario';
@@ -2992,6 +3103,41 @@ function skipFollowup(){
 // ══════════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════════
+
+// Auth guard: redirect to landing if not logged in
+(function checkAuth(){
+  const session=getSession();
+  if(!session||!session.access_token){
+    window.location.href='index.html';
+    return;
+  }
+  // Check if token is expired
+  try{
+    const payload=JSON.parse(atob(session.access_token.split('.')[1]));
+    if(payload.exp && payload.exp*1000 < Date.now()){
+      localStorage.removeItem('vn_session');
+      window.location.href='index.html';
+      return;
+    }
+  }catch(e){}
+})();
+
+// Add logout button to config panel
+(function addLogout(){
+  const configBottom=document.querySelector('.config-panel .config-section:last-child');
+  if(configBottom){
+    const btn=document.createElement('div');
+    btn.className='config-row';
+    btn.style.cssText='color:var(--red);cursor:pointer;';
+    btn.innerHTML='<span class="cr-ico">🚪</span>Cerrar sesión';
+    btn.onclick=()=>{
+      localStorage.removeItem('vn_session');
+      window.location.href='index.html';
+    };
+    configBottom.appendChild(btn);
+  }
+})();
+
 loadSettings();
 applyTheme();
 applyFontSize();
@@ -3000,9 +3146,12 @@ rebuildVaccList();
 const _s0=getSettings();
 const _tog0=document.getElementById('theme-toggle');
 if(_tog0)_tog0.classList.toggle('on',_s0.darkMode!==false);
-// render right panel after load
-setTimeout(renderRightPanel, 100);
-if(!_s0.clinic)setTimeout(()=>showMainMenu(),600);
+// Sync from Supabase then render
+syncFromSupabase().then(()=>{
+  setTimeout(renderRightPanel,50);
+  if(!getSettings().clinic)setTimeout(()=>showMainMenu(),800);
+});
+setTimeout(renderRightPanel,100);
 </script>
 </body>
 </html>
