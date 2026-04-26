@@ -1745,7 +1745,7 @@ const getContacts=()=>CACHE.get('contacts')||[];
 const saveContacts=c=>{CACHE.set('contacts',c);_sbSave('contacts',c,fromContact);};
 const saveCustomVaccs=v=>{CACHE.set('custom_vaccs',v);_sbSave('custom_vaccs',v,fromCustomVacc);};
 const toContact=r=>({id:r.id,name:r.name||'',ref:r.reference||'',phone:r.phone||'',address:r.address||''});
-const fromContact=(c,uid)=>{const o={user_id:uid,name:c.name||'',reference:c.ref||'',phone:c.phone||'',address:c.address||''};if(c.id)o.id=c.id;return o;};
+const fromContact=(c,uid)=>{const o={user_id:uid,name:c.name||'',reference:c.ref||'',phone:c.phone||'',address:c.address||''};if(c.id&&/^[0-9a-f-]{36}$/i.test(c.id))o.id=c.id;return o;};
 const toCustomVacc=r=>({id:r.id,name:r.name||'',days:r.days||365});
 const fromCustomVacc=(v,uid)=>{const o={user_id:uid,name:v.name||'',days:v.days||365};if(v.id)o.id=v.id;return o;};
 
@@ -3457,7 +3457,7 @@ function saveContact(){
     }
   } else {
     contacts.push({
-      id:'c'+Date.now(),
+      id: crypto.randomUUID(),
       name,
       ref:document.getElementById('contact-ref-fi').value.trim(),
       phone:document.getElementById('contact-phone-fi').value.trim(),
