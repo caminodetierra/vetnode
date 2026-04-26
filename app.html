@@ -3375,20 +3375,6 @@ function skipFollowup(){
   }
 })();
 
-loadSettings();
-applyTheme();
-applyFontSize();
-syncFsPills();
-rebuildVaccList();
-const _s0=getSettings();
-const _tog0=document.getElementById('theme-toggle');
-if(_tog0)_tog0.classList.toggle('on',_s0.darkMode!==false);
-// Sync from Supabase then render
-syncFromSupabase().then(()=>{
-  setTimeout(renderRightPanel,50);
-  if(!getSettings().clinic)setTimeout(()=>showMainMenu(),800);
-});
-setTimeout(renderRightPanel,100);
 // ══════════════════════════════════════════════════
 //  AGENDA
 // ══════════════════════════════════════════════════
@@ -3491,6 +3477,20 @@ function deleteContact(id){
   renderAgenda();
   showToast('Contacto eliminado');
 }
-</script>
+
+loadSettings();
+applyTheme();
+applyFontSize();
+syncFsPills();
+rebuildVaccList();
+const _s0=getSettings();
+const _tog0=document.getElementById('theme-toggle');
+if(_tog0)_tog0.classList.toggle('on',_s0.darkMode!==false);
+// Sync from Supabase then render
+syncFromSupabase().then(()=>{
+  setTimeout(renderRightPanel,50);
+  if(!getSettings().clinic)setTimeout(()=>showMainMenu(),800);
+});
+setTimeout(renderRightPanel,100);</script>
 </body>
 </html>
