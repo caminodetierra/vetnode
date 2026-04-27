@@ -1652,7 +1652,7 @@ async function sbSelectProfile(){
 async function sbUpsert(table,rows){
   const url=`${SUPABASE_URL}/rest/v1/${table}`;
   const r=await fetch(url,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(Array.isArray(rows)?rows:[rows])});
-  if(!r.ok){console.error('sbUpsert',table,await r.text());return null;}return await r.json();
+  if(!r.ok){const err=await r.text();console.error('sbUpsert ERROR',table,err);showToast('Error al guardar en '+table+': '+err.substring(0,60));return null;}return await r.json();
 }
 async function sbDeleteIds(table,ids){
   if(!ids?.length)return;
