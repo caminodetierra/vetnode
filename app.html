@@ -1761,11 +1761,29 @@ const saveContacts=async c=>{
   }
   if(existing.length)_sbSave('contacts',existing,fromContact);
 };
-const saveCustomVaccs=v=>{CACHE.set('custom_vaccs',v);_sbSave('custom_vaccs',v,fromCustomVacc);};
+const saveCustomVaccs=async v=>{
+  CACHE.set('custom_vaccs',v);
+  const uid=getUserId();if(!uid)return;
+  const newOnes=v.filter(x=>!x._saved);
+  const existing=v.filter(x=>x._saved&&/^[0-9a-f-]{36}$/i.test(x.id));
+  for(const vacc of newOnes){
+    const body={user_id:uid,name:vacc.name||'',days:vacc.days||365};
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/custom_vaccs`,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'return=representation'},body:JSON.stringify(body)});
+    if(r.ok){
+      const data=await r.json();
+      if(data[0]?.id){
+        const updated=CACHE.get('custom_vaccs')||[];
+        const idx=updated.findIndex(x=>x.id===vacc.id);
+        if(idx>-1){updated[idx]={...updated[idx],id:data[0].id,_saved:true};CACHE.set('custom_vaccs',updated);}
+      }
+    } else {console.error('custom_vaccs insert error',await r.text());}
+  }
+  if(existing.length)_sbSave('custom_vaccs',existing,fromCustomVacc);
+};
 const toContact=r=>({id:r.id,name:r.name||'',ref:r.reference||'',phone:r.phone||'',address:r.address||'',_saved:true});
 const fromContact=(c,uid)=>{const o={user_id:uid,name:c.name||'',reference:c.ref||'',phone:c.phone||'',address:c.address||''};if(c.id&&/^[0-9a-f-]{36}$/i.test(c.id))o.id=c.id;return o;};
-const toCustomVacc=r=>({id:r.id,name:r.name||'',days:r.days||365});
-const fromCustomVacc=(v,uid)=>{const o={user_id:uid,name:v.name||'',days:v.days||365};if(v.id)o.id=v.id;return o;};
+const toCustomVacc=r=>({id:r.id,name:r.name||'',days:r.days||365,_saved:true});
+const fromCustomVacc=(v,uid)=>{const o={user_id:uid,name:v.name||'',days:v.days||365};if(v.id&&/^[0-9a-f-]{36}$/i.test(v.id))o.id=v.id;return o;};
 
 // ══════════════════════════════════════════════════
 //  STATE
@@ -2652,7 +2670,7 @@ const DEFAULT_VACCS=[
 ];
 const getCustomVaccs=()=>{
   let vaccs=CACHE.get('custom_vaccs');
-  if(!vaccs){vaccs=DEFAULT_VACCS.map(v=>({id:DB.id(),name:v.name,days:v.days}));saveCustomVaccs(vaccs);}
+  if(!vaccs){vaccs=DEFAULT_VACCS.map(v=>({id:crypto.randomUUID(),name:v.name,days:v.days}));saveCustomVaccs(vaccs);}
   return vaccs;
 };
 function openNewCustomVacc(){
@@ -3496,6 +3514,12 @@ function deleteContact(id){
   showToast('Contacto eliminado');
 }
 
+// One-time migration: fix non-UUID custom_vaccs ids
+(()=>{
+  const vaccs=CACHE.get('custom_vaccs');if(!vaccs)return;
+  const fixed=vaccs.map(v=>(/^[0-9a-f-]{36}$/i.test(v.id)?v:{...v,id:crypto.randomUUID(),_saved:false}));
+  if(fixed.some((v,i)=>v.id!==vaccs[i].id))CACHE.set('custom_vaccs',fixed);
+})();
 // One-time migration: fix non-UUID contact ids in localStorage
 (()=>{
   const contacts=CACHE.get('contacts');if(!contacts)return;
