@@ -1742,13 +1742,27 @@ const getAppts=()=>CACHE.get('appts')||[];
 const saveAppts=a=>{CACHE.set('appts',a);_sbSave('appointments',a,fromAppt);};
 
 const getContacts=()=>CACHE.get('contacts')||[];
-const saveContacts=c=>{
+const saveContacts=async c=>{
   CACHE.set('contacts',c);
-  const valid=c.filter(x=>/^[0-9a-f-]{36}$/i.test(x.id));
-  if(valid.length)_sbSave('contacts',valid,fromContact);
+  const uid=getUserId();if(!uid)return;
+  const newOnes=c.filter(x=>!x._saved);
+  const existing=c.filter(x=>x._saved&&/^[0-9a-f-]{36}$/i.test(x.id));
+  for(const contact of newOnes){
+    const body={user_id:uid,name:contact.name||'',reference:contact.ref||'',phone:contact.phone||'',address:contact.address||''};
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/contacts`,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'return=representation'},body:JSON.stringify(body)});
+    if(r.ok){
+      const data=await r.json();
+      if(data[0]?.id){
+        const updated=CACHE.get('contacts')||[];
+        const idx=updated.findIndex(x=>x.id===contact.id);
+        if(idx>-1){updated[idx]={...updated[idx],id:data[0].id,_saved:true};CACHE.set('contacts',updated);}
+      }
+    } else {console.error('contacts insert error',await r.text());}
+  }
+  if(existing.length)_sbSave('contacts',existing,fromContact);
 };
 const saveCustomVaccs=v=>{CACHE.set('custom_vaccs',v);_sbSave('custom_vaccs',v,fromCustomVacc);};
-const toContact=r=>({id:r.id,name:r.name||'',ref:r.reference||'',phone:r.phone||'',address:r.address||''});
+const toContact=r=>({id:r.id,name:r.name||'',ref:r.reference||'',phone:r.phone||'',address:r.address||'',_saved:true});
 const fromContact=(c,uid)=>{const o={user_id:uid,name:c.name||'',reference:c.ref||'',phone:c.phone||'',address:c.address||''};if(c.id&&/^[0-9a-f-]{36}$/i.test(c.id))o.id=c.id;return o;};
 const toCustomVacc=r=>({id:r.id,name:r.name||'',days:r.days||365});
 const fromCustomVacc=(v,uid)=>{const o={user_id:uid,name:v.name||'',days:v.days||365};if(v.id)o.id=v.id;return o;};
