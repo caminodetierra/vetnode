@@ -1742,7 +1742,11 @@ const getAppts=()=>CACHE.get('appts')||[];
 const saveAppts=a=>{CACHE.set('appts',a);_sbSave('appointments',a,fromAppt);};
 
 const getContacts=()=>CACHE.get('contacts')||[];
-const saveContacts=c=>{CACHE.set('contacts',c);_sbSave('contacts',c,fromContact);};
+const saveContacts=c=>{
+  CACHE.set('contacts',c);
+  const valid=c.filter(x=>/^[0-9a-f-]{36}$/i.test(x.id));
+  if(valid.length)_sbSave('contacts',valid,fromContact);
+};
 const saveCustomVaccs=v=>{CACHE.set('custom_vaccs',v);_sbSave('custom_vaccs',v,fromCustomVacc);};
 const toContact=r=>({id:r.id,name:r.name||'',ref:r.reference||'',phone:r.phone||'',address:r.address||''});
 const fromContact=(c,uid)=>{const o={user_id:uid,name:c.name||'',reference:c.ref||'',phone:c.phone||'',address:c.address||''};if(c.id&&/^[0-9a-f-]{36}$/i.test(c.id))o.id=c.id;return o;};
@@ -3478,6 +3482,12 @@ function deleteContact(id){
   showToast('Contacto eliminado');
 }
 
+// One-time migration: fix non-UUID contact ids in localStorage
+(()=>{
+  const contacts=CACHE.get('contacts');if(!contacts)return;
+  const fixed=contacts.map(c=>(/^[0-9a-f-]{36}$/i.test(c.id)?c:{...c,id:crypto.randomUUID()}));
+  if(fixed.some((c,i)=>c.id!==contacts[i].id))CACHE.set('contacts',fixed);
+})();
 loadSettings();
 applyTheme();
 applyFontSize();
