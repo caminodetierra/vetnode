@@ -2162,7 +2162,7 @@ function renderPetProfile(){
     const vetBadge=vetInner?`<div class="v-vet-badge" title="${vetTooltip}" onclick="event.stopPropagation();showVetTooltip(${vt.vetId})">${vetInner}</div>`:'<div class="v-vet-badge" style="opacity:0;pointer-events:none"></div>';
     return`<div class="visit-bubble-wrap">
       ${vetBadge}
-      <div class="visit-bubble" onclick="openVisitDetail(${vt.id})">
+      <div class="visit-bubble" onclick="openVisitDetail('${vt.id}')">
         <div class="v-date">${formatDate(vt.date)} <span style="color:var(--blue);font-size:10px">toca para editar</span></div>
         ${vitals?`<div class="v-vitals">${vitals}</div>`:''}
         <div class="v-text">${(vt.notes||'Sin notas.').substring(0,120)}${(vt.notes||'').length>120?'…':''}</div>
@@ -2747,7 +2747,9 @@ document.addEventListener('click',()=>document.querySelectorAll('.cv-dropdown').
 function rebuildVaccList(){
   const custom=getCustomVaccs();
   const container=document.getElementById('vacc-list');
-  container.querySelectorAll('.custom-vacc').forEach(el=>el.remove());
+  if(!container)return;
+  // Remove all existing vacc items except reminder item
+  container.querySelectorAll('.vacc-item:not(.reminder-item)').forEach(el=>el.remove());
   const reminderItem=container.querySelector('.reminder-item');
   custom.forEach(cv=>{
     const div=document.createElement('div');div.className='vacc-item custom-vacc';
@@ -2898,7 +2900,7 @@ function renderTransferList(){
   const q=(v('transfer-search')||'').toLowerCase();
   const p=getPets().find(p=>p.id===transferPetId);
   const tutors=getTutors().filter(t=>t.id!==(p?p.tutorId:null)&&t.name.toLowerCase().includes(q));
-  document.getElementById('transfer-list').innerHTML=tutors.map(t=>`<div class="transfer-btn" onclick="selectTransferTutor(${t.id})" style="${transferTutorId===t.id?'border-color:var(--blue);background:var(--blue-dim)':''}"><div class="tc-av" style="width:28px;height:28px;font-size:13px">👤</div><span style="flex:1;font-size:13px">${t.name}</span>${transferTutorId===t.id?'<span style="color:var(--blue);font-weight:700">✓</span>':''}</div>`).join('');
+  document.getElementById('transfer-list').innerHTML=tutors.map(t=>`<div class="transfer-btn" onclick="selectTransferTutor('${t.id}')" style="${transferTutorId===t.id?'border-color:var(--blue);background:var(--blue-dim)':''}"><div class="tc-av" style="width:28px;height:28px;font-size:13px">👤</div><span style="flex:1;font-size:13px">${t.name}</span>${transferTutorId===t.id?'<span style="color:var(--blue);font-weight:700">✓</span>':''}</div>`).join('');
 }
 function selectTransferTutor(id){transferTutorId=id;document.getElementById('transfer-save-btn').style.display='block';renderTransferList();}
 function confirmTransfer(){
