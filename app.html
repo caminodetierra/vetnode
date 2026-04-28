@@ -2072,7 +2072,7 @@ function renderTutors(){
     const mp=pets.filter(p=>p.tutorId===t.id);
     const lv=visits.filter(v=>mp.some(p=>p.id===v.petId)).sort((a,b)=>b.date-a.date)[0];
     return`<div class="tutor-row">
-      <div class="tutor-card" onclick="openTutor(${t.id})">
+      <div class="tutor-card" onclick="openTutor('${t.id}')">
         <div class="tc-top"><div class="tc-av">👤</div><div class="tc-info"><div class="tc-name">${t.name}${t.alertActive&&t.alertText?` <span style="font-size:10px;color:var(--yellow);font-weight:600">(${t.alertText})</span>`:''}</div><div class="tc-phone">${t.phone||''}</div></div><div class="tc-last">${lv?timeAgo(lv.date):''}</div></div>
         ${mp.length?`<div class="tc-pets">${mp.map(p=>{const match=q&&p.name.toLowerCase().includes(q);return`<div class="pet-chip"${match?' style="background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue)"':''}>${petEmoji(p.species)} ${p.name}${p.deceased?' ✝':''}</div>`;}).join('')}</div>`:''}
       </div>
@@ -2096,7 +2096,7 @@ function renderTutorProfile(){
   if(!pets.length){el.innerHTML=`<div class="empty-state" style="padding:24px 0"><span class="emoji">🐾</span>Sin mascotas.<br>Tocá <strong>+ Nueva mascota</strong>.</div>`;return;}
   el.innerHTML=pets.map(p=>{
     const lv=visits.filter(v=>v.petId===p.id).sort((a,b)=>b.date-a.date)[0];
-    return`<div class="pet-btn" onclick="openPet(${p.id})">
+    return`<div class="pet-btn" onclick="openPet('${p.id}')">
       <div class="pet-ico ${petClass(p.species)}">${petEmoji(p.species)}</div>
       <div class="pet-info"><div class="pet-name">${p.name}${p.deceased?`<span class="pet-deceased">Fallecido/a</span>`:''}${p.alertActive&&p.alertText?` <span style="font-size:10px;color:var(--yellow);font-weight:600">(${p.alertText})</span>`:''}</div><div class="pet-sub">${[p.species,p.breed,calcAgeStr(p.dob),p.castrated?'Castrado/a':null].filter(Boolean).join(' · ')}</div></div>
       <div class="pet-right"><div class="pet-last">${lv?timeAgo(lv.date):''}</div><div class="pet-dots" onclick="event.stopPropagation();showPetCtx(event,${p.id})"><span></span><span></span><span></span></div></div>
@@ -2305,12 +2305,12 @@ function renderReminders(){
   let html=filterBadge;
   const rh=(r,cls)=>{
     const p=pets.find(p=>p.id===r.petId);const t=tutors.find(t=>t.id===r.tutorId);
-    const clickAction=r.petId?`openPetFromReminder(${r.petId},${r.tutorId||null})`:'';
+    const clickAction=r.petId?`openPetFromReminder('${r.petId}','${r.tutorId||null}')`:'';
     return`<div class="rem-card ${cls}" ${clickAction?`onclick="${clickAction}"`:''} style="${clickAction?'cursor:pointer':''}">
       <div class="rem-ico">${r.type==='followup'||r.type==='manual'?'🔔':'💉'}</div>
       <div class="rem-info"><div class="rem-title">${r.label}${p?' — '+p.name:''}</div><div class="rem-detail">${t?t.name:''}</div></div>
       <div class="rem-date">${formatDateShort(r.dueDate)}</div>
-      <div class="rem-opts" onclick="event.stopPropagation();showReminderCtx(event,${r.id},'${(r.type||'').replace(/'/g,"\'")}','${(r.label||'').replace(/'/g,"\'")}',${p?p.id:null},${t?t.id:null})"><span></span><span></span><span></span></div>
+      <div class="rem-opts" onclick="event.stopPropagation();showReminderCtx(event,${r.id},'${(r.type||'').replace(/'/g,"\'")}','${(r.label||'').replace(/'/g,"\'")}',${p?p.id:null},'${t?t.id:null}')"><span></span><span></span><span></span></div>
     </div>`;
   };
   if(over.length)html+=`<div class="rem-section">Vencidos</div>${over.map(r=>rh(r,'urgent')).join('')}`;
@@ -2336,7 +2336,7 @@ function renderNrPetSearch(){
   const tutors=getTutors();
   if(!pets.length){res.style.display='block';res.innerHTML=`<div style="padding:10px;font-size:12px;color:var(--text3)">Sin resultados</div>`;return;}
   res.style.display='block';
-  res.innerHTML=pets.map(p=>{const t=tutors.find(t=>t.id===p.tutorId);return`<div class="gsearch-result" onclick="selectNrPet(${p.id},'${p.name.replace(/'/g,"\\'")}',${t?t.id:null})"><div class="pet-ico ${petClass(p.species)}" style="width:26px;height:26px;font-size:13px">${petEmoji(p.species)}</div><div><div style="font-size:13px;font-weight:700;color:var(--text)">${p.name}</div><div style="font-size:10px;color:var(--text3)">${t?t.name:''}</div></div></div>`;}).join('');
+  res.innerHTML=pets.map(p=>{const t=tutors.find(t=>t.id===p.tutorId);return`<div class="gsearch-result" onclick="selectNrPet('${p.id}','${p.name.replace(/'/g,"\\'")}','${t?t.id:null}')"><div class="pet-ico ${petClass(p.species)}" style="width:26px;height:26px;font-size:13px">${petEmoji(p.species)}</div><div><div style="font-size:13px;font-weight:700;color:var(--text)">${p.name}</div><div style="font-size:10px;color:var(--text3)">${t?t.name:''}</div></div></div>`;}).join('');
 }
 function selectNrPet(petId,petName,tutorId){
   document.getElementById('nr-pet-id').value=petId;
@@ -2855,7 +2855,7 @@ function showTutorCtx(e,id){
   menu.style.cssText=`top:${rect.bottom-appRect.top+4}px;right:18px;`;
   menu.innerHTML=`
     <div class="ctx-item" onclick="closeCtx();openEditTutorById(${id})"><span class="ctx-ico">✏️</span>Modificar tutor</div>
-    <div class="ctx-item" onclick="closeCtx();openTutorAlert(${id})"><span class="ctx-ico">⚠️</span>Generar alerta</div>
+    <div class="ctx-item" onclick="closeCtx();openTutorAlert('${id}')"><span class="ctx-ico">⚠️</span>Generar alerta</div>
     <div class="ctx-divider"></div>
     <div class="ctx-item red" onclick="closeCtx();S.editTutorId=${id};deleteTutor()"><span class="ctx-ico">🗑️</span>Eliminar tutor</div>`;
   document.querySelector('.app').appendChild(menu);
@@ -2869,7 +2869,7 @@ function showPetCtx(e,id){
   menu.style.cssText=`top:${rect.bottom-appRect.top+4}px;right:18px;`;
   menu.innerHTML=`
     <div class="ctx-item" onclick="closeCtx();openEditPetById(${id})"><span class="ctx-ico">✏️</span>Modificar mascota</div>
-    <div class="ctx-item" onclick="closeCtx();openPetAlert(${id})"><span class="ctx-ico">⚠️</span>Generar alerta</div>
+    <div class="ctx-item" onclick="closeCtx();openPetAlert('${id}')"><span class="ctx-ico">⚠️</span>Generar alerta</div>
     <div class="ctx-item" onclick="closeCtx();toggleDeceased(${id})"><span class="ctx-ico">${p&&p.deceased?'💚':'🕊️'}</span>${p&&p.deceased?'Marcar como vivo/a':'Marcar como fallecido/a'}</div>
     <div class="ctx-item" onclick="closeCtx();openTransfer(${id})"><span class="ctx-ico">🔄</span>Cambio de propietario</div>
     <div class="ctx-divider"></div>
@@ -2922,8 +2922,8 @@ function renderGSearch(){
   if(!q){el.innerHTML='';return;}
   const tutors=getTutors().filter(t=>t.name.toLowerCase().includes(q));
   const pets=getPets().filter(p=>p.name.toLowerCase().includes(q));
-  const tutorHtml=tutors.length?`<div class="gsearch-label">Tutores</div>`+tutors.map(t=>`<div class="gsearch-result" onclick="closeModal('m-gsearch');openTutor(${t.id})"><div class="tc-av" style="width:30px;height:30px;font-size:13px">👤</div><div><div style="font-size:13px;font-weight:700;color:var(--text)">${t.name}</div><div style="font-size:10px;color:var(--text3)">${t.phone||''}</div></div></div>`).join(''):'';
-  const petHtml=pets.length?`<div class="gsearch-label">Mascotas</div>`+pets.map(p=>{const t=getTutors().find(t=>t.id===p.tutorId);return`<div class="gsearch-result" onclick="closeModal('m-gsearch');S.tutorId=${p.tutorId};openPet(${p.id})"><div class="pet-ico ${petClass(p.species)}" style="width:30px;height:30px;font-size:15px">${petEmoji(p.species)}</div><div><div style="font-size:13px;font-weight:700;color:var(--text)">${p.name}</div><div style="font-size:10px;color:var(--text3)">${t?t.name:''}</div></div></div>`;}).join(''):'';
+  const tutorHtml=tutors.length?`<div class="gsearch-label">Tutores</div>`+tutors.map(t=>`<div class="gsearch-result" onclick="closeModal('m-gsearch');openTutor('${t.id}')"><div class="tc-av" style="width:30px;height:30px;font-size:13px">👤</div><div><div style="font-size:13px;font-weight:700;color:var(--text)">${t.name}</div><div style="font-size:10px;color:var(--text3)">${t.phone||''}</div></div></div>`).join(''):'';
+  const petHtml=pets.length?`<div class="gsearch-label">Mascotas</div>`+pets.map(p=>{const t=getTutors().find(t=>t.id===p.tutorId);return`<div class="gsearch-result" onclick="closeModal('m-gsearch');S.tutorId='${p.tutorId}';openPet('${p.id}')"><div class="pet-ico ${petClass(p.species)}" style="width:30px;height:30px;font-size:15px">${petEmoji(p.species)}</div><div><div style="font-size:13px;font-weight:700;color:var(--text)">${p.name}</div><div style="font-size:10px;color:var(--text3)">${t?t.name:''}</div></div></div>`;}).join(''):'';
   el.innerHTML=tutorHtml+petHtml||(tutorHtml||petHtml?'':'<div style="text-align:center;padding:20px;font-size:12px;color:var(--text3)">Sin resultados</div>');
 }
 
@@ -2969,7 +2969,7 @@ function renderCalEvents(){
   if(!dayAppts.length){el.innerHTML=`<div class="cal-events-title">${dateLabel}</div><div class="empty-state" style="padding:24px 0;font-size:12px"><span class="emoji" style="font-size:28px">📅</span>Sin turnos para este día.<br>Tocá <strong>+</strong> para agregar uno.</div>`;return;}
   el.innerHTML=`<div class="cal-events-title">${dateLabel}</div>`+dayAppts.map(a=>{
     const p=getPets().find(p=>p.id===a.petId);const t=getTutors().find(t=>t.id===a.tutorId);
-    const clickAction=a.petId?`openPetFromReminder(${a.petId},${a.tutorId||null})`:'';
+    const clickAction=a.petId?`openPetFromReminder('${a.petId}','${a.tutorId||null}')`:'';
     return`<div class="cal-event-card" ${clickAction?`onclick="${clickAction}" style="cursor:pointer"`:''}">
       <div class="cal-event-time">${a.time}</div>
       <div class="cal-event-info">
@@ -3218,7 +3218,7 @@ function renderRpPetList(){
   el.innerHTML='<div style="padding:4px 12px 8px">'+pets.map(p=>{
     const isActive=p.id===S.petId;
     const lv=getVisits().filter(v=>v.petId===p.id).sort((a,b)=>b.date-a.date)[0];
-    return`<div class="rp-pet-chip${isActive?' rp-pet-chip-active':''}" onclick="openPet(${p.id})">
+    return`<div class="rp-pet-chip${isActive?' rp-pet-chip-active':''}" onclick="openPet('${p.id}')">
       <div class="rp-pet-chip-ico">${petEmoji(p.species)}</div>
       <div class="rp-pet-chip-info">
         <div class="rp-pet-chip-name">${p.name}${p.deceased?' ✝':''}</div>
@@ -3235,7 +3235,7 @@ function renderRpReminders(){
   el.innerHTML=rems.map(r=>{
     const p=pets.find(p=>p.id===r.petId);const t=tutors.find(t=>t.id===r.tutorId);
     const cls=r.dueDate<now?'urgent':r.dueDate<now+7*864e5?'soon':'';
-    const click=r.petId?`onclick="openPetFromReminder(${r.petId},${r.tutorId||null})"`:'' ;
+    const click=r.petId?`onclick="openPetFromReminder('${r.petId}','${r.tutorId||null}')"`:'' ;
     return`<div class="rp-rem ${cls}" ${click}>
       <div class="rp-rem-ico">${r.type==='vaccine'?'💉':'🔔'}</div>
       <div class="rp-rem-info"><div class="rp-rem-title">${r.label}${p?' — '+p.name:''}</div><div class="rp-rem-sub">${t?t.name:''}</div></div>
@@ -3274,7 +3274,7 @@ function renderRpEvents(){
   if(!dayAppts.length){el.innerHTML=`<div style="padding:4px;font-size:11px;color:var(--text3);text-align:center">Sin turnos</div>`;return;}
   el.innerHTML=dayAppts.map(a=>{
     const p=getPets().find(p=>p.id===a.petId);const t=getTutors().find(t=>t.id===a.tutorId);
-    const click=a.petId?`onclick="openPetFromReminder(${a.petId},${a.tutorId||null})"`:'' ;
+    const click=a.petId?`onclick="openPetFromReminder('${a.petId}','${a.tutorId||null}')"`:'' ;
     return`<div class="rp-event" ${click}><div class="rp-event-time">${a.time}</div><div><div class="rp-event-name">${p?p.name:'Sin mascota'}</div><div class="rp-event-detail">${t?t.name:''} · ${a.procedure||''}</div></div></div>`;
   }).join('');
 }
