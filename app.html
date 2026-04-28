@@ -1975,7 +1975,7 @@ function saveVet(){
   const vets=getVets();
   const data={name,phone:document.getElementById('vet-phone').value.trim(),license:document.getElementById('vet-license').value.trim(),photo:vetPhotoData||null};
   if(editingVetId){const i=vets.findIndex(v=>v.id===editingVetId);vets[i]={...vets[i],...data};}
-  else{const id=DB.id();vets.push({...data,id});const s=getSettings();if(!s.activeVetId){s.activeVetId=id;DB.set('settings',s);}}
+  else{const id=crypto.randomUUID();vets.push({...data,id});const s=getSettings();if(!s.activeVetId){s.activeVetId=id;DB.set('settings',s);}}
   saveVets(vets);closeModal('m-addvet');renderVetsList();showToast('Veterinario guardado ✓');
 }
 function showVetTooltip(vetId){
@@ -2127,7 +2127,7 @@ function saveTutor(){
   const tutors=getTutors();
   const data={name,phone:v('t-phone'),address:v('t-address'),city:v('t-city')};
   if(S.editTutorId){const i=tutors.findIndex(t=>t.id===S.editTutorId);tutors[i]={...tutors[i],...data};}
-  else tutors.unshift({...data,id:DB.id()});
+  else tutors.unshift({...data,id:crypto.randomUUID()});
   saveTutors(tutors);closeModal('m-tutor');renderTutors();
   if(S.editTutorId&&S.tutorId===S.editTutorId)renderTutorProfile();
   showToast(S.editTutorId?'Tutor actualizado ✓':'Tutor guardado ✓');
@@ -2202,7 +2202,7 @@ function savePet(){
   const pets=getPets();
   const data={name,species:v('p-species'),breed:v('p-breed'),dob:v('p-dob'),chip:v('p-chip'),castrated:document.getElementById('toggle-cast').classList.contains('on'),tutorId:S.tutorId};
   if(S.editPetId){const i=pets.findIndex(p=>p.id===S.editPetId);pets[i]={...pets[i],...data};}
-  else pets.unshift({...data,id:DB.id()});
+  else pets.unshift({...data,id:crypto.randomUUID()});
   savePets(pets);closeModal('m-pet');renderTutorProfile();
   showToast(S.editPetId?'Mascota actualizada ✓':'Mascota guardada ✓');
 }
@@ -2236,7 +2236,7 @@ function openNewVisit(){
 }
 function saveVisit(){
   const activeVet=getActiveVet();
-  const visit={id:DB.id(),petId:S.petId,date:Date.now(),vetId:activeVet?activeVet.id:null,temp:v('v-temp'),peso:v('v-peso'),fc:v('v-fc'),fr:v('v-fr'),presion:v('v-presion'),notes:v('v-notes'),vacc:S.vacc,attachments:visitAttachments.slice()};
+  const visit={id:crypto.randomUUID(),petId:S.petId,date:Date.now(),vetId:activeVet?activeVet.id:null,temp:v('v-temp'),peso:v('v-peso'),fc:v('v-fc'),fr:v('v-fr'),presion:v('v-presion'),notes:v('v-notes'),vacc:S.vacc,attachments:visitAttachments.slice()};
   const visits=getVisits();visits.push(visit);saveVisits(visits);
   visitAttachments=[];renderAttachPreviews();
   if(S.vacc){
@@ -2245,7 +2245,7 @@ function saveVisit(){
     if(S.vaccDays>0){
       due.setDate(due.getDate()+S.vaccDays);
       const rems=getReminders();
-      rems.push({id:DB.id(),petId:S.petId,tutorId:p?p.tutorId:null,type:'vaccine',label:S.vacc,dueDate:due.getTime()});
+      rems.push({id:crypto.randomUUID(),petId:S.petId,tutorId:p?p.tutorId:null,type:'vaccine',label:S.vacc,dueDate:due.getTime()});
       saveReminders(rems);
     } else {
       // followup: ask for date
@@ -2353,7 +2353,7 @@ function saveManualReminder(){
   const petId=document.getElementById('nr-pet-id').value||null;
   const pet=petId?getPets().find(p=>p.id==petId):null;
   const rems=getReminders();
-  rems.push({id:DB.id(),petId:petId?parseInt(petId):null,tutorId:pet?pet.tutorId:null,type:'manual',label,dueDate:new Date(dateVal+'T12:00').getTime()});
+  rems.push({id:crypto.randomUUID(),petId:petId?parseInt(petId):null,tutorId:pet?pet.tutorId:null,type:'manual',label,dueDate:new Date(dateVal+'T12:00').getTime()});
   saveReminders(rems);closeModal('m-new-reminder');renderReminders();showToast('Recordatorio guardado ✓');
 }
 
@@ -2625,11 +2625,11 @@ function saveAppt(){
   const procedure=document.getElementById('appt-proc').value.trim();
   const dateKey=`${calSelected.getFullYear()}-${String(calSelected.getMonth()+1).padStart(2,'0')}-${String(calSelected.getDate()).padStart(2,'0')}`;
   const appts=getAppts();
-  appts.push({id:DB.id(),date:dateKey,time,tutorId,petId,procedure});
+  appts.push({id:crypto.randomUUID(),date:dateKey,time,tutorId,petId,procedure});
   saveAppts(appts);
   const p=petId?getPets().find(p=>p.id===petId):null;
   const rems=getReminders();
-  rems.push({id:DB.id(),petId,tutorId,type:'manual',label:`Turno: ${procedure||'Consulta'} — ${p?p.name:''}`,dueDate:new Date(dateKey+'T'+time).getTime()});
+  rems.push({id:crypto.randomUUID(),petId,tutorId,type:'manual',label:`Turno: ${procedure||'Consulta'} — ${p?p.name:''}`,dueDate:new Date(dateKey+'T'+time).getTime()});
   saveReminders(rems);
   closeModal('m-appt');renderCalendar();showToast('Turno guardado ✓');
 }
@@ -2649,12 +2649,12 @@ function saveQuickVisit(){
   const fallback=`${now.toLocaleDateString('es-AR')} ${now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}`;
   const petname=v('q-petname')||fallback;
   const tutors=getTutors();
-  const newTutor={id:DB.id(),name:petname,phone:'',address:'',city:'',quickEntry:true};
+  const newTutor={id:crypto.randomUUID(),name:petname,phone:'',address:'',city:'',quickEntry:true};
   tutors.unshift(newTutor);saveTutors(tutors);
   const pets=getPets();
-  const newPet={id:DB.id(),name:petname,species:'',breed:'',dob:'',chip:'',castrated:false,tutorId:newTutor.id,quickEntry:true};
+  const newPet={id:crypto.randomUUID(),name:petname,species:'',breed:'',dob:'',chip:'',castrated:false,tutorId:newTutor.id,quickEntry:true};
   pets.unshift(newPet);savePets(pets);
-  const visit={id:DB.id(),petId:newPet.id,date:now.getTime(),temp:v('q-temp'),peso:v('q-peso'),fc:v('q-fc'),fr:v('q-fr'),presion:v('q-presion'),notes:v('q-notes'),vacc:null,quick:true};
+  const visit={id:crypto.randomUUID(),petId:newPet.id,date:now.getTime(),temp:v('q-temp'),peso:v('q-peso'),fc:v('q-fc'),fr:v('q-fr'),presion:v('q-presion'),notes:v('q-notes'),vacc:null,quick:true};
   const visits=getVisits();visits.push(visit);saveVisits(visits);
   go('s-home');showToast('Visita guardada. Completá los datos desde Pacientes.');
 }
@@ -2697,7 +2697,7 @@ function saveCustomVacc(){
     const idx=vaccs.findIndex(x=>x.id===editId);
     if(idx>-1)vaccs[idx]={...vaccs[idx],name,days};
   } else {
-    vaccs.push({id:DB.id(),name,days});
+    vaccs.push({id:crypto.randomUUID(),name,days});
   }
   saveCustomVaccs(vaccs);
   document.getElementById('cv-name').value='';document.getElementById('cv-interval').value='';
@@ -3361,7 +3361,7 @@ function saveFollowupDate(){
   const dateVal=document.getElementById('followup-date').value;
   if(!dateVal){showToast('Seleccioná una fecha');return;}
   const rems=getReminders();
-  rems.push({id:DB.id(),petId:S.pendingFollowupPet,tutorId:S.pendingFollowupTutor,type:'followup',label:'Recordatorio de seguimiento',dueDate:new Date(dateVal+'T12:00').getTime()});
+  rems.push({id:crypto.randomUUID(),petId:S.pendingFollowupPet,tutorId:S.pendingFollowupTutor,type:'followup',label:'Recordatorio de seguimiento',dueDate:new Date(dateVal+'T12:00').getTime()});
   saveReminders(rems);
   S.pendingFollowupPet=null; S.pendingFollowupTutor=null;
   closeModal('m-followup-date');
