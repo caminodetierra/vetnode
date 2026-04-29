@@ -2138,7 +2138,7 @@ function renderTutors(){
         <div class="tc-top"><div class="tc-av">👤</div><div class="tc-info"><div class="tc-name">${t.name}${t.alertActive&&t.alertText?` <span style="font-size:10px;color:var(--yellow);font-weight:600">(${t.alertText})</span>`:''}</div><div class="tc-phone">${t.phone||''}</div></div><div class="tc-last">${lv?timeAgo(lv.date):''}</div></div>
         ${mp.length?`<div class="tc-pets">${mp.map(p=>{const match=q&&p.name.toLowerCase().includes(q);return`<div class="pet-chip"${match?' style="background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue)"':''}>${petEmoji(p.species)} ${p.name}${p.deceased?' ✝':''}</div>`;}).join('')}</div>`:''}
       </div>
-      <div class="opts-btn" onclick="event.stopPropagation();showTutorCtx(event,${t.id})"><span></span><span></span><span></span></div>
+      <div class="opts-btn" onclick="event.stopPropagation();showTutorCtx(event,'${t.id}')"><span></span><span></span><span></span></div>
     </div>`;
   }).join('');
 }
@@ -2210,7 +2210,7 @@ function renderTutorProfile(){
     return`<div class="pet-btn" onclick="openPet('${p.id}')">
       <div class="pet-ico ${petClass(p.species)}">${petEmoji(p.species)}</div>
       <div class="pet-info"><div class="pet-name">${p.name}${p.deceased?`<span class="pet-deceased">Fallecido/a</span>`:''}${p.alertActive&&p.alertText?` <span style="font-size:10px;color:var(--yellow);font-weight:600">(${p.alertText})</span>`:''}</div><div class="pet-sub">${[p.species,p.breed,calcAgeStr(p.dob),p.castrated?'Castrado/a':null].filter(Boolean).join(' · ')}</div></div>
-      <div class="pet-right"><div class="pet-last">${lv?timeAgo(lv.date):''}</div><div class="pet-dots" onclick="event.stopPropagation();showPetCtx(event,${p.id})"><span></span><span></span><span></span></div></div>
+      <div class="pet-right"><div class="pet-last">${lv?timeAgo(lv.date):''}</div><div class="pet-dots" onclick="event.stopPropagation();showPetCtx(event,'${p.id}')"><span></span><span></span><span></span></div></div>
     </div>`;
   }).join('');
 }
@@ -2266,7 +2266,7 @@ function renderPetProfile(){
   if(!visits.length)html+=`<div class="empty-state" style="padding:24px 0"><span class="emoji">📋</span>Sin visitas aún.<br>Tocá <strong>+</strong> para registrar la primera.</div>`;
   else html+=visits.map(vt=>{
     const vitals=[vt.temp?`<div class="v-pill">T° ${vt.temp}</div>`:'',vt.peso?`<div class="v-pill">${vt.peso} kg</div>`:'',vt.fc?`<div class="v-pill">FC ${vt.fc}</div>`:'',vt.fr?`<div class="v-pill">FR ${vt.fr}</div>`:'',vt.vacc?`<div class="v-pill green">💉 ${vt.vacc}</div>`:''].join('');
-    const attachHtml=(vt.attachments||[]).map((a,ai)=>a.type?.startsWith('image')?`<img class="attach-thumb" src="${a.data}" onclick="event.stopPropagation();previewAttachment('${vt.id}',${ai})">`:`<div class="attach-audio">📎 ${(a.name||'').substring(0,16)}</div>`).join('');
+    const attachHtml=(vt.attachments||[]).map((a,ai)=>a.type?.startsWith('image')?`<img class="attach-thumb" src="${a.data}" onclick="event.stopPropagation();previewAttachment('${vt.id}',${ai})">`:`<div class="attach-audio" onclick="event.stopPropagation();previewAttachment('${vt.id}',${ai})" style="cursor:pointer">📎 ${(a.name||'').substring(0,16)}</div>`).join('');
     const vt2=getVets().find(vv=>vv.id===vt.vetId);
     const vetTooltip=vt2?vt2.name:'';
     const vetInner=vt2?(vt2.photo?`<img src="${vt2.photo}" style="width:100%;height:100%;object-fit:cover;">`:`<span style="font-size:9px;font-weight:700">${(vt2.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}</span>`):'';
