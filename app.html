@@ -565,6 +565,21 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .next{flex:2;background:linear-gradient(135deg,var(--blue),#2060cc);border:none;border-radius:11px;padding:12px;color:white;font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;box-shadow:0 3px 12px rgba(74,144,226,0.35);}
 
 /* ── STATS ── */
+.stats-tabs{display:flex;gap:6px;padding:12px 18px 0;flex-shrink:0;}
+.stats-tab{flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;text-align:center;transition:.15s;}
+.stats-tab.active{background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue);}
+.stats-species-bar{display:flex;gap:6px;padding:10px 18px 0;flex-shrink:0;overflow-x:auto;}
+.stats-species-bar::-webkit-scrollbar{display:none;}
+.spc-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.spc-btn.active{background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue);}
+.diag-list{margin-top:10px;}
+.diag-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.diag-row:last-child{border-bottom:none;}
+.diag-badge{font-size:14px;flex-shrink:0;}
+.diag-name{flex:1;font-size:12px;font-weight:700;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.diag-count{font-size:11px;color:var(--text3);font-weight:600;flex-shrink:0;}
+.global-region{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:12px;}
+.global-empty{text-align:center;padding:30px 16px;font-size:13px;color:var(--text3);}
 .stats-body{flex:1;overflow-y:auto;padding:16px 18px;}
 .stats-body::-webkit-scrollbar{width:3px;}
 .stats-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
@@ -829,10 +844,10 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
   <!-- SIDEBAR (desktop only) -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <div class="sidebar-logo-ico" id="sidebar-logo-ico" onclick="openClinicModal()">+</div>
-      <div>
-        <div class="sidebar-clinic-name" id="sidebar-clinic-name">VetNode</div>
-        <div class="sidebar-clinic-sub" id="sidebar-clinic-sub">v0.1</div>
+      <img src="/logo-vetnode.jpg" style="height:32px;object-fit:contain;border-radius:6px;flex-shrink:0;">
+      <div style="line-height:1.2">
+        <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;letter-spacing:-0.5px"><span style="color:#f07030">Vet</span><span style="color:#7aaccf">Node</span></div>
+        <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:1px;text-transform:uppercase">v0.1</div>
       </div>
     </div>
     <div class="sidebar-nav" id="sidebar-nav-main">
@@ -898,23 +913,15 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
     <!-- HOME -->
     <div class="screen active" id="s-home">
       <div class="app-header">
-        <div class="app-topbar">
-          <div style="width:34px"></div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <img src="/logo-vetnode.jpg" style="height:36px;object-fit:contain;border-radius:8px;">
-            <div style="line-height:1.2">
-              <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.5px"><span style="color:#f07030">Vet</span><span style="color:#7aaccf">Node</span></div>
-              <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:1px;text-transform:uppercase">v0.1</div>
-            </div>
-          </div>
-          <div class="menu-btn" onclick="showMainMenu()"><span></span><span></span><span></span></div>
-        </div>
         <div class="clinic-row">
           <div class="clinic-text">
             <div class="clinic-name" id="home-clinic-name">Clínica Veterinaria</div>
             <div class="clinic-sub" id="home-clinic-sub">Configurá tu clínica en el menú</div>
           </div>
-          <div class="clinic-logo" id="clinic-logo-el" onclick="triggerClinicPhoto()">+</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="clinic-logo" id="clinic-logo-el" onclick="triggerClinicPhoto()">+</div>
+            <div class="menu-btn" onclick="showMainMenu()"><span></span><span></span><span></span></div>
+          </div>
           <input type="file" id="clinic-photo-input" accept="image/*" style="display:none" onchange="handleClinicPhoto(this)">
         </div>
       </div>
@@ -1173,6 +1180,16 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
         <div class="hdr-info"><div class="hdr-title">Estadísticas</div></div>
         <div class="hdr-actions"><button class="icon-btn" onclick="openGlobalSearch()">🔍</button></div>
       </div>
+      <div class="stats-tabs">
+        <div class="stats-tab active" id="tab-personal" onclick="setStatsTab('personal')">Mi clínica</div>
+        <div class="stats-tab" id="tab-global" onclick="setStatsTab('global')">Global</div>
+      </div>
+      <div class="stats-species-bar" id="stats-species-bar" style="display:none">
+        <div class="spc-btn active" onclick="setStatSpecies('')">Todos</div>
+        <div class="spc-btn" onclick="setStatSpecies('Perro')">🐶 Perro</div>
+        <div class="spc-btn" onclick="setStatSpecies('Gato')">🐱 Gato</div>
+        <div class="spc-btn" onclick="setStatSpecies('Otro')">🐾 Otro</div>
+      </div>
       <div class="stats-body" id="stats-body"></div>
     </div>
 
@@ -1247,6 +1264,8 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           </div>
           <div class="ctx-divider"></div>
           <div class="ctx-item" onclick="closeModal('m-mainmenu');openSupport()"><span class="ctx-ico">💬</span>Soporte</div>
+          <div class="ctx-divider"></div>
+          <div class="ctx-item" style="color:var(--red)" onclick="localStorage.removeItem('vn_session');window.location.href='index.html'"><span class="ctx-ico">🚪</span>Cerrar sesión</div>
         </div>
       </div>
     </div>
@@ -1753,6 +1772,7 @@ async function syncFromSupabase(){
     }
     loadSettings();renderRightPanel();
     showToast('Datos sincronizados ✓');
+    pushStatsGlobal();
   }catch(e){console.error('Sync error',e);}
 }
 
@@ -1843,7 +1863,7 @@ let calSelected=new Date();
 let editingVisitId=null;
 let transferPetId=null,transferTutorId=null;
 let editingVetId=null,vetPhotoData=null;
-let statsView={level:'organs',organ:null,diag:null};
+let statsView={level:'organs',organ:null,diag:null,tab:'personal',species:''};
 const PIE_COLORS=['#4a90e2','#52c97a','#f5c842','#f06a6a','#9b72e8','#40c4c4','#ff9040','#e060a0','#70c040','#8090ff'];
 
 // ══════════════════════════════════════════════════
@@ -1871,7 +1891,7 @@ function go(id){
   if(id==='s-newvisit')setTimeout(()=>{setRpPetMode(true);},50);
   if(id==='s-survey1'||id==='s-survey2'||id==='s-visitdetail')setTimeout(()=>{setRpPetMode(true);},50);
   if(id==='s-survey2')renderSymptoms();
-  if(id==='s-stats'){statsView={level:'organs'};renderStats();}
+  if(id==='s-stats'){statsView={level:'organs',organ:null,diag:null,tab:statsView.tab||'personal',species:statsView.species||''};renderStats();}
   if(id==='s-calendar'){renderCalendar();setTimeout(renderRpCalendar,50);}
   if(id==='s-home')setTimeout(renderRightPanel,50);
   if(['s-home','s-patients','s-reminders','s-calendar','s-stats','s-agenda','s-custom-vaccs'].includes(id))setRpPetMode(false);
@@ -1895,15 +1915,9 @@ function loadSettings(){
   const activeVet=getVets().find(v=>v.id===s.activeVetId);
   const vetLabel=activeVet?activeVet.name:'Configurá tu clínica en el menú';
   document.getElementById('home-clinic-sub').textContent=vetLabel;
-  const sbn=document.getElementById('sidebar-clinic-name');
-  const sbs=document.getElementById('sidebar-clinic-sub');
-  if(sbn)sbn.textContent=s.clinic||'VetNode';
-  if(sbs)sbs.textContent=s.clinicAddr||s.city||'v0.1';
   const logo=document.getElementById('clinic-logo-el');
-  const slogo=document.getElementById('sidebar-logo-ico');
   if(s.clinicPhoto){
     if(logo)logo.innerHTML=`<img src="${s.clinicPhoto}">`;
-    if(slogo)slogo.innerHTML=`<img src="${s.clinicPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
   } else {
     if(logo&&logo.querySelector('img'))logo.innerHTML='+';
   }
@@ -2536,7 +2550,7 @@ function showReminderCtx(e,remId,type,label,petId,tutorId){
   menu.innerHTML=`
     <div class="ctx-item" onclick="closeCtx();openReminderMsg()"><span class="ctx-ico">💬</span>Enviar mensaje</div>
     <div class="ctx-divider"></div>
-    <div class="ctx-item red" onclick="closeCtx();deleteReminder(${remId})"><span class="ctx-ico">🗑️</span>Eliminar recordatorio</div>`;
+    <div class="ctx-item red" onclick="closeCtx();deleteReminder('${remId}')"><span class="ctx-ico">🗑️</span>Eliminar recordatorio</div>`;
   document.querySelector('.app').appendChild(menu);
   const ov=document.createElement('div');ov.className='ctx-overlay';ov.onclick=closeCtx;
   document.querySelector('.app').appendChild(ov);
@@ -2967,10 +2981,10 @@ function showTutorCtx(e,id){
   const menu=document.createElement('div');menu.className='ctx-menu';
   menu.style.cssText=`top:${rect.bottom-appRect.top+4}px;right:18px;`;
   menu.innerHTML=`
-    <div class="ctx-item" onclick="closeCtx();openEditTutorById(${id})"><span class="ctx-ico">✏️</span>Modificar tutor</div>
+    <div class="ctx-item" onclick="closeCtx();openEditTutorById('${id}')"><span class="ctx-ico">✏️</span>Modificar tutor</div>
     <div class="ctx-item" onclick="closeCtx();openTutorAlert('${id}')"><span class="ctx-ico">⚠️</span>Generar alerta</div>
     <div class="ctx-divider"></div>
-    <div class="ctx-item red" onclick="closeCtx();S.editTutorId=${id};deleteTutor()"><span class="ctx-ico">🗑️</span>Eliminar tutor</div>`;
+    <div class="ctx-item red" onclick="closeCtx();S.editTutorId='${id}';deleteTutor()"><span class="ctx-ico">🗑️</span>Eliminar tutor</div>`;
   document.querySelector('.app').appendChild(menu);
   const ov=document.createElement('div');ov.className='ctx-overlay';ov.onclick=closeCtx;document.querySelector('.app').appendChild(ov);
 }
@@ -2981,12 +2995,12 @@ function showPetCtx(e,id){
   const menu=document.createElement('div');menu.className='ctx-menu';
   menu.style.cssText=`top:${rect.bottom-appRect.top+4}px;right:18px;`;
   menu.innerHTML=`
-    <div class="ctx-item" onclick="closeCtx();openEditPetById(${id})"><span class="ctx-ico">✏️</span>Modificar mascota</div>
+    <div class="ctx-item" onclick="closeCtx();openEditPetById('${id}')"><span class="ctx-ico">✏️</span>Modificar mascota</div>
     <div class="ctx-item" onclick="closeCtx();openPetAlert('${id}')"><span class="ctx-ico">⚠️</span>Generar alerta</div>
-    <div class="ctx-item" onclick="closeCtx();toggleDeceased(${id})"><span class="ctx-ico">${p&&p.deceased?'💚':'🕊️'}</span>${p&&p.deceased?'Marcar como vivo/a':'Marcar como fallecido/a'}</div>
-    <div class="ctx-item" onclick="closeCtx();openTransfer(${id})"><span class="ctx-ico">🔄</span>Cambio de propietario</div>
+    <div class="ctx-item" onclick="closeCtx();toggleDeceased('${id}')"><span class="ctx-ico">${p&&p.deceased?'💚':'🕊️'}</span>${p&&p.deceased?'Marcar como vivo/a':'Marcar como fallecido/a'}</div>
+    <div class="ctx-item" onclick="closeCtx();openTransfer('${id}')"><span class="ctx-ico">🔄</span>Cambio de propietario</div>
     <div class="ctx-divider"></div>
-    <div class="ctx-item red" onclick="closeCtx();S.editPetId=${id};deletePet()"><span class="ctx-ico">🗑️</span>Eliminar mascota</div>`;
+    <div class="ctx-item red" onclick="closeCtx();S.editPetId='${id}';deletePet()"><span class="ctx-ico">🗑️</span>Eliminar mascota</div>`;
   document.querySelector('.app').appendChild(menu);
   const ov=document.createElement('div');ov.className='ctx-overlay';ov.onclick=closeCtx;document.querySelector('.app').appendChild(ov);
 }
@@ -3096,9 +3110,29 @@ function renderCalEvents(){
 // ══════════════════════════════════════════════════
 //  STATS
 // ══════════════════════════════════════════════════
+function setStatsTab(tab){
+  statsView.tab=tab;statsView.level='organs';statsView.organ=null;statsView.diag=null;
+  document.getElementById('tab-personal').classList.toggle('active',tab==='personal');
+  document.getElementById('tab-global').classList.toggle('active',tab==='global');
+  document.getElementById('stats-species-bar').style.display=tab==='personal'?'flex':'none';
+  renderStats();
+}
+function setStatSpecies(sp){
+  statsView.species=sp;statsView.level='organs';statsView.organ=null;statsView.diag=null;
+  document.querySelectorAll('.spc-btn').forEach(b=>b.classList.toggle('active',b.textContent.includes(sp||'Todos')));
+  renderStats();
+}
 function renderStats(){
-  const visits=getVisits().filter(v=>v.organs&&v.organs.length);
   const el=document.getElementById('stats-body');
+  document.getElementById('stats-species-bar').style.display=statsView.tab==='personal'?'flex':'none';
+  if(statsView.tab==='global'){renderStatsGlobal(el);return;}
+  // filter visits by species
+  const pets=getPets();
+  const speciesFilter=statsView.species;
+  const filteredPetIds=speciesFilter
+    ?new Set(pets.filter(p=>p.species===speciesFilter||(speciesFilter==='Otro'&&p.species!=='Perro'&&p.species!=='Gato')).map(p=>p.id))
+    :null;
+  const visits=getVisits().filter(v=>v.organs&&v.organs.length&&(!filteredPetIds||filteredPetIds.has(v.petId)));
   if(!visits.length){el.innerHTML=`<div class="empty-state"><span class="emoji">📊</span>Sin datos suficientes.<br>Completá la encuesta de cierre en las visitas.</div>`;return;}
   if(statsView.level==='organs')renderStatsOrgans(visits,el);
   else if(statsView.level==='diags')renderStatsDiags(visits,el);
@@ -3108,10 +3142,16 @@ function renderStatsOrgans(visits,el){
   const counts={};visits.forEach(v=>(v.organs||[]).forEach(o=>{counts[o]=(counts[o]||0)+1;}));
   const total=Object.values(counts).reduce((a,b)=>a+b,0);
   const items=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  const all=getVisits().filter(v=>v.diagPresuntivo||v.diagDefinitivo);
+  const allVisits=getVisits();
+  const pets=getPets();
+  const filteredPetIds=statsView.species?new Set(pets.filter(p=>p.species===statsView.species||(statsView.species==='Otro'&&p.species!=='Perro'&&p.species!=='Gato')).map(p=>p.id)):null;
+  const all=allVisits.filter(v=>(v.diagPresuntivo||v.diagDefinitivo)&&(!filteredPetIds||filteredPetIds.has(v.petId)));
   const confirmed=all.filter(v=>v.confStatus==='Sí').length;
   const byLab=all.filter(v=>v.confMethod==='Test / Lab'||v.confMethod==='Imagen').length;
   const byClin=all.filter(v=>v.confMethod==='Clínica').length;
+  // species breakdown
+  const spCounts={Perro:0,Gato:0,Otro:0};
+  visits.forEach(v=>{const p=pets.find(x=>x.id===v.petId);const sp=p?.species;if(sp==='Perro')spCounts.Perro++;else if(sp==='Gato')spCounts.Gato++;else spCounts.Otro++;});
   el.innerHTML=`
     <div class="breadcrumb">Todos los sistemas</div>
     <div class="stats-card">
@@ -3127,22 +3167,41 @@ function renderStatsOrgans(visits,el){
         <div class="stats-meta-item"><div class="stats-meta-val">${byLab}</div><div class="stats-meta-lbl">Lab / Imagen</div></div>
         <div class="stats-meta-item"><div class="stats-meta-val">${byClin}</div><div class="stats-meta-lbl">Clínica</div></div>
       </div>
-    </div>`;
-  drawPie('pie-canvas','pie-legend',items,total,label=>{statsView={level:'diags',organ:label};renderStats();});
+    </div>
+    ${!statsView.species?`<div class="stats-card">
+      <div class="stats-title">Por especie</div>
+      <div class="stats-meta">
+        <div class="stats-meta-item"><div class="stats-meta-val">${spCounts.Perro}</div><div class="stats-meta-lbl">🐶 Perro</div></div>
+        <div class="stats-meta-item"><div class="stats-meta-val">${spCounts.Gato}</div><div class="stats-meta-lbl">🐱 Gato</div></div>
+        <div class="stats-meta-item"><div class="stats-meta-val">${spCounts.Otro}</div><div class="stats-meta-lbl">🐾 Otro</div></div>
+      </div>
+    </div>`:''}`;
+  drawPie('pie-canvas','pie-legend',items,total,label=>{statsView={...statsView,level:'diags',organ:label};renderStats();});
 }
 function renderStatsDiags(visits,el){
   const organ=statsView.organ;
   const filtered=visits.filter(v=>(v.organs||[]).includes(organ));
   const counts={};filtered.forEach(v=>{const d=v.diagPresuntivo||'Sin diagnóstico';counts[d]=(counts[d]||0)+1;});
   const total=filtered.length;
+  // build diag list with ✅/❓
+  const diagList=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([d,c])=>{
+    const hasDefinitive=filtered.some(v=>v.diagDefinitivo===d&&v.confStatus==='Sí');
+    const badge=d==='Sin diagnóstico'?'🔍':hasDefinitive?'✅':'❓';
+    return`<div class="diag-row"><span class="diag-badge">${badge}</span><span class="diag-name">${d}</span><span class="diag-count">${c} caso${c>1?'s':''} · ${Math.round(c/total*100)}%</span></div>`;
+  }).join('');
   el.innerHTML=`
-    <div class="breadcrumb"><span onclick="statsView={level:'organs'};renderStats()">Sistemas</span> › <b>${organ}</b></div>
+    <div class="breadcrumb"><span onclick="statsView={...statsView,level:'organs'};renderStats()" style="cursor:pointer">Sistemas</span> › <b>${organ}</b></div>
     <div class="stats-card">
       <div class="stats-title">Diagnósticos en ${organ} — ${total} visitas</div>
       <canvas id="pie-canvas" width="200" height="200" style="display:block;margin:0 auto 8px;cursor:pointer"></canvas>
       <div class="pie-legend" id="pie-legend"></div>
+    </div>
+    <div class="stats-card">
+      <div class="stats-title">Listado de diagnósticos</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-weight:600">✅ Confirmado · ❓ Presuntivo · 🔍 Sin diagnóstico</div>
+      <div class="diag-list">${diagList}</div>
     </div>`;
-  drawPie('pie-canvas','pie-legend',Object.entries(counts).sort((a,b)=>b[1]-a[1]),total,label=>{statsView={level:'symptoms',organ,diag:label==='Sin diagnóstico'?null:label};renderStats();});
+  drawPie('pie-canvas','pie-legend',Object.entries(counts).sort((a,b)=>b[1]-a[1]),total,label=>{statsView={...statsView,level:'symptoms',diag:label==='Sin diagnóstico'?null:label};renderStats();});
 }
 function renderStatsSymptoms(visits,el){
   const {organ,diag}=statsView;
@@ -3150,11 +3209,99 @@ function renderStatsSymptoms(visits,el){
   const syms={};filtered.forEach(v=>(v.symptoms||[]).forEach(s=>{syms[s]=(syms[s]||0)+1;}));
   const items=Object.entries(syms).sort((a,b)=>b[1]-a[1]);const total=filtered.length;
   el.innerHTML=`
-    <div class="breadcrumb"><span onclick="statsView={level:'organs'};renderStats()">Sistemas</span> › <span onclick="statsView={level:'diags',organ};renderStats()">${organ}</span> › <b>${diag||'Sin diagnóstico'}</b></div>
+    <div class="breadcrumb"><span onclick="statsView={...statsView,level:'organs'};renderStats()" style="cursor:pointer">Sistemas</span> › <span onclick="statsView={...statsView,level:'diags'};renderStats()" style="cursor:pointer">${organ}</span> › <b>${diag||'Sin diagnóstico'}</b></div>
     <div class="stats-card">
       <div class="stats-title">Síntomas — ${diag||'Sin diagnóstico'} (${total} visitas)</div>
       ${items.length?items.map(([s,c],i)=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:3px;font-weight:600"><span>${s}</span><span>${Math.round(c/total*100)}%</span></div><div class="stats-bar-wrap"><div class="stats-bar" style="width:${Math.round(c/total*100)}%;background:${PIE_COLORS[i%PIE_COLORS.length]}"></div></div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-weight:600">Sin síntomas registrados.</div>'}
     </div>`;
+}
+async function renderStatsGlobal(el){
+  el.innerHTML=`<div class="global-empty">⏳ Cargando datos globales...</div>`;
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/stats_global`,{headers:{...getAuthHeaders(),'Accept':'application/json'}});
+    if(!r.ok)throw new Error('fetch failed');
+    const rows=await r.json();
+    if(!rows.length){el.innerHTML=`<div class="global-empty">📊 Aún no hay suficientes datos globales.<br><br>A medida que más veterinarios usen VetNode, los datos irán apareciendo acá.</div>`;return;}
+    // aggregate
+    const totTutors=rows.reduce((a,r)=>a+(r.total_tutors||0),0);
+    const totPets=rows.reduce((a,r)=>a+(r.total_pets||0),0);
+    const totVisits=rows.reduce((a,r)=>a+(r.total_visits||0),0);
+    const users=rows.length;
+    // species
+    const sp={Perro:0,Gato:0,Otro:0};
+    rows.forEach(r=>{const s=r.species_counts||{};sp.Perro+=(s.Perro||0);sp.Gato+=(s.Gato||0);sp.Otro+=(s.Otro||0);});
+    // top organs
+    const organMap={};
+    rows.forEach(r=>(r.top_organs||[]).forEach(o=>{organMap[o.name]=(organMap[o.name]||0)+o.count;}));
+    const topOrgans=Object.entries(organMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    // top diags
+    const diagMap={};
+    rows.forEach(r=>(r.top_diags||[]).forEach(d=>{diagMap[d.name]=(diagMap[d.name]||0)+d.count;}));
+    const topDiags=Object.entries(diagMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    // countries
+    const countryMap={};rows.forEach(r=>{if(r.country)countryMap[r.country]=(countryMap[r.country]||0)+1;});
+    const topCountries=Object.entries(countryMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const maxOrgan=topOrgans[0]?.[1]||1;
+    const maxDiag=topDiags[0]?.[1]||1;
+    el.innerHTML=`
+      <div class="stats-card">
+        <div class="stats-title">Resumen global — ${users} clínica${users>1?'s':''}</div>
+        <div class="stats-meta">
+          <div class="stats-meta-item"><div class="stats-meta-val">${totTutors}</div><div class="stats-meta-lbl">Tutores</div></div>
+          <div class="stats-meta-item"><div class="stats-meta-val">${totPets}</div><div class="stats-meta-lbl">Mascotas</div></div>
+          <div class="stats-meta-item"><div class="stats-meta-val">${totVisits}</div><div class="stats-meta-lbl">Visitas</div></div>
+        </div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-title">Por especie (global)</div>
+        <div class="stats-meta">
+          <div class="stats-meta-item"><div class="stats-meta-val">${sp.Perro}</div><div class="stats-meta-lbl">🐶 Perro</div></div>
+          <div class="stats-meta-item"><div class="stats-meta-val">${sp.Gato}</div><div class="stats-meta-lbl">🐱 Gato</div></div>
+          <div class="stats-meta-item"><div class="stats-meta-val">${sp.Otro}</div><div class="stats-meta-lbl">🐾 Otro</div></div>
+        </div>
+      </div>
+      ${topOrgans.length?`<div class="stats-card">
+        <div class="stats-title">Sistemas más frecuentes</div>
+        ${topOrgans.map(([name,count],i)=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:3px;font-weight:600"><span>${name}</span><span>${count}</span></div><div class="stats-bar-wrap"><div class="stats-bar" style="width:${Math.round(count/maxOrgan*100)}%;background:${PIE_COLORS[i%PIE_COLORS.length]}"></div></div></div>`).join('')}
+      </div>`:''}
+      ${topDiags.length?`<div class="stats-card">
+        <div class="stats-title">Diagnósticos más frecuentes</div>
+        <div class="diag-list">${topDiags.map(([name,count],i)=>`<div class="diag-row"><span class="diag-badge" style="color:${PIE_COLORS[i%PIE_COLORS.length]}">●</span><span class="diag-name">${name}</span><span class="diag-count">${count}</span></div>`).join('')}</div>
+      </div>`:''}
+      ${topCountries.length?`<div class="stats-card">
+        <div class="stats-title">Por país</div>
+        <div class="diag-list">${topCountries.map(([country,count])=>`<div class="diag-row"><span class="diag-badge">🌎</span><span class="diag-name">${country}</span><span class="diag-count">${count} clínica${count>1?'s':''}</span></div>`).join('')}</div>
+      </div>`:''}`;
+  }catch(e){el.innerHTML=`<div class="global-empty">Error al cargar datos globales.</div>`;}
+}
+async function pushStatsGlobal(){
+  const uid=getUserId();if(!uid)return;
+  const session=getSession();
+  const meta=session?.user?.user_metadata||{};
+  const visits=getVisits();const pets=getPets();
+  // species counts
+  const sp={Perro:0,Gato:0,Otro:0};
+  pets.forEach(p=>{if(p.species==='Perro')sp.Perro++;else if(p.species==='Gato')sp.Gato++;else sp.Otro++;});
+  // top organs
+  const organMap={};visits.forEach(v=>(v.organs||[]).forEach(o=>{organMap[o]=(organMap[o]||0)+1;}));
+  const topOrgans=Object.entries(organMap).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([name,count])=>({name,count}));
+  // top diags
+  const diagMap={};visits.forEach(v=>{if(v.diagPresuntivo)diagMap[v.diagPresuntivo]=(diagMap[v.diagPresuntivo]||0)+1;});
+  const topDiags=Object.entries(diagMap).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([name,count])=>({name,count}));
+  const payload={
+    user_id:uid,
+    country:meta.country||'',
+    state:meta.state||'',
+    city:meta.city||'',
+    total_tutors:getTutors().length,
+    total_pets:pets.length,
+    total_visits:visits.length,
+    species_counts:sp,
+    top_organs:topOrgans,
+    top_diags:topDiags,
+    updated_at:new Date().toISOString()
+  };
+  await sbUpsert('stats_global',payload);
 }
 function drawPie(canvasId,legendId,items,total,onClick){
   const canvas=document.getElementById(canvasId);if(!canvas)return;
