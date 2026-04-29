@@ -736,6 +736,46 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .rp-pet-chip-sub{font-size:10px;color:var(--text3);margin-top:1px;}
 .rp-pet-chip-active{border-color:var(--blue-border);background:var(--blue-dim);}
 .rp-pet-chip-active .rp-pet-chip-name{color:var(--blue);}
+.home-search-wrap{position:relative;margin-bottom:14px;}
+.home-search-input{
+  width:100%;box-sizing:border-box;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:10px 14px;
+  font-size:14px;color:var(--text);outline:none;
+  font-family:'Nunito',sans-serif;
+}
+.home-search-input:focus{border-color:var(--blue-border);}
+.home-search-results{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);
+  z-index:50;display:none;max-height:260px;overflow-y:auto;
+}
+.home-search-results.open{display:block;}
+.hsr-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);
+}
+.hsr-item:last-child{border-bottom:none;}
+.hsr-item:hover{background:var(--blue-dim);}
+.hsr-ico{font-size:18px;flex-shrink:0;}
+.hsr-info{flex:1;min-width:0;}
+.hsr-name{font-size:13px;font-weight:700;color:var(--text);}
+.hsr-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.recent-patients-wrap{margin-bottom:14px;}
+.recent-patients-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.recent-patients-list{display:flex;flex-direction:column;gap:6px;}
+.recent-pet-chip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:10px 14px;cursor:pointer;transition:.15s;
+}
+.recent-pet-chip:hover{border-color:var(--blue-border);background:var(--blue-dim);}
+.rpc-ico{font-size:18px;flex-shrink:0;}
+.rpc-info{flex:1;min-width:0;}
+.rpc-name{font-size:13px;font-weight:700;color:var(--text);}
+.rpc-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.rpc-time{font-size:11px;color:var(--text3);flex-shrink:0;}
 /* ── AGENDA ── */
 .agenda-list{padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
 .contact-chip{
@@ -880,6 +920,10 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
       </div>
       <div class="home-body">
         <button class="quick-btn" onclick="openQuickLoad()">⚡ Carga rápida</button>
+        <div class="home-search-wrap">
+          <input class="home-search-input" id="home-search" placeholder="🔍  Buscar tutor o mascota..." oninput="renderHomeSearch()" autocomplete="off">
+          <div id="home-search-results" class="home-search-results"></div>
+        </div>
         <div class="btn-grid">
           <div class="main-btn" onclick="go('s-patients')"><span class="btn-ico">🐾</span><span class="btn-lbl">Pacientes</span><span class="btn-desc">Historias clínicas</span></div>
           <div class="main-btn" onclick="go('s-reminders')"><span class="btn-ico">🔔</span><span class="btn-lbl">Recordatorios</span><span class="btn-desc">Vacunas y seguimiento</span></div>
@@ -2029,6 +2073,8 @@ function doRestore(input){
 function renderTutors(){
   const q=(document.getElementById('search-tutors')?.value||'').toLowerCase();
   const pets=getPets();const visits=getVisits();
+  const THREE_DAYS=3*24*60*60*1000;
+  const cutoff=Date.now()-THREE_DAYS;
 
   // match tutors by name/phone OR by any of their pets' names
   let tutors=getTutors().filter(t=>{
@@ -2036,6 +2082,16 @@ function renderTutors(){
     if(q&&pets.some(p=>p.tutorId===t.id&&p.name.toLowerCase().includes(q)))return true;
     return false;
   });
+
+  // if no search and no date filter, show only tutors with activity in last 3 days
+  const showingRecent=!q&&!tutorDateFrom&&!tutorDateTo;
+  if(showingRecent){
+    tutors=tutors.filter(t=>{
+      const mp=pets.filter(p=>p.tutorId===t.id);
+      const lv=visits.filter(v=>mp.some(p=>p.id===v.petId)).sort((a,b)=>b.date-a.date)[0];
+      return lv&&lv.date>=cutoff;
+    });
+  }
 
   // apply date range filter on last visit
   if(tutorDateFrom||tutorDateTo){
@@ -2067,8 +2123,14 @@ function renderTutors(){
       <span onclick="clearDateFilter()" style="margin-left:auto;cursor:pointer;font-size:14px">✕</span>
     </div>`:'';
 
-  if(!tutors.length){el.innerHTML=bannerHtml+`<div class="empty-state"><span class="emoji">🐾</span>${tutorDateFrom||tutorDateTo?'Sin resultados en ese rango de fechas.':'Sin tutores aún.<br>Tocá <strong>+</strong> para agregar el primero.'}</div>`;return;}
-  el.innerHTML=bannerHtml+tutors.map(t=>{
+  if(!tutors.length){
+    el.innerHTML=bannerHtml+`<div class="empty-state"><span class="emoji">🐾</span>${
+      tutorDateFrom||tutorDateTo?'Sin resultados en ese rango de fechas.':
+      showingRecent?'Sin actividad en los últimos 3 días.<br><br><button class="save-btn" style="width:auto;padding:10px 24px" onclick="showAllTutors()">Ver todos los pacientes</button>':
+      'Sin tutores aún.<br>Tocá <strong>+</strong> para agregar el primero.'
+    }</div>`;return;
+  }
+  el.innerHTML=bannerHtml+(showingRecent?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:11px;color:var(--text3);font-weight:600">ÚLTIMOS 3 DÍAS</span><span onclick="showAllTutors()" style="font-size:11px;color:var(--blue);font-weight:700;cursor:pointer">Ver todos →</span></div>`:'')+tutors.map(t=>{
     const mp=pets.filter(p=>p.tutorId===t.id);
     const lv=visits.filter(v=>mp.some(p=>p.id===v.petId)).sort((a,b)=>b.date-a.date)[0];
     return`<div class="tutor-row">
@@ -2081,6 +2143,55 @@ function renderTutors(){
   }).join('');
 }
 function openTutor(id){S.tutorId=id;go('s-tutor');}
+function showAllTutors(){
+  // Force show all by setting a dummy date filter far back
+  tutorDateFrom=null;tutorDateTo=null;
+  const el=document.getElementById('search-tutors');
+  if(el)el.value=' '; // space triggers "has query" mode
+  renderTutors();
+  if(el)el.value='';
+  renderTutors();
+}
+function renderHomeSearch(){
+  const q=(document.getElementById('home-search')?.value||'').trim().toLowerCase();
+  const results=document.getElementById('home-search-results');
+  if(!results)return;
+  if(!q){results.classList.remove('open');results.innerHTML='';return;}
+  const pets=getPets();const visits=getVisits();const tutors=getTutors();
+  const items=[];
+  tutors.forEach(t=>{
+    const mp=pets.filter(p=>p.tutorId===t.id);
+    const lv=visits.filter(v=>mp.some(p=>p.id===v.petId)).sort((a,b)=>b.date-a.date)[0];
+    if(t.name.toLowerCase().includes(q)||(t.phone||'').includes(q)){
+      items.push({type:'tutor',id:t.id,name:t.name,sub:t.phone||'Tutor',last:lv?.date});
+    }
+    mp.forEach(p=>{
+      if(p.name.toLowerCase().includes(q)){
+        items.push({type:'pet',id:p.id,tutorId:t.id,name:p.name,sub:t.name,species:p.species,last:lv?.date});
+      }
+    });
+  });
+  items.sort((a,b)=>(b.last||0)-(a.last||0));
+  if(!items.length){
+    results.innerHTML=`<div class="hsr-item"><div class="hsr-info"><div class="hsr-name" style="color:var(--text3)">Sin resultados</div></div></div>`;
+    results.classList.add('open');return;
+  }
+  results.innerHTML=items.slice(0,8).map(i=>`
+    <div class="hsr-item" onclick="${i.type==='pet'?`openPet('${i.id}');document.getElementById('home-search').value='';document.getElementById('home-search-results').classList.remove('open')`:
+    `openTutor('${i.id}');document.getElementById('home-search').value='';document.getElementById('home-search-results').classList.remove('open')`}">
+      <div class="hsr-ico">${i.type==='pet'?petEmoji(i.species):'👤'}</div>
+      <div class="hsr-info">
+        <div class="hsr-name">${i.name}</div>
+        <div class="hsr-sub">${i.sub}${i.last?' · '+timeAgo(i.last):''}</div>
+      </div>
+    </div>`).join('');
+  results.classList.add('open');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.home-search-wrap')){
+    document.getElementById('home-search-results')?.classList.remove('open');
+  }
+});
 function renderTutorProfile(){
   const t=getTutors().find(t=>t.id===S.tutorId);if(!t)return;
   document.getElementById('tutor-hdr-name').textContent=t.name+(t.alertActive&&t.alertText?' ('+t.alertText+')':'');
