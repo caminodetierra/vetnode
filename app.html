@@ -843,12 +843,8 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 
   <!-- SIDEBAR (desktop only) -->
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <img src="/logo-vetnode.jpg" style="height:32px;object-fit:contain;border-radius:6px;flex-shrink:0;">
-      <div style="line-height:1.2">
-        <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;letter-spacing:-0.5px"><span style="color:#f07030">Vet</span><span style="color:#7aaccf">Node</span></div>
-        <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:1px;text-transform:uppercase">v0.1</div>
-      </div>
+    <div class="sidebar-logo" style="padding:16px 16px 20px;justify-content:center;">
+      <img src="/logo-vetnode.jpg" style="width:100%;max-width:160px;height:auto;object-fit:contain;border-radius:10px;">
     </div>
     <div class="sidebar-nav" id="sidebar-nav-main">
       <div class="sidebar-item" onclick="showConfigPanel()"><span class="s-ico">⚙️</span>Configuración</div>
@@ -3139,17 +3135,16 @@ function renderStats(){
   else renderStatsSymptoms(visits,el);
 }
 function renderStatsOrgans(visits,el){
+  const pets=getPets();
   const counts={};visits.forEach(v=>(v.organs||[]).forEach(o=>{counts[o]=(counts[o]||0)+1;}));
   const total=Object.values(counts).reduce((a,b)=>a+b,0);
   const items=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  const allVisits=getVisits();
-  const pets=getPets();
   const filteredPetIds=statsView.species?new Set(pets.filter(p=>p.species===statsView.species||(statsView.species==='Otro'&&p.species!=='Perro'&&p.species!=='Gato')).map(p=>p.id)):null;
-  const all=allVisits.filter(v=>(v.diagPresuntivo||v.diagDefinitivo)&&(!filteredPetIds||filteredPetIds.has(v.petId)));
-  const confirmed=all.filter(v=>v.confStatus==='Sí').length;
-  const byLab=all.filter(v=>v.confMethod==='Test / Lab'||v.confMethod==='Imagen').length;
-  const byClin=all.filter(v=>v.confMethod==='Clínica').length;
-  // species breakdown
+  const allVisits=getVisits().filter(v=>!filteredPetIds||filteredPetIds.has(v.petId));
+  const presuntivos=allVisits.filter(v=>v.diagPresuntivo&&!v.diagDefinitivo).length;
+  const confirmados=allVisits.filter(v=>v.diagDefinitivo||(v.diagPresuntivo&&v.confStatus==='Sí')).length;
+  const byLab=allVisits.filter(v=>v.confMethod==='Test / Lab'||v.confMethod==='Imagen').length;
+  const byClin=allVisits.filter(v=>v.confMethod==='Clínica').length;
   const spCounts={Perro:0,Gato:0,Otro:0};
   visits.forEach(v=>{const p=pets.find(x=>x.id===v.petId);const sp=p?.species;if(sp==='Perro')spCounts.Perro++;else if(sp==='Gato')spCounts.Gato++;else spCounts.Otro++;});
   el.innerHTML=`
@@ -3162,8 +3157,8 @@ function renderStatsOrgans(visits,el){
     <div class="stats-card">
       <div class="stats-title">Diagnósticos</div>
       <div class="stats-meta">
-        <div class="stats-meta-item"><div class="stats-meta-val">${all.length}</div><div class="stats-meta-lbl">Con diagnóstico</div></div>
-        <div class="stats-meta-item"><div class="stats-meta-val">${confirmed}</div><div class="stats-meta-lbl">Confirmados</div></div>
+        <div class="stats-meta-item"><div class="stats-meta-val">${presuntivos}</div><div class="stats-meta-lbl">Presuntivos</div></div>
+        <div class="stats-meta-item"><div class="stats-meta-val">${confirmados}</div><div class="stats-meta-lbl">Confirmados</div></div>
         <div class="stats-meta-item"><div class="stats-meta-val">${byLab}</div><div class="stats-meta-lbl">Lab / Imagen</div></div>
         <div class="stats-meta-item"><div class="stats-meta-val">${byClin}</div><div class="stats-meta-lbl">Clínica</div></div>
       </div>
@@ -3181,13 +3176,17 @@ function renderStatsOrgans(visits,el){
 function renderStatsDiags(visits,el){
   const organ=statsView.organ;
   const filtered=visits.filter(v=>(v.organs||[]).includes(organ));
-  const counts={};filtered.forEach(v=>{const d=v.diagPresuntivo||'Sin diagnóstico';counts[d]=(counts[d]||0)+1;});
+  const counts={};
+  filtered.forEach(v=>{
+    const d=v.diagDefinitivo||v.diagPresuntivo||'Sin diagnóstico';
+    counts[d]=(counts[d]||0)+1;
+  });
   const total=filtered.length;
-  // build diag list with ✅/❓
-  const diagList=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([d,c])=>{
-    const hasDefinitive=filtered.some(v=>v.diagDefinitivo===d&&v.confStatus==='Sí');
-    const badge=d==='Sin diagnóstico'?'🔍':hasDefinitive?'✅':'❓';
-    return`<div class="diag-row"><span class="diag-badge">${badge}</span><span class="diag-name">${d}</span><span class="diag-count">${c} caso${c>1?'s':''} · ${Math.round(c/total*100)}%</span></div>`;
+  const items=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const diagList=items.map(([d,c])=>{
+    const isDefinitive=filtered.some(v=>(v.diagDefinitivo===d)||(v.diagPresuntivo===d&&(v.confStatus==='Sí'||v.confMethod)));
+    const badge=d==='Sin diagnóstico'?'🔍':isDefinitive?'✅':'❓';
+    return`<div class="diag-row" onclick="statsView={...statsView,level:'symptoms',diag:'${d.replace(/'/g,"\\'")}',organ:'${organ.replace(/'/g,"\\'")}' };renderStats()" style="cursor:pointer"><span class="diag-badge">${badge}</span><span class="diag-name">${d}</span><span class="diag-count">${c} caso${c>1?'s':''} · ${Math.round(c/total*100)}%</span></div>`;
   }).join('');
   el.innerHTML=`
     <div class="breadcrumb"><span onclick="statsView={...statsView,level:'organs'};renderStats()" style="cursor:pointer">Sistemas</span> › <b>${organ}</b></div>
@@ -3198,22 +3197,27 @@ function renderStatsDiags(visits,el){
     </div>
     <div class="stats-card">
       <div class="stats-title">Listado de diagnósticos</div>
-      <div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-weight:600">✅ Confirmado · ❓ Presuntivo · 🔍 Sin diagnóstico</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-weight:600">✅ Confirmado · ❓ Presuntivo · 🔍 Sin diagnóstico · Tocá para ver síntomas</div>
       <div class="diag-list">${diagList}</div>
     </div>`;
-  drawPie('pie-canvas','pie-legend',Object.entries(counts).sort((a,b)=>b[1]-a[1]),total,label=>{statsView={...statsView,level:'symptoms',diag:label==='Sin diagnóstico'?null:label};renderStats();});
+  drawPie('pie-canvas','pie-legend',items,total,label=>{statsView={...statsView,level:'symptoms',diag:label==='Sin diagnóstico'?null:label};renderStats();});
 }
 function renderStatsSymptoms(visits,el){
   const {organ,diag}=statsView;
-  const filtered=visits.filter(v=>(v.organs||[]).includes(organ)&&((diag&&v.diagPresuntivo===diag)||(!diag&&!v.diagPresuntivo)));
+  const filtered=visits.filter(v=>{
+    if(!(v.organs||[]).includes(organ))return false;
+    const d=v.diagDefinitivo||v.diagPresuntivo||'Sin diagnóstico';
+    return diag?d===diag:d==='Sin diagnóstico';
+  });
   const syms={};filtered.forEach(v=>(v.symptoms||[]).forEach(s=>{syms[s]=(syms[s]||0)+1;}));
   const items=Object.entries(syms).sort((a,b)=>b[1]-a[1]);const total=filtered.length;
   el.innerHTML=`
     <div class="breadcrumb"><span onclick="statsView={...statsView,level:'organs'};renderStats()" style="cursor:pointer">Sistemas</span> › <span onclick="statsView={...statsView,level:'diags'};renderStats()" style="cursor:pointer">${organ}</span> › <b>${diag||'Sin diagnóstico'}</b></div>
     <div class="stats-card">
-      <div class="stats-title">Síntomas — ${diag||'Sin diagnóstico'} (${total} visitas)</div>
-      ${items.length?items.map(([s,c],i)=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:3px;font-weight:600"><span>${s}</span><span>${Math.round(c/total*100)}%</span></div><div class="stats-bar-wrap"><div class="stats-bar" style="width:${Math.round(c/total*100)}%;background:${PIE_COLORS[i%PIE_COLORS.length]}"></div></div></div>`).join(''):'<div style="font-size:12px;color:var(--text3);font-weight:600">Sin síntomas registrados.</div>'}
+      <div class="stats-title">Síntomas — ${diag||'Sin diagnóstico'} (${total} visita${total!==1?'s':''})</div>
+      ${items.length?`<canvas id="pie-canvas" width="200" height="200" style="display:block;margin:0 auto 8px"></canvas><div class="pie-legend" id="pie-legend"></div>`:'<div style="font-size:12px;color:var(--text3);font-weight:600">Sin síntomas registrados.</div>'}
     </div>`;
+  if(items.length)drawPie('pie-canvas','pie-legend',items,total,()=>{});
 }
 async function renderStatsGlobal(el){
   el.innerHTML=`<div class="global-empty">⏳ Cargando datos globales...</div>`;
@@ -3222,27 +3226,24 @@ async function renderStatsGlobal(el){
     if(!r.ok)throw new Error('fetch failed');
     const rows=await r.json();
     if(!rows.length){el.innerHTML=`<div class="global-empty">📊 Aún no hay suficientes datos globales.<br><br>A medida que más veterinarios usen VetNode, los datos irán apareciendo acá.</div>`;return;}
-    // aggregate
     const totTutors=rows.reduce((a,r)=>a+(r.total_tutors||0),0);
     const totPets=rows.reduce((a,r)=>a+(r.total_pets||0),0);
     const totVisits=rows.reduce((a,r)=>a+(r.total_visits||0),0);
     const users=rows.length;
-    // species
     const sp={Perro:0,Gato:0,Otro:0};
     rows.forEach(r=>{const s=r.species_counts||{};sp.Perro+=(s.Perro||0);sp.Gato+=(s.Gato||0);sp.Otro+=(s.Otro||0);});
-    // top organs
     const organMap={};
     rows.forEach(r=>(r.top_organs||[]).forEach(o=>{organMap[o.name]=(organMap[o.name]||0)+o.count;}));
-    const topOrgans=Object.entries(organMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
-    // top diags
+    const topOrgans=Object.entries(organMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
     const diagMap={};
     rows.forEach(r=>(r.top_diags||[]).forEach(d=>{diagMap[d.name]=(diagMap[d.name]||0)+d.count;}));
     const topDiags=Object.entries(diagMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    // countries
     const countryMap={};rows.forEach(r=>{if(r.country)countryMap[r.country]=(countryMap[r.country]||0)+1;});
     const topCountries=Object.entries(countryMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
-    const maxOrgan=topOrgans[0]?.[1]||1;
-    const maxDiag=topDiags[0]?.[1]||1;
+    const spItems=[['🐶 Perro',sp.Perro],['🐱 Gato',sp.Gato],['🐾 Otro',sp.Otro]].filter(x=>x[1]>0);
+    const spTotal=spItems.reduce((a,x)=>a+x[1],0);
+    const orgTotal=topOrgans.reduce((a,x)=>a+x[1],0);
+    const diagTotal=topDiags.reduce((a,x)=>a+x[1],0);
     el.innerHTML=`
       <div class="stats-card">
         <div class="stats-title">Resumen global — ${users} clínica${users>1?'s':''}</div>
@@ -3252,26 +3253,28 @@ async function renderStatsGlobal(el){
           <div class="stats-meta-item"><div class="stats-meta-val">${totVisits}</div><div class="stats-meta-lbl">Visitas</div></div>
         </div>
       </div>
-      <div class="stats-card">
+      ${spTotal?`<div class="stats-card">
         <div class="stats-title">Por especie (global)</div>
-        <div class="stats-meta">
-          <div class="stats-meta-item"><div class="stats-meta-val">${sp.Perro}</div><div class="stats-meta-lbl">🐶 Perro</div></div>
-          <div class="stats-meta-item"><div class="stats-meta-val">${sp.Gato}</div><div class="stats-meta-lbl">🐱 Gato</div></div>
-          <div class="stats-meta-item"><div class="stats-meta-val">${sp.Otro}</div><div class="stats-meta-lbl">🐾 Otro</div></div>
-        </div>
-      </div>
+        <canvas id="pie-sp" width="200" height="200" style="display:block;margin:0 auto 8px"></canvas>
+        <div class="pie-legend" id="legend-sp"></div>
+      </div>`:''}
       ${topOrgans.length?`<div class="stats-card">
         <div class="stats-title">Sistemas más frecuentes</div>
-        ${topOrgans.map(([name,count],i)=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:3px;font-weight:600"><span>${name}</span><span>${count}</span></div><div class="stats-bar-wrap"><div class="stats-bar" style="width:${Math.round(count/maxOrgan*100)}%;background:${PIE_COLORS[i%PIE_COLORS.length]}"></div></div></div>`).join('')}
+        <canvas id="pie-org" width="200" height="200" style="display:block;margin:0 auto 8px"></canvas>
+        <div class="pie-legend" id="legend-org"></div>
       </div>`:''}
       ${topDiags.length?`<div class="stats-card">
         <div class="stats-title">Diagnósticos más frecuentes</div>
-        <div class="diag-list">${topDiags.map(([name,count],i)=>`<div class="diag-row"><span class="diag-badge" style="color:${PIE_COLORS[i%PIE_COLORS.length]}">●</span><span class="diag-name">${name}</span><span class="diag-count">${count}</span></div>`).join('')}</div>
+        <canvas id="pie-diag" width="200" height="200" style="display:block;margin:0 auto 8px"></canvas>
+        <div class="pie-legend" id="legend-diag"></div>
       </div>`:''}
       ${topCountries.length?`<div class="stats-card">
         <div class="stats-title">Por país</div>
         <div class="diag-list">${topCountries.map(([country,count])=>`<div class="diag-row"><span class="diag-badge">🌎</span><span class="diag-name">${country}</span><span class="diag-count">${count} clínica${count>1?'s':''}</span></div>`).join('')}</div>
       </div>`:''}`;
+    if(spTotal)drawPie('pie-sp','legend-sp',spItems,spTotal,()=>{});
+    if(topOrgans.length)drawPie('pie-org','legend-org',topOrgans,orgTotal,()=>{});
+    if(topDiags.length)drawPie('pie-diag','legend-diag',topDiags,diagTotal,()=>{});
   }catch(e){el.innerHTML=`<div class="global-empty">Error al cargar datos globales.</div>`;}
 }
 async function pushStatsGlobal(){
