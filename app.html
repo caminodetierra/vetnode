@@ -82,17 +82,6 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
   border-bottom:1px solid var(--border);
   margin-bottom:16px;
 }
-.sidebar-logo-ico{
-  width:42px;height:42px;border-radius:50%;
-  border:1.5px dashed var(--text3);
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;color:var(--text3);overflow:hidden;
-  cursor:pointer;background:var(--blue-dim);
-  flex-shrink:0;
-}
-.sidebar-logo-ico img{width:100%;height:100%;object-fit:cover;}
-.sidebar-clinic-name{font-size:13px;font-weight:700;color:var(--text);line-height:1.3;}
-.sidebar-clinic-sub{font-size:10px;color:var(--text3);margin-top:1px;}
 .sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:0 10px;flex:1;}
 .sidebar-item{
   display:flex;align-items:center;gap:10px;
@@ -226,10 +215,6 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
   border-bottom:1px solid var(--border);
   flex-shrink:0;
   background:var(--surface);
-}
-.app-topbar{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:12px;
 }
 .app-version{
   font-size:10px;color:var(--text3);letter-spacing:1.5px;
@@ -1266,6 +1251,21 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
       </div>
     </div>
 
+    <!-- WELCOME TUTORIAL -->
+    <div class="modal-wrap" id="m-welcome">
+      <div class="modal" style="max-height:85vh;overflow-y:auto;">
+        <div class="modal-handle"></div>
+        <div id="welcome-slides">
+          <!-- slides rendered by JS -->
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="save-btn" id="welcome-prev-btn" onclick="welcomeStep(-1)" style="background:var(--surface2);color:var(--text2);display:none">← Anterior</button>
+          <button class="save-btn" id="welcome-next-btn" onclick="welcomeStep(1)">Siguiente →</button>
+        </div>
+        <div style="display:flex;justify-content:center;gap:6px;margin-top:12px;" id="welcome-dots"></div>
+      </div>
+    </div>
+
     <!-- CLINIC -->
     <div class="modal-wrap" id="m-clinic" onclick="closeIfOutside(event,'m-clinic')">
       <div class="modal">
@@ -1515,6 +1515,10 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
             <span class="ctx-ico">❤️</span>
             <div><div style="font-size:13px;font-weight:700;color:var(--text)">Donar</div><div style="font-size:10px;color:var(--text3)">La app es gratuita — si querés apoyarla económicamente, te lo agradecemos</div></div>
           </div>
+          <div class="ctx-item" style="border:1px solid var(--border);border-radius:11px;" onclick="closeModal('m-support');_welcomeIdx=0;renderWelcomeSlide();openModal('m-welcome')">
+            <span class="ctx-ico">📖</span>
+            <div><div style="font-size:13px;font-weight:700;color:var(--text)">Ver tutorial</div><div style="font-size:10px;color:var(--text3)">Repasá cómo usar VetNode desde el principio</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1756,7 +1760,7 @@ async function syncFromSupabase(){
     if(appts.length||!CACHE.get('appts'))CACHE.set('appts',appts.map(toAppt));
     if(vets.length||!CACHE.get('vets'))CACHE.set('vets',vets.map(toVet));
     if(contacts.length||!CACHE.get('contacts'))CACHE.set('contacts',contacts.map(toContact));
-    if(customVaccsRaw.length||!CACHE.get('custom_vaccs'))CACHE.set('custom_vaccs',customVaccsRaw.map(toCustomVacc));
+    if(customVaccsRaw.length)CACHE.set('custom_vaccs',customVaccsRaw.map(toCustomVacc));
     if(profile){
       const s=CACHE.get('settings')||{};
       if(profile.clinic_name)s.clinic=profile.clinic_name;
@@ -1768,14 +1772,43 @@ async function syncFromSupabase(){
     }
     loadSettings();renderRightPanel();
     showToast('Datos sincronizados ✓');
+    flushPending();
     pushStatsGlobal();
+    maybeShowWelcome();
   }catch(e){console.error('Sync error',e);}
 }
 
 // ── Async Supabase writes ──
+const PENDING_KEY='vn_pending_sync';
+function getPending(){try{return JSON.parse(localStorage.getItem(PENDING_KEY)||'[]');}catch{return[];}}
+function addPending(table,rows){
+  const q=getPending();
+  // merge: replace existing entry for same table
+  const idx=q.findIndex(x=>x.table===table);
+  if(idx>-1)q[idx].rows=rows;else q.push({table,rows});
+  localStorage.setItem(PENDING_KEY,JSON.stringify(q));
+}
+async function flushPending(){
+  const q=getPending();if(!q.length)return;
+  const uid=getUserId();if(!uid)return;
+  const remaining=[];
+  for(const item of q){
+    try{
+      const r=await fetch(`${SUPABASE_URL}/rest/v1/${item.table}`,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(item.rows)});
+      if(!r.ok)remaining.push(item);
+    }catch{remaining.push(item);}
+  }
+  localStorage.setItem(PENDING_KEY,JSON.stringify(remaining));
+  if(remaining.length<q.length)showToast(`${q.length-remaining.length} cambio${q.length-remaining.length>1?'s':''} sincronizado${q.length-remaining.length>1?'s':''} ✓`);
+}
 const _sbSave=async(table,rows,mapper)=>{
   const uid=getUserId();if(!uid||!rows.length)return;
-  await sbUpsert(table,rows.map(r=>mapper(r,uid)));
+  const mapped=rows.map(r=>mapper(r,uid));
+  if(!navigator.onLine){addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');return;}
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(mapped)});
+    if(!r.ok){addPending(table,mapped);showToast('Error al guardar — se reintentará al sincronizar');}
+  }catch{addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');}
 };
 
 // ── DB accessors ──
@@ -1937,7 +1970,7 @@ function showMainMenu(){
 function toggleTheme(){
   const s=getSettings();
   s.darkMode=s.darkMode!==false?false:true;
-  DB.set('settings',s);applyTheme();
+  CACHE.set('settings',s);applyTheme();
   const tog=document.getElementById('theme-toggle');
   if(tog)tog.classList.toggle('on',s.darkMode!==false);
 }
@@ -2029,7 +2062,7 @@ function saveVet(){
   const vets=getVets();
   const data={name,phone:document.getElementById('vet-phone').value.trim(),license:document.getElementById('vet-license').value.trim(),photo:vetPhotoData||null};
   if(editingVetId){const i=vets.findIndex(v=>v.id===editingVetId);vets[i]={...vets[i],...data};}
-  else{const id=crypto.randomUUID();vets.push({...data,id});const s=getSettings();if(!s.activeVetId){s.activeVetId=id;DB.set('settings',s);}}
+  else{const id=crypto.randomUUID();vets.push({...data,id});const s=getSettings();if(!s.activeVetId){s.activeVetId=id;CACHE.set('settings',s);}}
   saveVets(vets);closeModal('m-addvet');renderVetsList();showToast('Veterinario guardado ✓');
 }
 function showVetTooltip(vetId){
@@ -2053,7 +2086,7 @@ function vetBadgeHtml(vetId){
 // ══════════════════════════════════════════════════
 function openBackupModal(){openModal('m-backup');}
 function doBackup(){
-  const data={tutors:getTutors(),pets:getPets(),visits:getVisits(),reminders:getReminders(),appts:getAppts(),settings:getSettings(),vets:getVets(),customVaccs:DB.get('custom_vaccs')||[]};
+  const data={tutors:getTutors(),pets:getPets(),visits:getVisits(),reminders:getReminders(),appts:getAppts(),settings:getSettings(),vets:getVets(),customVaccs:CACHE.get('custom_vaccs')||[]};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -2069,7 +2102,7 @@ function doRestore(input){
       const d=JSON.parse(e.target.result);
       if(d.tutors)saveTutors(d.tutors);if(d.pets)savePets(d.pets);
       if(d.visits)saveVisits(d.visits);if(d.reminders)saveReminders(d.reminders);
-      if(d.appts)saveAppts(d.appts);if(d.settings)DB.set('settings',d.settings);
+      if(d.appts)saveAppts(d.appts);if(d.settings)CACHE.set('settings',d.settings);
       if(d.vets)saveVets(d.vets);if(d.customVaccs)saveCustomVaccs(d.customVaccs);
       loadSettings();rebuildVaccList();closeModal('m-backup');showToast('Backup restaurado ✓');
     }catch(err){showToast('Error al leer el archivo');}
@@ -2791,8 +2824,12 @@ const DEFAULT_VACCS=[
 ];
 const getCustomVaccs=()=>{
   let vaccs=CACHE.get('custom_vaccs');
-  if(!vaccs){vaccs=DEFAULT_VACCS.map(v=>({id:crypto.randomUUID(),name:v.name,days:v.days}));saveCustomVaccs(vaccs);}
-  return vaccs;
+  if(!vaccs&&!localStorage.getItem('vn_vaccs_seeded')){
+    vaccs=DEFAULT_VACCS.map(v=>({id:crypto.randomUUID(),name:v.name,days:v.days}));
+    localStorage.setItem('vn_vaccs_seeded','1');
+    saveCustomVaccs(vaccs);
+  }
+  return vaccs||[];
 };
 function openNewCustomVacc(){
   document.getElementById('cv-modal-title').textContent='Nueva vacuna personalizada';
@@ -3204,18 +3241,23 @@ function renderStatsDiags(visits,el){
 }
 function renderStatsSymptoms(visits,el){
   const {organ,diag}=statsView;
+  // Match same logic as renderStatsDiags: use diagDefinitivo first, then diagPresuntivo
   const filtered=visits.filter(v=>{
     if(!(v.organs||[]).includes(organ))return false;
     const d=v.diagDefinitivo||v.diagPresuntivo||'Sin diagnóstico';
-    return diag?d===diag:d==='Sin diagnóstico';
+    return diag?d===diag:!v.diagDefinitivo&&!v.diagPresuntivo;
   });
-  const syms={};filtered.forEach(v=>(v.symptoms||[]).forEach(s=>{syms[s]=(syms[s]||0)+1;}));
-  const items=Object.entries(syms).sort((a,b)=>b[1]-a[1]);const total=filtered.length;
+  const syms={};
+  filtered.forEach(v=>(v.symptoms||[]).forEach(s=>{if(s)syms[s]=(syms[s]||0)+1;}));
+  const items=Object.entries(syms).sort((a,b)=>b[1]-a[1]);
+  const total=filtered.length;
   el.innerHTML=`
     <div class="breadcrumb"><span onclick="statsView={...statsView,level:'organs'};renderStats()" style="cursor:pointer">Sistemas</span> › <span onclick="statsView={...statsView,level:'diags'};renderStats()" style="cursor:pointer">${organ}</span> › <b>${diag||'Sin diagnóstico'}</b></div>
     <div class="stats-card">
       <div class="stats-title">Síntomas — ${diag||'Sin diagnóstico'} (${total} visita${total!==1?'s':''})</div>
-      ${items.length?`<canvas id="pie-canvas" width="200" height="200" style="display:block;margin:0 auto 8px"></canvas><div class="pie-legend" id="pie-legend"></div>`:'<div style="font-size:12px;color:var(--text3);font-weight:600">Sin síntomas registrados.</div>'}
+      ${items.length
+        ?`<canvas id="pie-canvas" width="200" height="200" style="display:block;margin:0 auto 8px"></canvas><div class="pie-legend" id="pie-legend"></div>`
+        :`<div style="font-size:12px;color:var(--text3);font-weight:600;padding:8px 0">Sin síntomas registrados en estas visitas.</div>`}
     </div>`;
   if(items.length)drawPie('pie-canvas','pie-legend',items,total,()=>{});
 }
@@ -3244,6 +3286,9 @@ async function renderStatsGlobal(el){
     const spTotal=spItems.reduce((a,x)=>a+x[1],0);
     const orgTotal=topOrgans.reduce((a,x)=>a+x[1],0);
     const diagTotal=topDiags.reduce((a,x)=>a+x[1],0);
+    // global stats view state
+    if(!window._gStatsView)window._gStatsView={level:'organs'};
+    const gv=window._gStatsView;
     el.innerHTML=`
       <div class="stats-card">
         <div class="stats-title">Resumen global — ${users} clínica${users>1?'s':''}</div>
@@ -3254,27 +3299,39 @@ async function renderStatsGlobal(el){
         </div>
       </div>
       ${spTotal?`<div class="stats-card">
-        <div class="stats-title">Por especie (global)</div>
-        <canvas id="pie-sp" width="200" height="200" style="display:block;margin:0 auto 8px"></canvas>
+        <div class="stats-title">Por especie</div>
+        <canvas id="pie-sp" width="200" height="200" style="display:block;margin:0 auto 8px;cursor:pointer"></canvas>
         <div class="pie-legend" id="legend-sp"></div>
       </div>`:''}
       ${topOrgans.length?`<div class="stats-card">
-        <div class="stats-title">Sistemas más frecuentes</div>
-        <canvas id="pie-org" width="200" height="200" style="display:block;margin:0 auto 8px"></canvas>
+        <div class="stats-title">Sistemas más frecuentes ${gv.organ?`<span onclick="window._gStatsView={level:'organs'};renderStatsGlobal(document.getElementById('stats-body'))" style="font-size:11px;color:var(--blue);cursor:pointer;font-weight:600;margin-left:8px">← Todos</span>`:''}</div>
+        ${gv.organ?`<div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:600">📍 ${gv.organ}</div>`:''}
+        <canvas id="pie-org" width="200" height="200" style="display:block;margin:0 auto 8px;cursor:pointer"></canvas>
         <div class="pie-legend" id="legend-org"></div>
-      </div>`:''}
-      ${topDiags.length?`<div class="stats-card">
-        <div class="stats-title">Diagnósticos más frecuentes</div>
-        <canvas id="pie-diag" width="200" height="200" style="display:block;margin:0 auto 8px"></canvas>
-        <div class="pie-legend" id="legend-diag"></div>
+        ${gv.organ?`<div class="stats-card" style="margin-top:10px;padding:0;box-shadow:none;border:none">
+          <div class="stats-title" style="margin-bottom:8px">Diagnósticos en ${gv.organ}</div>
+          <div class="diag-list" id="global-diag-list"></div>
+        </div>`:''}
       </div>`:''}
       ${topCountries.length?`<div class="stats-card">
         <div class="stats-title">Por país</div>
         <div class="diag-list">${topCountries.map(([country,count])=>`<div class="diag-row"><span class="diag-badge">🌎</span><span class="diag-name">${country}</span><span class="diag-count">${count} clínica${count>1?'s':''}</span></div>`).join('')}</div>
       </div>`:''}`;
     if(spTotal)drawPie('pie-sp','legend-sp',spItems,spTotal,()=>{});
-    if(topOrgans.length)drawPie('pie-org','legend-org',topOrgans,orgTotal,()=>{});
-    if(topDiags.length)drawPie('pie-diag','legend-diag',topDiags,diagTotal,()=>{});
+    if(topOrgans.length){
+      const organToShow=gv.organ?topDiags:topOrgans;
+      const totalToShow=gv.organ?diagTotal:orgTotal;
+      drawPie('pie-org','legend-org',organToShow,totalToShow,label=>{
+        if(!gv.organ){
+          window._gStatsView={level:'diags',organ:label};
+          renderStatsGlobal(document.getElementById('stats-body'));
+        }
+      });
+      if(gv.organ){
+        const diagListEl=document.getElementById('global-diag-list');
+        if(diagListEl)diagListEl.innerHTML=topDiags.map(([name,count])=>`<div class="diag-row"><span class="diag-badge">❓</span><span class="diag-name">${name}</span><span class="diag-count">${count}</span></div>`).join('');
+      }
+    }
   }catch(e){el.innerHTML=`<div class="global-empty">Error al cargar datos globales.</div>`;}
 }
 async function pushStatsGlobal(){
@@ -3380,7 +3437,7 @@ function syncConfigPanel(){
 
 // ── FONT SIZE ──
 function setFontSize(sz){
-  const s=getSettings();s.fontSize=sz;DB.set('settings',s);applyFontSize();syncFsPills();
+  const s=getSettings();s.fontSize=sz;CACHE.set('settings',s);applyFontSize();syncFsPills();
   closeConfigPanel();
 }
 function applyFontSize(){
@@ -3675,8 +3732,46 @@ function skipFollowup(){
 })();
 
 // ══════════════════════════════════════════════════
-//  AGENDA
+//  WELCOME TUTORIAL
 // ══════════════════════════════════════════════════
+const WELCOME_SLIDES=[
+  {ico:'🐾',title:'Bienvenido/a a VetNode',body:'Tu historia clínica veterinaria inteligente. Gestioná pacientes, visitas, recordatorios y más desde cualquier dispositivo.'},
+  {ico:'👤',title:'Tutores y mascotas',body:'Empezá creando un tutor desde la sección <b>Pacientes</b>. A cada tutor podés agregarle una o más mascotas con su ficha completa.'},
+  {ico:'📋',title:'Registrá visitas',body:'Desde la ficha de cada mascota podés cargar una nueva visita con motivo, peso, diagnóstico, vacunas y adjuntar archivos o fotos.'},
+  {ico:'🔔',title:'Recordatorios y agenda',body:'Los recordatorios de vacunas se crean automáticamente al finalizar una visita. También podés agendar contactos de referencia en el módulo <b>Agenda</b>.'},
+  {ico:'📊',title:'Estadísticas',body:'En el módulo <b>Estadísticas</b> encontrás el análisis clínico de tu práctica y podés compararlo con datos globales anonimizados de otros veterinarios.'},
+];
+let _welcomeIdx=0;
+function renderWelcomeSlide(){
+  const s=WELCOME_SLIDES[_welcomeIdx];
+  document.getElementById('welcome-slides').innerHTML=`
+    <div style="text-align:center;padding:8px 0 16px">
+      <div style="font-size:48px;margin-bottom:12px">${s.ico}</div>
+      <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:10px">${s.title}</div>
+      <div style="font-size:14px;color:var(--text2);line-height:1.6">${s.body}</div>
+    </div>`;
+  const isLast=_welcomeIdx===WELCOME_SLIDES.length-1;
+  const nextBtn=document.getElementById('welcome-next-btn');
+  const prevBtn=document.getElementById('welcome-prev-btn');
+  nextBtn.textContent=isLast?'¡Empezar! 🚀':'Siguiente →';
+  nextBtn.onclick=isLast?()=>{closeModal('m-welcome');localStorage.setItem('vn_welcomed','1');}:()=>welcomeStep(1);
+  prevBtn.style.display=_welcomeIdx>0?'flex':'none';
+  document.getElementById('welcome-dots').innerHTML=WELCOME_SLIDES.map((_,i)=>
+    `<div style="width:7px;height:7px;border-radius:50%;background:${i===_welcomeIdx?'var(--blue)':'var(--border2)'}"></div>`).join('');
+}
+function welcomeStep(dir){
+  _welcomeIdx=Math.max(0,Math.min(WELCOME_SLIDES.length-1,_welcomeIdx+dir));
+  renderWelcomeSlide();
+}
+function maybeShowWelcome(){
+  if(!localStorage.getItem('vn_welcomed')){
+    _welcomeIdx=0;
+    renderWelcomeSlide();
+    openModal('m-welcome');
+  }
+}
+// Flush pending ops when connection is restored
+window.addEventListener('online',()=>{flushPending();showToast('Conexión restaurada 📶');});
 let editingContactId=null;
 
 function renderAgenda(){
