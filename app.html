@@ -355,14 +355,15 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
   color:var(--blue);font-weight:600;
 }
 .opts-btn{
-  width:34px;flex-shrink:0;background:var(--surface);
+  width:40px;flex-shrink:0;background:var(--surface);
   border:1px solid var(--border);border-left:none;
   border-radius:0 var(--radius) var(--radius) 0;
   display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:3px;cursor:pointer;
-  box-shadow:var(--shadow);
+  box-shadow:var(--shadow);min-height:52px;
 }
-.opts-btn span{display:block;width:4px;height:4px;background:var(--text3);border-radius:50%;}
+.opts-btn:hover{background:var(--blue-dim);}
+.opts-btn span{display:block;width:4px;height:4px;background:var(--text2);border-radius:50%;}
 .empty-state{
   text-align:center;padding:52px 24px;color:var(--text3);
   font-size:13px;line-height:1.7;
@@ -406,8 +407,9 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .pet-sub{font-size:10px;color:var(--text3);margin-top:2px;}
 .pet-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
 .pet-last{font-size:10px;color:var(--text3);}
-.pet-dots{display:flex;flex-direction:column;align-items:center;gap:2.5px;}
-.pet-dots span{display:block;width:3px;height:3px;background:var(--text3);border-radius:50%;}
+.pet-dots{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 10px;cursor:pointer;border-radius:8px;min-width:32px;min-height:32px;flex-shrink:0;}
+.pet-dots:hover{background:var(--blue-dim);}
+.pet-dots span{display:block;width:4px;height:4px;background:var(--text2);border-radius:50%;}
 .pet-deceased{font-size:10px;background:var(--red-dim);border:1px solid var(--red-border);color:var(--red);border-radius:5px;padding:1px 6px;margin-left:4px;}
 
 /* ── PET PROFILE ── */
@@ -505,8 +507,9 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .rem-detail{font-size:10px;color:var(--text3);margin-top:2px;}
 .rem-date{font-size:11px;color:var(--text3);flex-shrink:0;text-align:right;}
 .rem-card.urgent .rem-date{color:var(--yellow);font-weight:700;}
-.rem-opts{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5px;padding:4px 6px;cursor:pointer;flex-shrink:0;}
-.rem-opts span{display:block;width:3px;height:3px;background:var(--text3);border-radius:50%;}
+.rem-opts{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 10px;cursor:pointer;flex-shrink:0;border-radius:8px;min-width:32px;min-height:32px;}
+.rem-opts:hover{background:var(--blue-dim);}
+.rem-opts span{display:block;width:4px;height:4px;background:var(--text2);border-radius:50%;}
 .rem-hdr-actions{display:flex;gap:8px;}
 .rem-hdr-btn{height:32px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text2);cursor:pointer;font-size:12px;font-family:var(--font);font-weight:600;padding:0 10px;display:flex;align-items:center;gap:5px;}
 .rem-hdr-btn.green{background:var(--green-dim);border-color:var(--green-border);color:var(--green);}
@@ -2464,7 +2467,7 @@ function renderReminders(){
       <div class="rem-ico">${r.type==='followup'||r.type==='manual'?'🔔':'💉'}</div>
       <div class="rem-info"><div class="rem-title">${r.label}${p?' — '+p.name:''}</div><div class="rem-detail">${t?t.name:''}</div></div>
       <div class="rem-date">${formatDateShort(r.dueDate)}</div>
-      <div class="rem-opts" onclick="event.stopPropagation();showReminderCtx(event,${r.id},'${(r.type||'').replace(/'/g,"\'")}','${(r.label||'').replace(/'/g,"\'")}',${p?p.id:null},'${t?t.id:null}')"><span></span><span></span><span></span></div>
+      <div class="rem-opts" onclick="event.stopPropagation();showReminderCtx(event,'${r.id}','${(r.type||'').replace(/'/g,"\\'")}','${(r.label||'').replace(/'/g,"\\'")}','${p?p.id:null}','${t?t.id:null}')"><span></span><span></span><span></span></div>
     </div>`;
   };
   if(over.length)html+=`<div class="rem-section">Vencidos</div>${over.map(r=>rh(r,'urgent')).join('')}`;
@@ -2817,20 +2820,7 @@ function toggleAttachQ(){const m=document.getElementById('attach-menu-q');m.styl
 // ══════════════════════════════════════════════════
 //  VACCINES
 // ══════════════════════════════════════════════════
-const DEFAULT_VACCS=[
-  {name:'Séxtuple',days:365},{name:'Antirrábica',days:365},
-  {name:'Leptospirosis',days:180},{name:'Quíntuple',days:365},
-  {name:'Triple felina',days:365},{name:'Leucemia felina',days:365},
-];
-const getCustomVaccs=()=>{
-  let vaccs=CACHE.get('custom_vaccs');
-  if(!vaccs&&!localStorage.getItem('vn_vaccs_seeded')){
-    vaccs=DEFAULT_VACCS.map(v=>({id:crypto.randomUUID(),name:v.name,days:v.days}));
-    localStorage.setItem('vn_vaccs_seeded','1');
-    saveCustomVaccs(vaccs);
-  }
-  return vaccs||[];
-};
+const getCustomVaccs=()=>CACHE.get('custom_vaccs')||[];
 function openNewCustomVacc(){
   document.getElementById('cv-modal-title').textContent='Nueva vacuna personalizada';
   document.getElementById('cv-edit-id').value='';
@@ -2896,7 +2886,11 @@ function renderCustomVaccsScreen(){
       </div>
     </div>`;
   }).join('');
-  container.innerHTML=chips+`<div class="add-new-chip" onclick="openNewCustomVacc()">
+  const emptyState=!vaccs.length?`<div class="agenda-empty">
+    <div class="agenda-empty-ico">💉</div>
+    <div class="agenda-empty-txt">No hay vacunas cargadas todavía</div>
+  </div>`:'';
+  container.innerHTML=emptyState+chips+`<div class="add-new-chip" onclick="openNewCustomVacc()">
     <span class="add-new-chip-ico">💉</span>
     <span>Agregar nueva vacuna</span>
   </div>`;
@@ -2906,9 +2900,16 @@ function rebuildVaccList(){
   const custom=getCustomVaccs();
   const container=document.getElementById('vacc-list');
   if(!container)return;
-  // Remove all existing vacc items except reminder item
   container.querySelectorAll('.vacc-item:not(.reminder-item)').forEach(el=>el.remove());
   const reminderItem=container.querySelector('.reminder-item');
+  if(!custom.length){
+    const empty=document.createElement('div');
+    empty.className='vacc-item empty-vacc';
+    empty.style.cssText='color:var(--text3);font-size:12px;padding:10px 12px;cursor:default;';
+    empty.innerHTML='Sin vacunas cargadas — agregá desde Recordatorios → 💉 +';
+    container.insertBefore(empty,reminderItem);
+    return;
+  }
   custom.forEach(cv=>{
     const div=document.createElement('div');div.className='vacc-item custom-vacc';
     div.innerHTML=`<div class="vacc-ico2">💉</div><div class="vacc-item-info"><div class="vacc-nm">${cv.name}</div><div class="vacc-int">Repetir en: ${cv.days} días</div></div><div class="vacc-chk"></div>`;
@@ -3739,7 +3740,8 @@ const WELCOME_SLIDES=[
   {ico:'👤',title:'Tutores y mascotas',body:'Empezá creando un tutor desde la sección <b>Pacientes</b>. A cada tutor podés agregarle una o más mascotas con su ficha completa.'},
   {ico:'📋',title:'Registrá visitas',body:'Desde la ficha de cada mascota podés cargar una nueva visita con motivo, peso, diagnóstico, vacunas y adjuntar archivos o fotos.'},
   {ico:'🔔',title:'Recordatorios y agenda',body:'Los recordatorios de vacunas se crean automáticamente al finalizar una visita. También podés agendar contactos de referencia en el módulo <b>Agenda</b>.'},
-  {ico:'📊',title:'Estadísticas',body:'En el módulo <b>Estadísticas</b> encontrás el análisis clínico de tu práctica y podés compararlo con datos globales anonimizados de otros veterinarios.'},
+  {ico:'🔔',title:'Recordatorios inteligentes',body:'Al tocar los <b>3 puntos</b> de un recordatorio podés enviarle un mensaje de recordatorio al tutor directamente por <b>WhatsApp</b> con el nombre del paciente y la vacuna pendiente, o copiar el texto para enviarlo por otro medio.'},
+  {ico:'💉',title:'Configurá tus vacunas',body:'Antes de cargar visitas, agregá las vacunas que usás habitualmente en <b>Recordatorios → 💉 +</b>. Definí el nombre y cada cuántos días se repite. Esas vacunas van a aparecer disponibles al cerrar cada consulta.'},
 ];
 let _welcomeIdx=0;
 function renderWelcomeSlide(){
@@ -3872,12 +3874,6 @@ function deleteContact(id){
   showToast('Contacto eliminado');
 }
 
-// One-time migration: fix non-UUID custom_vaccs ids
-(()=>{
-  const vaccs=CACHE.get('custom_vaccs');if(!vaccs)return;
-  const fixed=vaccs.map(v=>(/^[0-9a-f-]{36}$/i.test(v.id)?v:{...v,id:crypto.randomUUID(),_saved:false}));
-  if(fixed.some((v,i)=>v.id!==vaccs[i].id))CACHE.set('custom_vaccs',fixed);
-})();
 // One-time migration: fix non-UUID contact ids in localStorage
 (()=>{
   const contacts=CACHE.get('contacts');if(!contacts)return;
