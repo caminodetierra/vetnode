@@ -1170,8 +1170,8 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
       </div>
       <div class="stats-species-bar" id="stats-species-bar" style="display:none">
         <div class="spc-btn active" onclick="setStatSpecies('')">Todos</div>
-        <div class="spc-btn" onclick="setStatSpecies('Perro')">🐶 Perro</div>
-        <div class="spc-btn" onclick="setStatSpecies('Gato')">🐱 Gato</div>
+        <div class="spc-btn" onclick="setStatSpecies('Canino')">🐕 Canino</div>
+        <div class="spc-btn" onclick="setStatSpecies('Felino')">🐈 Felino</div>
         <div class="spc-btn" onclick="setStatSpecies('Otro')">🐾 Otro</div>
       </div>
       <div class="stats-body" id="stats-body"></div>
@@ -1362,17 +1362,27 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
         <div class="modal-title" id="m-pet-title">Nueva mascota</div>
         <div class="fg"><label>Nombre</label><input class="fi" id="p-name" placeholder="Rex"></div>
         <div class="fi-row">
-          <div class="fg" style="margin:0"><label>Especie</label><input class="fi" id="p-species" placeholder="Canino"></div>
+          <div class="fg" style="margin:0">
+            <label>Especie</label>
+            <select class="fi fi-select" id="p-species" onchange="toggleOtherSpecies()">
+              <option value="">— Seleccioná —</option>
+              <option value="Canino">🐕 Canino</option>
+              <option value="Felino">🐈 Felino</option>
+              <option value="Otro">🐾 Otro</option>
+            </select>
+          </div>
           <div class="fg" style="margin:0"><label>Raza</label><input class="fi" id="p-breed" placeholder="Labrador"></div>
         </div>
-        <div class="fi-row" style="margin-top:13px">
+        <div class="fg" id="p-species-other-wrap" style="display:none"><label>Especificá la especie</label><input class="fi" id="p-species-other" placeholder="Ej: Equino, Bovino..."></div>
+        <div class="fi-row" style="margin-top:4px">
+          <div class="cast-box"><span class="cast-lbl">Macho</span><div class="toggle" id="toggle-sex" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div><span class="cast-lbl">Hembra</span></div>
+          <div class="cast-box"><span class="cast-lbl">Castrado/a</span><div class="toggle" id="toggle-cast" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
+        </div>
+        <div class="fi-row" style="margin-top:8px">
           <div class="fg" style="margin:0"><label>Fecha de nac.</label><input class="fi" id="p-dob" placeholder="12/03/2021" oninput="calcAge()"></div>
           <div class="fg" style="margin:0"><label>Edad</label><input class="fi auto" id="p-age" placeholder="se calcula" oninput="calcDob()"></div>
         </div>
-        <div class="chip-cast" style="margin-top:13px">
-          <div class="fg" style="margin:0"><label>N° de chip</label><input class="fi" id="p-chip" placeholder="941000012345678"></div>
-          <div class="cast-box"><span class="cast-lbl">Castrado/a</span><div class="toggle" id="toggle-cast" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
-        </div>
+        <div class="fg" style="margin-top:8px"><label>N° de chip</label><input class="fi" id="p-chip" placeholder="941000012345678"></div>
         <button class="save-btn" id="m-pet-save" onclick="savePet()">Guardar mascota</button>
         <button class="del-btn" id="m-pet-del" style="display:none" onclick="deletePet()">Eliminar mascota</button>
       </div>
@@ -1728,8 +1738,8 @@ async function sbDeleteIds(table,ids){
 // ── Data mappers ──
 const toTutor=r=>({id:r.id,name:r.name,phone:r.phone||'',address:r.address||'',city:r.city||'',alertText:r.alert_text||'',alertActive:!!r.alert_active,quickEntry:!!r.quick_entry});
 const fromTutor=(t,uid)=>{const o={user_id:uid,name:t.name,phone:t.phone||'',address:t.address||'',city:t.city||'',alert_text:t.alertText||'',alert_active:!!t.alertActive,quick_entry:!!t.quickEntry};if(t.id)o.id=t.id;return o;};
-const toPet=r=>(({id:r.id,tutorId:r.tutor_id,name:r.name,species:r.species||'',breed:r.breed||'',dob:r.dob||'',chip:r.chip||'',castrated:!!r.castrated,deceased:!!r.deceased,alertText:r.alert_text||'',alertActive:!!r.alert_active,quickEntry:!!r.quick_entry}));
-const fromPet=(p,uid)=>{const o={user_id:uid,tutor_id:p.tutorId,name:p.name,species:p.species||'',breed:p.breed||'',dob:p.dob||'',chip:p.chip||'',castrated:!!p.castrated,deceased:!!p.deceased,alert_text:p.alertText||'',alert_active:!!p.alertActive,quick_entry:!!p.quickEntry};if(p.id)o.id=p.id;return o;};
+const toPet=r=>(({id:r.id,tutorId:r.tutor_id,name:r.name,species:r.species||'',breed:r.breed||'',dob:r.dob||'',chip:r.chip||'',sex:r.sex||'',castrated:!!r.castrated,deceased:!!r.deceased,alertText:r.alert_text||'',alertActive:!!r.alert_active,quickEntry:!!r.quick_entry}));
+const fromPet=(p,uid)=>{const o={user_id:uid,tutor_id:p.tutorId,name:p.name,species:p.species||'',breed:p.breed||'',dob:p.dob||'',chip:p.chip||'',sex:p.sex||'',castrated:!!p.castrated,deceased:!!p.deceased,alert_text:p.alertText||'',alert_active:!!p.alertActive,quick_entry:!!p.quickEntry};if(p.id)o.id=p.id;return o;};
 const toVisit=r=>(({id:r.id,petId:r.pet_id,vetId:r.vet_id,date:new Date(r.visit_date).getTime(),temp:r.temp||'',peso:r.peso||'',fc:r.fc||'',fr:r.fr||'',presion:r.presion||'',notes:r.notes||'',vacc:r.vacc||null,organs:r.organs||[],symptoms:r.symptoms||[],diagPresuntivo:r.diag_presuntivo||'',diagDefinitivo:r.diag_definitivo||'',confMethod:r.conf_method||'',confStatus:r.conf_status||'',attachments:r.attachments||[],quick:!!r.quick}));
 const fromVisit=(v,uid)=>{const o={user_id:uid,pet_id:v.petId,vet_id:v.vetId||null,visit_date:new Date(v.date).toISOString(),temp:v.temp||'',peso:v.peso||'',fc:v.fc||'',fr:v.fr||'',presion:v.presion||'',notes:v.notes||'',vacc:v.vacc||null,organs:v.organs||[],symptoms:v.symptoms||[],diag_presuntivo:v.diagPresuntivo||'',diag_definitivo:v.diagDefinitivo||'',conf_method:v.confMethod||'',conf_status:v.confStatus||'',attachments:v.attachments||[],quick:!!v.quick};if(v.id)o.id=v.id;return o;};
 const toReminder=r=>(({id:r.id,petId:r.pet_id,tutorId:r.tutor_id,type:r.type||'manual',label:r.label||'',dueDate:new Date(r.due_date).getTime()}));
@@ -1748,6 +1758,7 @@ const CACHE={
 
 // ── Sync from Supabase on load ──
 async function syncFromSupabase(){
+  if(!await ensureValidSession())return;
   const uid=getUserId();if(!uid)return;
   try{
     const [tutors,pets,visits,rems,appts,vets,contacts,customVaccsRaw,profile]=await Promise.all([
@@ -1806,6 +1817,7 @@ async function flushPending(){
 }
 const _sbSave=async(table,rows,mapper)=>{
   const uid=getUserId();if(!uid||!rows.length)return;
+  if(isTokenExpired())await refreshSession();
   const mapped=rows.map(r=>mapper(r,uid));
   if(!navigator.onLine){addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');return;}
   try{
@@ -2188,6 +2200,16 @@ function renderTutors(){
     </div>`;
   }).join('');
 }
+function toggleOtherSpecies(){
+  const sel=document.getElementById('p-species').value;
+  document.getElementById('p-species-other-wrap').style.display=sel==='Otro'?'block':'none';
+}
+function normalizeSpecies(s){
+  const sl=(s||'').toLowerCase();
+  if(sl.includes('can')||sl.includes('perro'))return'Canino';
+  if(sl.includes('fel')||sl.includes('gat'))return'Felino';
+  return'Otro';
+}
 function openTutor(id){S.tutorId=id;go('s-tutor');}
 function showAllTutors(){
   // Force show all by setting a dummy date filter far back
@@ -2335,8 +2357,11 @@ function openNewPet(){
   S.editPetId=null;
   document.getElementById('m-pet-title').textContent='Nueva mascota';
   document.getElementById('m-pet-del').style.display='none';
-  ['p-name','p-species','p-breed','p-dob','p-age','p-chip'].forEach(id=>document.getElementById(id).value='');
+  ['p-name','p-breed','p-dob','p-age','p-chip','p-species-other'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('p-species').value='';
+  document.getElementById('p-species-other-wrap').style.display='none';
   document.getElementById('toggle-cast').classList.remove('on');
+  document.getElementById('toggle-sex').classList.remove('on');
   openModal('m-pet');
 }
 function openEditPet(){openEditPetById(S.petId);}
@@ -2346,18 +2371,31 @@ function openEditPetById(id){
   document.getElementById('m-pet-title').textContent='Modificar mascota';
   document.getElementById('m-pet-del').style.display='block';
   document.getElementById('p-name').value=p.name||'';
-  document.getElementById('p-species').value=p.species||'';
+  const sp=p.species||'';const spLow=sp.toLowerCase();
+  let selVal='';
+  if(spLow.includes('can')||spLow.includes('perro'))selVal='Canino';
+  else if(spLow.includes('fel')||spLow.includes('gat'))selVal='Felino';
+  else if(sp)selVal='Otro';
+  document.getElementById('p-species').value=selVal;
+  const otherWrap=document.getElementById('p-species-other-wrap');
+  const otherInput=document.getElementById('p-species-other');
+  if(selVal==='Otro'){otherWrap.style.display='block';otherInput.value=sp;}
+  else{otherWrap.style.display='none';otherInput.value='';}
   document.getElementById('p-breed').value=p.breed||'';
   document.getElementById('p-dob').value=p.dob||'';
   document.getElementById('p-age').value=calcAgeStr(p.dob)||'';
   document.getElementById('p-chip').value=p.chip||'';
   document.getElementById('toggle-cast').classList.toggle('on',!!p.castrated);
+  document.getElementById('toggle-sex').classList.toggle('on',p.sex==='Hembra');
   openModal('m-pet');
 }
 function savePet(){
   const name=v('p-name');if(!name){showToast('El nombre es obligatorio');return;}
+  const selSpecies=document.getElementById('p-species').value;
+  const species=selSpecies==='Otro'?(v('p-species-other')||'Otro'):selSpecies;
+  const sex=document.getElementById('toggle-sex').classList.contains('on')?'Hembra':'Macho';
   const pets=getPets();
-  const data={name,species:v('p-species'),breed:v('p-breed'),dob:v('p-dob'),chip:v('p-chip'),castrated:document.getElementById('toggle-cast').classList.contains('on'),tutorId:S.tutorId};
+  const data={name,species,breed:v('p-breed'),dob:v('p-dob'),chip:v('p-chip'),sex,castrated:document.getElementById('toggle-cast').classList.contains('on'),tutorId:S.tutorId};
   if(S.editPetId){const i=pets.findIndex(p=>p.id===S.editPetId);pets[i]={...pets[i],...data};}
   else pets.unshift({...data,id:crypto.randomUUID()});
   savePets(pets);closeModal('m-pet');renderTutorProfile();
@@ -3164,7 +3202,7 @@ function renderStats(){
   const pets=getPets();
   const speciesFilter=statsView.species;
   const filteredPetIds=speciesFilter
-    ?new Set(pets.filter(p=>p.species===speciesFilter||(speciesFilter==='Otro'&&p.species!=='Perro'&&p.species!=='Gato')).map(p=>p.id))
+    ?new Set(pets.filter(p=>normalizeSpecies(p.species)===speciesFilter).map(p=>p.id))
     :null;
   const visits=getVisits().filter(v=>v.organs&&v.organs.length&&(!filteredPetIds||filteredPetIds.has(v.petId)));
   if(!visits.length){el.innerHTML=`<div class="empty-state"><span class="emoji">📊</span>Sin datos suficientes.<br>Completá la encuesta de cierre en las visitas.</div>`;return;}
@@ -3177,14 +3215,14 @@ function renderStatsOrgans(visits,el){
   const counts={};visits.forEach(v=>(v.organs||[]).forEach(o=>{counts[o]=(counts[o]||0)+1;}));
   const total=Object.values(counts).reduce((a,b)=>a+b,0);
   const items=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  const filteredPetIds=statsView.species?new Set(pets.filter(p=>p.species===statsView.species||(statsView.species==='Otro'&&p.species!=='Perro'&&p.species!=='Gato')).map(p=>p.id)):null;
+  const filteredPetIds=statsView.species?new Set(pets.filter(p=>normalizeSpecies(p.species)===statsView.species).map(p=>p.id)):null;
   const allVisits=getVisits().filter(v=>!filteredPetIds||filteredPetIds.has(v.petId));
   const presuntivos=allVisits.filter(v=>v.diagPresuntivo&&!v.diagDefinitivo).length;
   const confirmados=allVisits.filter(v=>v.diagDefinitivo||(v.diagPresuntivo&&v.confStatus==='Sí')).length;
   const byLab=allVisits.filter(v=>v.confMethod==='Test / Lab'||v.confMethod==='Imagen').length;
   const byClin=allVisits.filter(v=>v.confMethod==='Clínica').length;
-  const spCounts={Perro:0,Gato:0,Otro:0};
-  visits.forEach(v=>{const p=pets.find(x=>x.id===v.petId);const sp=p?.species;if(sp==='Perro')spCounts.Perro++;else if(sp==='Gato')spCounts.Gato++;else spCounts.Otro++;});
+  const spCounts={Canino:0,Felino:0,Otro:0};
+  visits.forEach(v=>{const p=pets.find(x=>x.id===v.petId);const sp=normalizeSpecies(p?.species);if(sp==='Canino')spCounts.Canino++;else if(sp==='Felino')spCounts.Felino++;else spCounts.Otro++;});
   el.innerHTML=`
     <div class="breadcrumb">Todos los sistemas</div>
     <div class="stats-card">
@@ -3204,8 +3242,8 @@ function renderStatsOrgans(visits,el){
     ${!statsView.species?`<div class="stats-card">
       <div class="stats-title">Por especie</div>
       <div class="stats-meta">
-        <div class="stats-meta-item"><div class="stats-meta-val">${spCounts.Perro}</div><div class="stats-meta-lbl">🐶 Perro</div></div>
-        <div class="stats-meta-item"><div class="stats-meta-val">${spCounts.Gato}</div><div class="stats-meta-lbl">🐱 Gato</div></div>
+        <div class="stats-meta-item"><div class="stats-meta-val">${spCounts.Canino}</div><div class="stats-meta-lbl">🐕 Canino</div></div>
+        <div class="stats-meta-item"><div class="stats-meta-val">${spCounts.Felino}</div><div class="stats-meta-lbl">🐈 Felino</div></div>
         <div class="stats-meta-item"><div class="stats-meta-val">${spCounts.Otro}</div><div class="stats-meta-lbl">🐾 Otro</div></div>
       </div>
     </div>`:''}`;
@@ -3269,97 +3307,141 @@ async function renderStatsGlobal(el){
     if(!r.ok)throw new Error('fetch failed');
     const rows=await r.json();
     if(!rows.length){el.innerHTML=`<div class="global-empty">📊 Aún no hay suficientes datos globales.<br><br>A medida que más veterinarios usen VetNode, los datos irán apareciendo acá.</div>`;return;}
-    const totTutors=rows.reduce((a,r)=>a+(r.total_tutors||0),0);
-    const totPets=rows.reduce((a,r)=>a+(r.total_pets||0),0);
+    const gv=window._gStatsView||{level:'organs'};
     const totVisits=rows.reduce((a,r)=>a+(r.total_visits||0),0);
     const users=rows.length;
-    const sp={Perro:0,Gato:0,Otro:0};
-    rows.forEach(r=>{const s=r.species_counts||{};sp.Perro+=(s.Perro||0);sp.Gato+=(s.Gato||0);sp.Otro+=(s.Otro||0);});
+    const sp={Canino:0,Felino:0,Otro:0};
+    rows.forEach(r=>{const s=r.species_counts||{};sp.Canino+=(s.Canino||0);sp.Felino+=(s.Felino||0);sp.Otro+=(s.Otro||0);});
+    const dm={presuntivos:0,confirmados:0,byLab:0,byClin:0};
+    rows.forEach(r=>{const d=r.diags_meta||{};dm.presuntivos+=(d.presuntivos||0);dm.confirmados+=(d.confirmados||0);dm.byLab+=(d.byLab||0);dm.byClin+=(d.byClin||0);});
     const organMap={};
     rows.forEach(r=>(r.top_organs||[]).forEach(o=>{organMap[o.name]=(organMap[o.name]||0)+o.count;}));
     const topOrgans=Object.entries(organMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    const diagMap={};
-    rows.forEach(r=>(r.top_diags||[]).forEach(d=>{diagMap[d.name]=(diagMap[d.name]||0)+d.count;}));
-    const topDiags=Object.entries(diagMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    const countryMap={};rows.forEach(r=>{if(r.country)countryMap[r.country]=(countryMap[r.country]||0)+1;});
-    const topCountries=Object.entries(countryMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
-    const spItems=[['🐶 Perro',sp.Perro],['🐱 Gato',sp.Gato],['🐾 Otro',sp.Otro]].filter(x=>x[1]>0);
-    const spTotal=spItems.reduce((a,x)=>a+x[1],0);
     const orgTotal=topOrgans.reduce((a,x)=>a+x[1],0);
-    const diagTotal=topDiags.reduce((a,x)=>a+x[1],0);
-    // global stats view state
-    if(!window._gStatsView)window._gStatsView={level:'organs'};
-    const gv=window._gStatsView;
-    el.innerHTML=`
-      <div class="stats-card">
-        <div class="stats-title">Resumen global — ${users} clínica${users>1?'s':''}</div>
-        <div class="stats-meta">
-          <div class="stats-meta-item"><div class="stats-meta-val">${totTutors}</div><div class="stats-meta-lbl">Tutores</div></div>
-          <div class="stats-meta-item"><div class="stats-meta-val">${totPets}</div><div class="stats-meta-lbl">Mascotas</div></div>
-          <div class="stats-meta-item"><div class="stats-meta-val">${totVisits}</div><div class="stats-meta-lbl">Visitas</div></div>
+    const countryMap={};rows.forEach(r=>{if(r.country){const c=r.country.charAt(0).toUpperCase()+r.country.slice(1);countryMap[c]=(countryMap[c]||0)+1;}});
+    const topCountries=Object.entries(countryMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    if(gv.level==='organs'){
+      el.innerHTML=`
+        <div class="breadcrumb">Todos los sistemas — ${users} clínica${users>1?'s':''}</div>
+        <div class="stats-card">
+          <div class="stats-title">Sistemas afectados — ${totVisits} visitas globales</div>
+          <canvas id="pie-canvas" width="200" height="200" style="display:block;margin:0 auto 8px;cursor:pointer"></canvas>
+          <div class="pie-legend" id="pie-legend"></div>
         </div>
-      </div>
-      ${spTotal?`<div class="stats-card">
-        <div class="stats-title">Por especie</div>
-        <canvas id="pie-sp" width="200" height="200" style="display:block;margin:0 auto 8px;cursor:pointer"></canvas>
-        <div class="pie-legend" id="legend-sp"></div>
-      </div>`:''}
-      ${topOrgans.length?`<div class="stats-card">
-        <div class="stats-title">Sistemas más frecuentes ${gv.organ?`<span onclick="window._gStatsView={level:'organs'};renderStatsGlobal(document.getElementById('stats-body'))" style="font-size:11px;color:var(--blue);cursor:pointer;font-weight:600;margin-left:8px">← Todos</span>`:''}</div>
-        ${gv.organ?`<div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:600">📍 ${gv.organ}</div>`:''}
-        <canvas id="pie-org" width="200" height="200" style="display:block;margin:0 auto 8px;cursor:pointer"></canvas>
-        <div class="pie-legend" id="legend-org"></div>
-        ${gv.organ?`<div class="stats-card" style="margin-top:10px;padding:0;box-shadow:none;border:none">
-          <div class="stats-title" style="margin-bottom:8px">Diagnósticos en ${gv.organ}</div>
-          <div class="diag-list" id="global-diag-list"></div>
-        </div>`:''}
-      </div>`:''}
-      ${topCountries.length?`<div class="stats-card">
-        <div class="stats-title">Por país</div>
-        <div class="diag-list">${topCountries.map(([country,count])=>`<div class="diag-row"><span class="diag-badge">🌎</span><span class="diag-name">${country}</span><span class="diag-count">${count} clínica${count>1?'s':''}</span></div>`).join('')}</div>
-      </div>`:''}`;
-    if(spTotal)drawPie('pie-sp','legend-sp',spItems,spTotal,()=>{});
-    if(topOrgans.length){
-      const organToShow=gv.organ?topDiags:topOrgans;
-      const totalToShow=gv.organ?diagTotal:orgTotal;
-      drawPie('pie-org','legend-org',organToShow,totalToShow,label=>{
-        if(!gv.organ){
-          window._gStatsView={level:'diags',organ:label};
-          renderStatsGlobal(document.getElementById('stats-body'));
-        }
-      });
-      if(gv.organ){
-        const diagListEl=document.getElementById('global-diag-list');
-        if(diagListEl)diagListEl.innerHTML=topDiags.map(([name,count])=>`<div class="diag-row"><span class="diag-badge">❓</span><span class="diag-name">${name}</span><span class="diag-count">${count}</span></div>`).join('');
-      }
+        <div class="stats-card">
+          <div class="stats-title">Diagnósticos</div>
+          <div class="stats-meta">
+            <div class="stats-meta-item"><div class="stats-meta-val">${dm.presuntivos}</div><div class="stats-meta-lbl">Presuntivos</div></div>
+            <div class="stats-meta-item"><div class="stats-meta-val">${dm.confirmados}</div><div class="stats-meta-lbl">Confirmados</div></div>
+            <div class="stats-meta-item"><div class="stats-meta-val">${dm.byLab}</div><div class="stats-meta-lbl">Lab / Imagen</div></div>
+            <div class="stats-meta-item"><div class="stats-meta-val">${dm.byClin}</div><div class="stats-meta-lbl">Clínica</div></div>
+          </div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-title">Por especie</div>
+          <div class="stats-meta">
+            <div class="stats-meta-item"><div class="stats-meta-val">${sp.Canino}</div><div class="stats-meta-lbl">🐕 Canino</div></div>
+            <div class="stats-meta-item"><div class="stats-meta-val">${sp.Felino}</div><div class="stats-meta-lbl">🐈 Felino</div></div>
+            <div class="stats-meta-item"><div class="stats-meta-val">${sp.Otro}</div><div class="stats-meta-lbl">🐾 Otro</div></div>
+          </div>
+        </div>
+        ${topCountries.length?`<div class="stats-card">
+          <div class="stats-title">Por país</div>
+          <div class="diag-list">${topCountries.map(([c,n])=>`<div class="diag-row"><span class="diag-badge">🌎</span><span class="diag-name">${c}</span><span class="diag-count">${n} clínica${n>1?'s':''}</span></div>`).join('')}</div>
+        </div>`:''}`;
+      if(topOrgans.length)drawPie('pie-canvas','pie-legend',topOrgans,orgTotal,label=>{window._gStatsView={level:'diags',organ:label};renderStatsGlobal(el);});
+    } else if(gv.level==='diags'){
+      const diagAgg={};
+      rows.forEach(r=>{const ob=(r.organs_by_diag||[]).find(x=>x.organ===gv.organ);if(ob)(ob.diags||[]).forEach(d=>{if(!diagAgg[d.name])diagAgg[d.name]={count:0,isDefinitive:false};diagAgg[d.name].count+=d.count;if(d.isDefinitive)diagAgg[d.name].isDefinitive=true;});});
+      const diagItems=Object.entries(diagAgg).sort((a,b)=>b[1].count-a[1].count);
+      const diagTotal=diagItems.reduce((a,x)=>a+x[1].count,0);
+      const diagList=diagItems.map(([name,v])=>{
+        const badge=name==='Sin diagnóstico'?'🔍':v.isDefinitive?'✅':'❓';
+        const safeOrgan=gv.organ.replace(/'/g,"\'");const safeDiag=name.replace(/'/g,"\'");
+        return`<div class="diag-row" onclick="window._gStatsView={level:'symptoms',organ:'${safeOrgan}',diag:'${safeDiag}'};renderStatsGlobal(document.getElementById('stats-body'))" style="cursor:pointer"><span class="diag-badge">${badge}</span><span class="diag-name">${name}</span><span class="diag-count">${v.count} caso${v.count>1?'s':''} · ${diagTotal?Math.round(v.count/diagTotal*100):0}%</span></div>`;
+      }).join('');
+      el.innerHTML=`
+        <div class="breadcrumb"><span onclick="window._gStatsView={level:'organs'};renderStatsGlobal(document.getElementById('stats-body'))" style="cursor:pointer">Sistemas</span> › <b>${gv.organ}</b></div>
+        <div class="stats-card">
+          <div class="stats-title">Diagnósticos en ${gv.organ}</div>
+          <canvas id="pie-canvas" width="200" height="200" style="display:block;margin:0 auto 8px;cursor:pointer"></canvas>
+          <div class="pie-legend" id="pie-legend"></div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-title">Listado de diagnósticos</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-weight:600">✅ Confirmado · ❓ Presuntivo · 🔍 Sin diagnóstico · Tocá para ver síntomas</div>
+          <div class="diag-list">${diagList}</div>
+        </div>`;
+      if(diagItems.length)drawPie('pie-canvas','pie-legend',diagItems.map(([n,v])=>[n,v.count]),diagTotal,label=>{window._gStatsView={level:'symptoms',organ:gv.organ,diag:label};renderStatsGlobal(el);});
+    } else if(gv.level==='symptoms'){
+      const symAgg={};
+      rows.forEach(r=>{const ob=(r.organs_by_diag||[]).find(x=>x.organ===gv.organ);if(ob){const d=(ob.diags||[]).find(x=>x.name===gv.diag);if(d)(d.symptoms||[]).forEach(s=>{symAgg[s.name]=(symAgg[s.name]||0)+s.count;});}});
+      const symItems=Object.entries(symAgg).sort((a,b)=>b[1]-a[1]);
+      const symTotal=symItems.reduce((a,x)=>a+x[1],0);
+      const safeOrgan=gv.organ.replace(/'/g,"\'");
+      el.innerHTML=`
+        <div class="breadcrumb"><span onclick="window._gStatsView={level:'organs'};renderStatsGlobal(document.getElementById('stats-body'))" style="cursor:pointer">Sistemas</span> › <span onclick="window._gStatsView={level:'diags',organ:'${safeOrgan}'};renderStatsGlobal(document.getElementById('stats-body'))" style="cursor:pointer">${gv.organ}</span> › <b>${gv.diag}</b></div>
+        <div class="stats-card">
+          <div class="stats-title">Síntomas — ${gv.diag} (${symTotal} caso${symTotal!==1?'s':''})</div>
+          ${symItems.length?`<canvas id="pie-canvas" width="200" height="200" style="display:block;margin:0 auto 8px"></canvas><div class="pie-legend" id="pie-legend"></div>`:`<div style="font-size:12px;color:var(--text3);font-weight:600;padding:8px 0">Sin síntomas registrados.</div>`}
+        </div>`;
+      if(symItems.length)drawPie('pie-canvas','pie-legend',symItems,symTotal,()=>{});
     }
-  }catch(e){el.innerHTML=`<div class="global-empty">Error al cargar datos globales.</div>`;}
+  }catch(e){console.error(e);el.innerHTML=`<div class="global-empty">Error al cargar datos globales.</div>`;}
 }
 async function pushStatsGlobal(){
   const uid=getUserId();if(!uid)return;
   const session=getSession();
   const meta=session?.user?.user_metadata||{};
   const visits=getVisits();const pets=getPets();
-  // species counts
-  const sp={Perro:0,Gato:0,Otro:0};
-  pets.forEach(p=>{if(p.species==='Perro')sp.Perro++;else if(p.species==='Gato')sp.Gato++;else sp.Otro++;});
+  const sp={Canino:0,Felino:0,Otro:0};
+  pets.forEach(p=>{const ns=normalizeSpecies(p.species);if(ns==='Canino')sp.Canino++;else if(ns==='Felino')sp.Felino++;else sp.Otro++;});
   // top organs
   const organMap={};visits.forEach(v=>(v.organs||[]).forEach(o=>{organMap[o]=(organMap[o]||0)+1;}));
-  const topOrgans=Object.entries(organMap).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([name,count])=>({name,count}));
+  const topOrgans=Object.entries(organMap).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([name,count])=>({name,count}));
   // top diags
   const diagMap={};visits.forEach(v=>{if(v.diagPresuntivo)diagMap[v.diagPresuntivo]=(diagMap[v.diagPresuntivo]||0)+1;});
   const topDiags=Object.entries(diagMap).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([name,count])=>({name,count}));
+  // diags meta (presuntivos, confirmados, lab, clinica)
+  const allWithDiag=visits.filter(v=>v.diagPresuntivo||v.diagDefinitivo);
+  const diagsMeta={
+    presuntivos:allWithDiag.filter(v=>v.diagPresuntivo&&!v.diagDefinitivo).length,
+    confirmados:allWithDiag.filter(v=>v.diagDefinitivo||(v.diagPresuntivo&&v.confStatus==='Sí')).length,
+    byLab:allWithDiag.filter(v=>v.confMethod==='Test / Lab'||v.confMethod==='Imagen').length,
+    byClin:allWithDiag.filter(v=>v.confMethod==='Clínica').length
+  };
+  // organs_by_diag: for each organ, list of {name, count, isDefinitive, symptoms[]}
+  const organsByDiag={};
+  visits.forEach(v=>{
+    (v.organs||[]).forEach(organ=>{
+      if(!organsByDiag[organ])organsByDiag[organ]={};
+      const d=v.diagDefinitivo||v.diagPresuntivo||'Sin diagnóstico';
+      if(!organsByDiag[organ][d])organsByDiag[organ][d]={count:0,isDefinitive:false,symptoms:{}};
+      organsByDiag[organ][d].count++;
+      if(v.diagDefinitivo||(v.diagPresuntivo&&v.confStatus==='Sí'))organsByDiag[organ][d].isDefinitive=true;
+      (v.symptoms||[]).forEach(s=>{organsByDiag[organ][d].symptoms[s]=(organsByDiag[organ][d].symptoms[s]||0)+1;});
+    });
+  });
+  const organsByDiagArr=Object.entries(organsByDiag).map(([organ,diags])=>({
+    organ,
+    diags:Object.entries(diags).sort((a,b)=>b[1].count-a[1].count).slice(0,8).map(([name,v])=>({
+      name,count:v.count,isDefinitive:v.isDefinitive,
+      symptoms:Object.entries(v.symptoms).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([name,count])=>({name,count}))
+    }))
+  }));
   const payload={
     user_id:uid,
-    country:meta.country||'',
-    state:meta.state||'',
-    city:meta.city||'',
+    country:(meta.country||'').toLowerCase().trim(),
+    state:(meta.state||'').toLowerCase().trim(),
+    city:(meta.city||'').toLowerCase().trim(),
     total_tutors:getTutors().length,
     total_pets:pets.length,
     total_visits:visits.length,
     species_counts:sp,
     top_organs:topOrgans,
     top_diags:topDiags,
+    diags_meta:diagsMeta,
+    organs_by_diag:organsByDiagArr,
     updated_at:new Date().toISOString()
   };
   await sbUpsert('stats_global',payload);
@@ -3698,22 +3780,57 @@ function skipFollowup(){
 //  INIT
 // ══════════════════════════════════════════════════
 
-// Auth guard: redirect to landing if not logged in
-(function checkAuth(){
-  const session=getSession();
-  if(!session||!session.access_token){
-    window.location.href='index.html';
-    return;
-  }
-  // Check if token is expired
+// Token refresh
+async function refreshSession(){
+  const s=getSession();if(!s?.refresh_token)return false;
   try{
-    const payload=JSON.parse(atob(session.access_token.split('.')[1]));
-    if(payload.exp && payload.exp*1000 < Date.now()){
-      localStorage.removeItem('vn_session');
-      window.location.href='index.html';
-      return;
+    const r=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY},
+      body:JSON.stringify({refresh_token:s.refresh_token})
+    });
+    if(!r.ok)return false;
+    const data=await r.json();
+    if(data.access_token){
+      localStorage.setItem('vn_session',JSON.stringify({...s,...data}));
+      return true;
     }
   }catch(e){}
+  return false;
+}
+function isTokenExpired(){
+  try{
+    const s=getSession();if(!s?.access_token)return true;
+    const payload=JSON.parse(atob(s.access_token.split('.')[1]));
+    // refresh if less than 5 minutes left
+    return payload.exp&&payload.exp*1000<Date.now()+5*60*1000;
+  }catch(e){return true;}
+}
+async function ensureValidSession(){
+  if(!isTokenExpired())return true;
+  const ok=await refreshSession();
+  if(!ok){localStorage.removeItem('vn_session');window.location.href='index.html';return false;}
+  return true;
+}
+
+// Auth guard: redirect to landing if not logged in
+(async function checkAuth(){
+  const session=getSession();
+  if(!session?.access_token){window.location.href='index.html';return;}
+  // If token expired try to refresh silently
+  if(isTokenExpired()){
+    const ok=await refreshSession();
+    if(!ok){localStorage.removeItem('vn_session');window.location.href='index.html';return;}
+  }
+  // Set up proactive refresh every 4 minutes
+  setInterval(async()=>{if(isTokenExpired())await refreshSession();},4*60*1000);
+  // Periodic sync every 5 minutes: flush pending queue
+  setInterval(async()=>{
+    if(!navigator.onLine)return;
+    if(isTokenExpired())await refreshSession();
+    const pending=getPending();
+    if(pending.length){flushPending();showToast('Sincronizando cambios pendientes... 🔄');}
+  },5*60*1000);
 })();
 
 // Add logout button to config panel
