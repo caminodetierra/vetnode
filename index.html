@@ -347,6 +347,24 @@ footer span{color:var(--orange);font-weight:700;}
   .epi-inner{padding:36px 20px;}
   .auth-card{padding:28px 20px;}
 }
+.carousel-section{padding:60px 24px 40px;text-align:center;}
+.carousel-label{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan2);margin-bottom:24px;}
+.carousel-wrap{position:relative;max-width:360px;margin:0 auto;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08);}
+.carousel-track{display:flex;transition:transform .4s cubic-bezier(.4,0,.2,1);}
+.carousel-slide{min-width:100%;width:100%;height:auto;display:block;object-fit:cover;}
+.carousel-btn{
+  position:absolute;top:50%;transform:translateY(-50%);
+  background:rgba(0,0,0,.5);border:none;color:#fff;
+  font-size:28px;width:40px;height:40px;border-radius:50%;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);transition:.2s;z-index:2;
+}
+.carousel-btn:hover{background:rgba(240,112,48,.7);}
+.carousel-prev{left:10px;}
+.carousel-next{right:10px;}
+.carousel-dots{display:flex;justify-content:center;gap:8px;margin-top:16px;}
+.carousel-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:.2s;}
+.carousel-dot.active{background:var(--orange);transform:scale(1.2);}
 </style>
 </head>
 <body>
@@ -427,6 +445,23 @@ footer span{color:var(--orange);font-weight:700;}
 </div>
 
 <!-- EPIDEMIOLOGY -->
+<!-- CAROUSEL -->
+<section class="carousel-section">
+  <div class="carousel-label">Así se ve VetNode</div>
+  <div class="carousel-wrap">
+    <div class="carousel-track" id="carousel-track">
+      <img src="/screen1.jpg" class="carousel-slide" alt="VetNode - Pantalla 1">
+      <img src="/screen2.jpg" class="carousel-slide" alt="VetNode - Pantalla 2">
+      <img src="/screen3.jpg" class="carousel-slide" alt="VetNode - Pantalla 3">
+      <img src="/screen4.jpg" class="carousel-slide" alt="VetNode - Pantalla 4">
+      <img src="/screen5.jpg" class="carousel-slide" alt="VetNode - Pantalla 5">
+    </div>
+    <button class="carousel-btn carousel-prev" onclick="carouselMove(-1)">‹</button>
+    <button class="carousel-btn carousel-next" onclick="carouselMove(1)">›</button>
+  </div>
+  <div class="carousel-dots" id="carousel-dots"></div>
+</section>
+
 <section class="epi-section" id="epidemiology">
   <div class="epi-inner">
     <span class="epi-icon">🧬</span>
@@ -720,6 +755,29 @@ document.addEventListener('keydown', e => {
     else if (document.getElementById('overlay-register').classList.contains('open')) handleRegister();
   }
 });
+// ── CAROUSEL ──
+(function initCarousel(){
+  const total=5;let cur=0;let timer;
+  const track=document.getElementById('carousel-track');
+  const dotsEl=document.getElementById('carousel-dots');
+  if(!track||!dotsEl)return;
+  // build dots
+  for(let i=0;i<total;i++){
+    const d=document.createElement('div');
+    d.className='carousel-dot'+(i===0?' active':'');
+    d.onclick=()=>goTo(i);
+    dotsEl.appendChild(d);
+  }
+  function goTo(n){
+    cur=(n+total)%total;
+    track.style.transform=`translateX(-${cur*100}%)`;
+    dotsEl.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===cur));
+    resetTimer();
+  }
+  function resetTimer(){clearInterval(timer);timer=setInterval(()=>goTo(cur+1),4000);}
+  window.carouselMove=n=>goTo(cur+n);
+  resetTimer();
+})();
 </script>
 </body>
 </html>
