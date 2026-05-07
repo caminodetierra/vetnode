@@ -1532,6 +1532,14 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
             <span class="ctx-ico">📖</span>
             <div><div style="font-size:13px;font-weight:700;color:var(--text)">Ver tutorial</div><div style="font-size:10px;color:var(--text3)">Repasá cómo usar VetNode desde el principio</div></div>
           </div>
+          <div class="ctx-item" style="border:1px solid var(--border);border-radius:11px;" onclick="window.open('https://youtu.be/fiBi1zwjb5U?si=y8P368QRSKLJwmUx','_blank')">
+            <span class="ctx-ico">▶️</span>
+            <div><div style="font-size:13px;font-weight:700;color:var(--text)">Video tutorial — Parte 1</div><div style="font-size:10px;color:var(--text3)">Introducción y primeros pasos en VetNode</div></div>
+          </div>
+          <div class="ctx-item" style="border:1px solid var(--border);border-radius:11px;" onclick="window.open('https://youtu.be/xonirkfcV30','_blank')">
+            <span class="ctx-ico">▶️</span>
+            <div><div style="font-size:13px;font-weight:700;color:var(--text)">Video tutorial — Parte 2</div><div style="font-size:10px;color:var(--text3)">Funciones avanzadas y estadísticas</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -2129,6 +2137,7 @@ function doRestore(input){
 //  TUTORS
 // ══════════════════════════════════════════════════
 function renderTutors(){
+  showAllTutorsFlag=showAllTutorsFlag&&!(document.getElementById('search-tutors')?.value||'').trim();
   const q=(document.getElementById('search-tutors')?.value||'').toLowerCase();
   const pets=getPets();const visits=getVisits();
   const THREE_DAYS=3*24*60*60*1000;
@@ -2142,7 +2151,7 @@ function renderTutors(){
   });
 
   // if no search and no date filter, show only tutors with activity in last 3 days
-  const showingRecent=!q&&!tutorDateFrom&&!tutorDateTo;
+  const showingRecent=!q&&!tutorDateFrom&&!tutorDateTo&&!showAllTutorsFlag;
   if(showingRecent){
     tutors=tutors.filter(t=>{
       const mp=pets.filter(p=>p.tutorId===t.id);
@@ -2211,13 +2220,10 @@ function normalizeSpecies(s){
   return'Otro';
 }
 function openTutor(id){S.tutorId=id;go('s-tutor');}
+let showAllTutorsFlag=false;
 function showAllTutors(){
-  // Force show all by setting a dummy date filter far back
   tutorDateFrom=null;tutorDateTo=null;
-  const el=document.getElementById('search-tutors');
-  if(el)el.value=' '; // space triggers "has query" mode
-  renderTutors();
-  if(el)el.value='';
+  showAllTutorsFlag=true;
   renderTutors();
 }
 function renderHomeSearch(){
