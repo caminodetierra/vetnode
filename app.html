@@ -2315,10 +2315,12 @@ function saveTutor(){
   const name=v('t-name');if(!name){showToast('El nombre es obligatorio');return;}
   const tutors=getTutors();
   const data={name,phone:v('t-phone'),address:v('t-address'),city:v('t-city')};
+  let newId=null;
   if(S.editTutorId){const i=tutors.findIndex(t=>t.id===S.editTutorId);tutors[i]={...tutors[i],...data};}
-  else tutors.unshift({...data,id:crypto.randomUUID()});
-  saveTutors(tutors);closeModal('m-tutor');renderTutors();
-  if(S.editTutorId&&S.tutorId===S.editTutorId)renderTutorProfile();
+  else{newId=crypto.randomUUID();tutors.unshift({...data,id:newId});}
+  saveTutors(tutors);closeModal('m-tutor');
+  if(newId){S.tutorId=newId;go('s-tutor');}
+  else{renderTutors();if(S.tutorId===S.editTutorId)renderTutorProfile();}
   showToast(S.editTutorId?'Tutor actualizado ✓':'Tutor guardado ✓');
 }
 function deleteTutor(){
@@ -2406,9 +2408,12 @@ function savePet(){
   const sex=document.getElementById('toggle-sex').classList.contains('on')?'Hembra':'Macho';
   const pets=getPets();
   const data={name,species,breed:v('p-breed'),dob:v('p-dob'),chip:v('p-chip'),sex,castrated:document.getElementById('toggle-cast').classList.contains('on'),tutorId:S.tutorId};
+  let newId=null;
   if(S.editPetId){const i=pets.findIndex(p=>p.id===S.editPetId);pets[i]={...pets[i],...data};}
-  else pets.unshift({...data,id:crypto.randomUUID()});
-  savePets(pets);closeModal('m-pet');renderTutorProfile();
+  else{newId=crypto.randomUUID();pets.unshift({...data,id:newId});}
+  savePets(pets);closeModal('m-pet');
+  if(newId){S.petId=newId;go('s-pet');}
+  else renderTutorProfile();
   showToast(S.editPetId?'Mascota actualizada ✓':'Mascota guardada ✓');
 }
 function deletePet(){
