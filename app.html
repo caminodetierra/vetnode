@@ -1204,6 +1204,10 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
         <div class="hdr-actions"><button class="save-sm" onclick="saveVisitEditFull()">Guardar</button></div>
       </div>
       <div class="visit-form">
+        <div class="fg" style="margin-bottom:12px">
+          <label style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px">Fecha de la visita</label>
+          <input type="date" class="fi" id="ve-visit-date" style="margin-top:4px">
+        </div>
         <div class="vitals-grid">
           <div><label class="v-label">T°</label><input class="v-input" id="ve-temp" placeholder="38.5"></div>
           <div><label class="v-label">Peso</label><input class="v-input" id="ve-peso" placeholder="kg"></div>
@@ -3696,6 +3700,12 @@ function openVisitDetail(id){
   const p=getPets().find(p=>p.id===vt.petId);
   document.getElementById('ve-title').textContent=`Editar visita · ${p?p.name:''}`;
   document.getElementById('ve-date').textContent=formatDate(vt.date);
+  // populate editable date field
+  const d=new Date(vt.date);
+  const yyyy=d.getFullYear();
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const dd=String(d.getDate()).padStart(2,'0');
+  document.getElementById('ve-visit-date').value=`${yyyy}-${mm}-${dd}`;
   document.getElementById('ve-temp').value=vt.temp||'';
   document.getElementById('ve-peso').value=vt.peso||'';
   document.getElementById('ve-fc').value=vt.fc||'';
@@ -3718,6 +3728,14 @@ function openVisitDetail(id){
 }
 function saveVisitEditFull(){
   const visits=getVisits();const i=visits.findIndex(v=>v.id===editingVisitIdFull);if(i<0)return;
+  const dateVal=document.getElementById('ve-visit-date').value;
+  if(dateVal){
+    // preserve original time, only change date
+    const orig=new Date(visits[i].date);
+    const [y,m,d]=dateVal.split('-').map(Number);
+    orig.setFullYear(y,m-1,d);
+    visits[i].date=orig.getTime();
+  }
   visits[i].temp=document.getElementById('ve-temp').value.trim();
   visits[i].peso=document.getElementById('ve-peso').value.trim();
   visits[i].fc=document.getElementById('ve-fc').value.trim();
