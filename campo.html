@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>VetNode Campo</title>
+<link rel="icon" type="image/jpeg" href="/favicon.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root{
+  --bg:#0a1a10; --surface:#0f2418; --surface2:#163020;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --blue:#4a90e2; --blue-dim:rgba(74,144,226,0.13); --blue-border:rgba(74,144,226,0.32);
+  --green:#52c97a; --green-dim:rgba(82,201,122,0.12); --green-border:rgba(82,201,122,0.3);
+  --yellow:#f5c842; --yellow-dim:rgba(245,200,66,0.1); --yellow-border:rgba(245,200,66,0.28);
+  --red:#f06a6a; --red-dim:rgba(240,106,106,0.12); --red-border:rgba(240,106,106,0.3);
+  --orange:#f07030;
+  --text:#d0f0d8; --text2:#6aaa88; --text3:#2a6040;
+  --radius:14px; --radius-sm:9px;
+  --shadow:0 2px 12px rgba(0,0,0,0.35);
+  --font:'Nunito',sans-serif;
+  /* Campo accent color — green */
+  --accent:#52c97a; --accent-dim:rgba(82,201,122,0.13); --accent-border:rgba(82,201,122,0.32);
+}
+body.light{
+  --bg:#eef7f1; --surface:#ffffff; --surface2:#f2faf5;
+  --border:rgba(0,0,0,0.09); --border2:rgba(0,0,0,0.16);
+  --blue:#2a66bb; --blue-dim:rgba(42,102,187,0.09); --blue-border:rgba(42,102,187,0.3);
+  --green:#1e8a4a; --green-dim:rgba(30,138,74,0.09); --green-border:rgba(30,138,74,0.3);
+  --yellow:#a86800; --yellow-dim:rgba(168,104,0,0.08); --yellow-border:rgba(168,104,0,0.25);
+  --red:#b82020; --red-dim:rgba(184,32,32,0.08); --red-border:rgba(184,32,32,0.25);
+  --orange:#d05010;
+  --text:#0a1e10; --text2:#1e5030; --text3:#5a8a6a;
+  --shadow:0 2px 12px rgba(0,0,0,0.1);
+  --accent:#1e8a4a; --accent-dim:rgba(30,138,74,0.09); --accent-border:rgba(30,138,74,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:var(--font);background:var(--bg);overflow:hidden;}
+
+/* ── LAYOUT ── */
+.app-wrap{height:100vh;height:100dvh;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+.screens{flex:1;position:relative;overflow:hidden;}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;opacity:0;pointer-events:none;transform:translateX(20px);transition:opacity .18s,transform .18s;}
+.screen.active{opacity:1;pointer-events:all;transform:none;}
+
+/* ── SCREEN HEADER ── */
+.screen-header{display:flex;align-items:center;padding:14px 16px 10px;gap:10px;flex-shrink:0;border-bottom:1px solid var(--border);}
+.back-btn{width:34px;height:34px;border-radius:10px;background:var(--surface2);border:none;color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hdr-info{flex:1;min-width:0;}
+.hdr-title{font-size:17px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hdr-sub{font-size:11px;color:var(--text3);font-weight:600;margin-top:1px;}
+.hdr-actions{display:flex;gap:8px;align-items:center;}
+.save-sm{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:6px 14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;}
+
+/* ── HOME ── */
+.home-header{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
+.home-brand{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.home-brand img{height:32px;object-fit:contain;border-radius:6px;}
+.home-brand-name{font-size:18px;font-weight:800;}
+.home-brand-name .v{color:var(--orange);}
+.home-brand-name .n{color:var(--accent);}
+.home-brand-tag{font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.home-clinic{font-size:15px;font-weight:700;color:var(--text);margin-top:8px;}
+.home-clinic-sub{font-size:12px;color:var(--text3);}
+.menu-btn{width:34px;height:34px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;flex-shrink:0;}
+.menu-btn span{display:block;width:14px;height:2px;background:var(--text2);border-radius:2px;}
+.home-header-row{display:flex;align-items:center;justify-content:space-between;}
+.home-body{flex:1;overflow-y:auto;padding:20px 18px;}
+.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.main-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 14px;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:.15s;}
+.main-btn:hover{border-color:var(--accent-border);background:var(--accent-dim);}
+.btn-ico{font-size:24px;}
+.btn-lbl{font-size:14px;font-weight:800;color:var(--text);}
+.btn-desc{font-size:11px;color:var(--text3);font-weight:600;}
+
+/* ── SCROLL ── */
+.scroll{flex:1;overflow-y:auto;padding:12px 0;}
+.list-pad{padding:0 16px;}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:52px 24px;color:var(--text3);font-size:13px;line-height:1.7;}
+.empty-state .emoji{font-size:40px;display:block;margin-bottom:12px;}
+
+/* ── FAB ── */
+.fab{position:absolute;bottom:24px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 20px rgba(82,201,122,0.4);display:flex;align-items:center;justify-content:center;z-index:10;}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin:0 16px 10px;overflow:hidden;}
+.card-row{display:flex;align-items:center;padding:14px 16px;gap:12px;cursor:pointer;}
+.card-row:hover{background:var(--accent-dim);}
+.card-ico{font-size:22px;flex-shrink:0;}
+.card-info{flex:1;min-width:0;}
+.card-name{font-size:14px;font-weight:800;color:var(--text);}
+.card-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.opts-btn{width:40px;flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-left:none;border-radius:0 var(--radius) var(--radius) 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;min-height:52px;}
+.opts-btn:hover{background:var(--accent-dim);}
+.opts-btn span{display:block;width:4px;height:4px;background:var(--text2);border-radius:50%;}
+
+/* ── FORMS ── */
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.fi{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--text);font-family:var(--font);outline:none;}
+.fi:focus{border-color:var(--accent-border);}
+.fi-select{appearance:none;}
+textarea.fi{resize:vertical;min-height:80px;}
+.fi-row{display:flex;gap:10px;margin-bottom:14px;}
+.save-btn{width:100%;background:var(--accent);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;color:#fff;cursor:pointer;margin-top:8px;}
+.save-btn:hover{opacity:.9;}
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;z-index:30;backdrop-filter:blur(6px);}
+.modal-wrap.open{display:flex;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 18px 32px;width:100%;max-height:88vh;overflow-y:auto;}
+.modal-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:16px;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(30,50,70,.97);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:.2s;z-index:100;pointer-events:none;white-space:nowrap;}
+#toast.show{opacity:1;}
+
+/* ── CTX MENU ── */
+.ctx-wrap{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.3);}
+.ctx-menu{position:fixed;background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:6px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+.ctx-item{padding:11px 14px;border-radius:10px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:10px;}
+.ctx-item:hover{background:var(--accent-dim);color:var(--text);}
+.ctx-item.red{color:var(--red);}
+.ctx-item.red:hover{background:var(--red-dim);}
+.ctx-divider{height:1px;background:var(--border);margin:4px 0;}
+.ctx-ico{font-size:16px;width:22px;text-align:center;}
+
+/* ── SECTION LABEL ── */
+.list-section{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:12px 16px 6px;}
+
+/* ── VISIT BUBBLES ── */
+.visit-wrap{padding:0 16px;}
+.visit-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;padding:14px 16px;cursor:pointer;}
+.visit-card:hover{border-color:var(--accent-border);}
+.visit-date{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+.visit-notes{font-size:13px;color:var(--text2);line-height:1.5;}
+.visit-attachments{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.attach-thumb{width:54px;height:54px;border-radius:9px;object-fit:cover;border:1px solid var(--border);cursor:pointer;}
+.attach-audio-chip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;}
+
+/* ── EVENT BUTTONS ── */
+.event-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px;}
+.event-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 12px;cursor:pointer;text-align:center;transition:.15s;}
+.event-btn:hover{border-color:var(--accent-border);background:var(--accent-dim);}
+.event-btn-ico{font-size:28px;display:block;margin-bottom:6px;}
+.event-btn-lbl{font-size:13px;font-weight:800;color:var(--text);}
+
+/* ── TACTO BUTTONS ── */
+.tacto-results{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0;}
+.tacto-btn{border-radius:12px;padding:18px 8px;border:2px solid var(--border2);cursor:pointer;text-align:center;font-size:13px;font-weight:800;background:var(--surface2);color:var(--text2);transition:.15s;}
+.tacto-btn.vacia{border-color:var(--yellow-border);}
+.tacto-btn.vacia.sel{background:var(--yellow-dim);border-color:var(--yellow);color:var(--yellow);}
+.tacto-btn.prenada{border-color:var(--green-border);}
+.tacto-btn.prenada.sel{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+.tacto-btn.advertencia{border-color:var(--red-border);}
+.tacto-btn.advertencia.sel{background:var(--red-dim);border-color:var(--red);color:var(--red);}
+.tacto-btn-ico{font-size:24px;display:block;margin-bottom:4px;}
+
+/* ── CARAVANA CHIPS ── */
+.caravana-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--text2);margin:3px;}
+.caravana-chip.prenada{border-color:var(--green-border);color:var(--green);background:var(--green-dim);}
+.caravana-chip.vacia{border-color:var(--yellow-border);color:var(--yellow);background:var(--yellow-dim);}
+.caravana-chip.advertencia{border-color:var(--red-border);color:var(--red);background:var(--red-dim);}
+.caravana-add-btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;margin:3px;}
+
+/* ── AUDIO RECORDER ── */
+.audio-recorder{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;margin-bottom:12px;}
+.rec-btn{width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.rec-btn.idle{background:var(--red-dim);color:var(--red);}
+.rec-btn.recording{background:var(--red);color:#fff;animation:pulse-rec 1s infinite;}
+@keyframes pulse-rec{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+.rec-status{font-size:12px;font-weight:600;color:var(--text3);flex:1;}
+.rec-play-btn{width:34px;height:34px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
+
+/* ── ATTACH PREVIEW ── */
+.attach-preview-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.attach-remove{position:relative;display:inline-block;}
+.attach-remove-x{position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:var(--red);border-radius:50%;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+/* ── TOGGLE ── */
+.toggle{width:44px;height:24px;background:var(--border2);border-radius:12px;cursor:pointer;position:relative;transition:.2s;flex-shrink:0;}
+.toggle.on{background:var(--accent);}
+.toggle-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s;}
+.toggle.on .toggle-knob{left:22px;}
+
+/* ── REMINDERS ── */
+.rem-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin:0 16px 8px;padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.rem-card.urgent{border-color:var(--red-border);background:var(--red-dim);}
+.rem-card.soon{border-color:var(--yellow-border);}
+.rem-info{flex:1;min-width:0;}
+.rem-label{font-size:13px;font-weight:700;color:var(--text);}
+.rem-date{font-size:11px;color:var(--text3);margin-top:2px;}
+.rem-del{width:28px;height:28px;border-radius:8px;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;}
+.rem-del:hover{color:var(--red);}
+
+/* ── TACTO SUMMARY ── */
+.tacto-summary{display:flex;gap:10px;margin:12px 16px;}
+.ts-box{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center;}
+.ts-val{font-size:20px;font-weight:800;color:var(--text);}
+.ts-lbl{font-size:10px;color:var(--text3);font-weight:600;margin-top:2px;}
+.ts-box.prenada .ts-val{color:var(--green);}
+.ts-box.vacia .ts-val{color:var(--yellow);}
+.ts-box.advertencia .ts-val{color:var(--red);}
+
+/* ── PROGRESS ── */
+.tacto-progress{font-size:12px;color:var(--text3);font-weight:600;text-align:center;margin-bottom:8px;}
+
+/* ── LIST BTN ── */
+.list-toggle-btn{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;margin:0 16px 12px;}
+
+/* ── RODEO CHIP ── */
+.rodeo-chip{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin:0 16px 8px;display:flex;align-items:center;}
+.rodeo-chip-body{flex:1;padding:12px 14px;cursor:pointer;}
+.rodeo-chip-body:hover{background:var(--accent-dim);border-radius:var(--radius) 0 0 var(--radius);}
+.rodeo-name{font-size:14px;font-weight:800;color:var(--text);}
+.rodeo-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* ── PRODUCTO MULTISELECT ── */
+.prod-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.prod-item{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;}
+.prod-item.sel{border-color:var(--accent-border);background:var(--accent-dim);}
+.prod-item-name{flex:1;font-size:13px;font-weight:700;color:var(--text);}
+.prod-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.prod-item.sel .prod-check{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ── PIE CHART ── */
+.pie-wrap{display:flex;flex-direction:column;align-items:center;padding:16px;}
+canvas.pie-canvas{max-width:200px;}
+.pie-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px;}
+.pie-leg-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);font-weight:600;}
+.pie-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+  <div class="screens" id="screens">
+
+    <!-- HOME -->
+    <div class="screen active" id="s-home">
+      <div class="home-header">
+        <div class="home-header-row">
+          <div class="home-brand">
+            <img src="/logo-vetnode.jpg" alt="VetNode">
+            <div>
+              <div class="home-brand-name"><span class="v">Vet</span><span class="n">Node</span></div>
+              <div class="home-brand-tag">Campo</div>
+            </div>
+          </div>
+          <div class="menu-btn" onclick="showMenu()"><span></span><span></span><span></span></div>
+        </div>
+        <div class="home-clinic" id="home-clinic-name">Bienvenido</div>
+        <div class="home-clinic-sub" id="home-clinic-sub"></div>
+      </div>
+      <div class="home-body">
+        <div class="btn-grid">
+          <div class="main-btn" onclick="go('s-establecimientos')">
+            <span class="btn-ico">🏡</span>
+            <span class="btn-lbl">Establecimientos</span>
+            <span class="btn-desc">Productores y campos</span>
+          </div>
+          <div class="main-btn" onclick="go('s-reminders')">
+            <span class="btn-ico">🔔</span>
+            <span class="btn-lbl">Recordatorios</span>
+            <span class="btn-desc">Alertas y fechas</span>
+          </div>
+          <div class="main-btn" onclick="go('s-calendar')">
+            <span class="btn-ico">📅</span>
+            <span class="btn-lbl">Calendario</span>
+            <span class="btn-desc">Agenda de visitas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESTABLECIMIENTOS -->
+    <div class="screen" id="s-establecimientos">
+      <div class="screen-header">
+        <button class="back-btn" onclick="go('s-home')">←</button>
+        <div class="hdr-info"><div class="hdr-title">Establecimientos</div></div>
+        <div class="hdr-actions"></div>
+      </div>
+      <input class="fi" id="search-estab" placeholder="🔍  Buscar establecimiento..." style="margin:10px 16px;width:calc(100% - 32px)" oninput="renderEstablecimientos()">
+      <div class="scroll" id="estab-list"></div>
+      <button class="fab" onclick="openNewEstab()">+</button>
+    </div>
+
+    <!-- ESTABLECIMIENTO DETAIL -->
+    <div class="screen" id="s-estab">
+      <div class="screen-header">
+        <button class="back-btn" onclick="go('s-establecimientos')">←</button>
+        <div class="hdr-info">
+          <div class="hdr-title" id="estab-hdr-name"></div>
+          <div class="hdr-sub" id="estab-hdr-sub"></div>
+        </div>
+        <div class="hdr-actions">
+          <button class="save-sm" onclick="openEventMenu()">Evento ▾</button>
+          <button class="save-sm" style="background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue)" onclick="openNewVisita()">+ Visita</button>
+        </div>
+      </div>
+      <div class="scroll" id="estab-detail-body"></div>
+    </div>
+
+    <!-- VISITA -->
+    <div class="screen" id="s-visita">
+      <div class="screen-header">
+        <button class="back-btn" id="visita-back-btn" onclick="go('s-estab')">←</button>
+        <div class="hdr-info"><div class="hdr-title" id="visita-title">Nueva visita</div></div>
+        <div class="hdr-actions"><button class="save-sm" onclick="saveVisita()">Guardar</button></div>
+      </div>
+      <div class="scroll">
+        <div class="list-pad" style="padding-top:12px">
+          <div class="fg">
+            <label>Fecha</label>
+            <input type="date" class="fi" id="v-date">
+          </div>
+          <div class="fg">
+            <label>Notas de la visita</label>
+            <textarea class="fi" id="v-notes" placeholder="Descripción, observaciones..." rows="4"></textarea>
+          </div>
+          <!-- Audio recorder -->
+          <div class="fg">
+            <label>Audio</label>
+            <div class="audio-recorder" id="audio-recorder-wrap">
+              <button class="rec-btn idle" id="rec-btn" onclick="toggleRecording()">🎙️</button>
+              <span class="rec-status" id="rec-status">Mantené para grabar</span>
+              <button class="rec-play-btn" id="rec-play" style="display:none" onclick="playRecording()">▶</button>
+            </div>
+          </div>
+          <!-- Attachments -->
+          <div class="fg">
+            <label>Archivos adjuntos</label>
+            <div class="attach-preview-wrap" id="v-attach-preview"></div>
+            <div style="display:flex;gap:8px">
+              <button onclick="triggerAttach('image')" style="flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer">📷 Foto</button>
+              <button onclick="triggerAttach('any')" style="flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer">📎 Archivo</button>
+            </div>
+            <input type="file" id="attach-input-img" accept="image/*" style="display:none" onchange="handleAttach(this)">
+            <input type="file" id="attach-input-any" style="display:none" onchange="handleAttach(this)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RODEO/LOTE -->
+    <div class="screen" id="s-rodeo">
+      <div class="screen-header">
+        <button class="back-btn" onclick="go('s-estab')">←</button>
+        <div class="hdr-info"><div class="hdr-title" id="rodeo-title">Nuevo rodeo / Lote</div></div>
+        <div class="hdr-actions"><button class="save-sm" onclick="saveRodeo()">Guardar</button></div>
+      </div>
+      <div class="scroll">
+        <div class="list-pad" style="padding-top:12px">
+          <div class="fg"><label>Nombre del rodeo / Lote</label><input class="fi" id="rod-nombre" placeholder="Ej: Rodeo vaca masa"></div>
+          <div class="fg"><label>Categoría</label><input class="fi" id="rod-categoria" placeholder="Ej: Vacas con cría, Vaquillonas..."></div>
+          <div class="fg">
+            <label>Caravanas</label>
+            <div id="rod-caravanas-wrap" style="margin-bottom:8px"></div>
+            <div style="display:flex;gap:8px">
+              <input class="fi" id="rod-car-input" placeholder="Número de caravana" style="flex:1" onkeydown="if(event.key==='Enter')addCaravanaToRodeo()">
+              <button onclick="addCaravanaToRodeo()" style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer">+ Agregar</button>
+            </div>
+          </div>
+          <div class="fg"><label>Descripción</label><textarea class="fi" id="rod-desc" rows="3" placeholder="Observaciones..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENTO: IDENTIFICACIÓN -->
+    <div class="screen" id="s-identificacion">
+      <div class="screen-header">
+        <button class="back-btn" onclick="go('s-estab')">←</button>
+        <div class="hdr-info"><div class="hdr-title">Identificación</div></div>
+        <div class="hdr-actions"><button class="save-sm" onclick="saveIdentificacion()">Guardar</button></div>
+      </div>
+      <div class="scroll">
+        <div class="list-pad" style="padding-top:12px">
+          <div class="fg"><label>Fecha</label><input type="date" class="fi" id="id-fecha"></div>
+          <div class="fg">
+            <label>Caravanas</label>
+            <div id="id-caravanas-wrap" style="margin-bottom:8px"></div>
+            <div style="display:flex;gap:8px">
+              <input class="fi" id="id-car-input" placeholder="Número de caravana" style="flex:1" onkeydown="if(event.key==='Enter')addCaravanaToId()">
+              <button onclick="addCaravanaToId()" style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer">+ Agregar</button>
+            </div>
+          </div>
+          <div class="fg"><label>Dentición</label><input class="fi" id="id-denticion" placeholder="Ej: 2 dientes, boca llena..."></div>
+          <div class="fg"><label>Score corporal</label><input class="fi" id="id-score" type="number" min="1" max="9" step="0.5" placeholder="1 - 9"></div>
+          <div class="fg"><label>Descripción</label><textarea class="fi" id="id-desc" rows="3" placeholder="Observaciones..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENTO: TACTO -->
+    <div class="screen" id="s-tacto">
+      <div class="screen-header">
+        <button class="back-btn" onclick="go('s-estab')">←</button>
+        <div class="hdr-info"><div class="hdr-title">Tacto</div><div class="hdr-sub" id="tacto-progress-hdr"></div></div>
+        <div class="hdr-actions">
+          <button class="save-sm" style="background:var(--surface2);color:var(--text2);border-color:var(--border2)" onclick="openTactoList()">Lista</button>
+          <button class="save-sm" onclick="saveTacto()">Guardar</button>
+        </div>
+      </div>
+      <div class="scroll">
+        <div class="list-pad" style="padding-top:12px">
+          <!-- Summary -->
+          <div class="tacto-summary" id="tacto-summary"></div>
+          <div class="fg">
+            <label>Fecha</label>
+            <input type="date" class="fi" id="tacto-fecha">
+          </div>
+          <div class="fg">
+            <label>Caravana actual</label>
+            <div style="display:flex;gap:8px">
+              <input class="fi" id="tacto-car-input" placeholder="Número o buscar..." style="flex:1" oninput="searchCaravana(this.value)">
+            </div>
+            <div id="tacto-car-suggestions" style="margin-top:4px"></div>
+          </div>
+          <div class="tacto-results">
+            <button class="tacto-btn vacia" id="tb-vacia" onclick="setTactoResult('Vacía')"><span class="tacto-btn-ico">⭕</span>Vacía</button>
+            <button class="tacto-btn prenada" id="tb-prenada" onclick="setTactoResult('Preñada')"><span class="tacto-btn-ico">✅</span>Preñada</button>
+            <button class="tacto-btn advertencia" id="tb-advertencia" onclick="setTactoResult('Advertencia')"><span class="tacto-btn-ico">⚠️</span>Advertencia</button>
+          </div>
+          <div class="fg"><label>Descripción</label><textarea class="fi" id="tacto-desc" rows="2" placeholder="Observaciones de este animal..."></textarea></div>
+          <div style="display:flex;gap:10px;margin-bottom:16px">
+            <button onclick="tactoNext()" style="flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px;font-size:14px;font-weight:700;color:var(--text2);cursor:pointer">Siguiente →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENTO: APLICACIÓN -->
+    <div class="screen" id="s-aplicacion">
+      <div class="screen-header">
+        <button class="back-btn" onclick="go('s-estab')">←</button>
+        <div class="hdr-info"><div class="hdr-title">Aplicación</div></div>
+        <div class="hdr-actions"><button class="save-sm" onclick="saveAplicacion()">Guardar</button></div>
+      </div>
+      <div class="scroll">
+        <div class="list-pad" style="padding-top:12px">
+          <div class="fg"><label>Fecha</label><input type="date" class="fi" id="ap-fecha"></div>
+          <div class="fg">
+            <label>Caravanas (opcional)</label>
+            <div id="ap-caravanas-wrap" style="margin-bottom:8px"></div>
+            <div style="display:flex;gap:8px">
+              <input class="fi" id="ap-car-input" placeholder="Número de caravana" style="flex:1" onkeydown="if(event.key==='Enter')addCaravanaToAp()">
+              <button onclick="addCaravanaToAp()" style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer">+ Agregar</button>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Productos aplicados</label>
+            <div class="prod-list" id="ap-prod-list"></div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <input class="fi" id="ap-prod-input" placeholder="Agregar producto..." style="flex:1" onkeydown="if(event.key==='Enter')addProducto()">
+              <button onclick="addProducto()" style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer">+ Agregar</button>
+            </div>
+          </div>
+          <div class="fg"><label>Cantidad de animales</label><input class="fi" id="ap-cantidad" type="number" placeholder="Ej: 50"></div>
+          <div class="fg"><label>Descripción</label><textarea class="fi" id="ap-desc" rows="2" placeholder="Observaciones..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENTO: DIAGNÓSTICO -->
+    <div class="screen" id="s-diagnostico">
+      <div class="screen-header">
+        <button class="back-btn" onclick="go('s-estab')">←</button>
+        <div class="hdr-info"><div class="hdr-title">Diagnóstico</div></div>
+        <div class="hdr-actions"><button class="save-sm" onclick="saveDiagnostico()">Guardar</button></div>
+      </div>
+      <div class="scroll">
+        <div class="list-pad" style="padding-top:12px">
+          <div class="fg"><label>Fecha</label><input type="date" class="fi" id="diag-fecha"></div>
+          <div class="fg">
+            <label>Caravanas (opcional)</label>
+            <div id="diag-caravanas-wrap" style="margin-bottom:8px"></div>
+            <div style="display:flex;gap:8px">
+              <input class="fi" id="diag-car-input" placeholder="Número de caravana" style="flex:1" onkeydown="if(event.key==='Enter')addCaravanaToDiag()">
+              <button onclick="addCaravanaToDiag()" style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer">+ Agregar</button>
+            </div>
+          </div>
+          <div class="fg"><label>Diagnóstico presuntivo</label><input class="fi" id="diag-presuntivo" placeholder="Ej: Queratoconjuntivitis..."></div>
+          <div class="fg"><label>Diagnóstico definitivo</label><input class="fi" id="diag-definitivo" placeholder="Confirmado..."></div>
+          <div class="fg"><label>Descripción</label><textarea class="fi" id="diag-desc" rows="3" placeholder="Observaciones..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECORDATORIOS -->
+    <div class="screen" id="s-reminders">
+      <div class="screen-header">
+        <button class="back-btn" onclick="go('s-home')">←</button>
+        <div class="hdr-info"><div class="hdr-title">Recordatorios</div></div>
+        <div class="hdr-actions"></div>
+      </div>
+      <div class="scroll" id="reminders-list"></div>
+      <button class="fab" onclick="openNewReminder()">+</button>
+    </div>
+
+    <!-- CALENDARIO -->
+    <div class="screen" id="s-calendar">
+      <div class="screen-header">
+        <button class="back-btn" onclick="go('s-home')">←</button>
+        <div class="hdr-info"><div class="hdr-title">Calendario</div></div>
+        <div class="hdr-actions"></div>
+      </div>
+      <div class="scroll" id="calendar-body">
+        <div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Próximamente</div>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+</div><!-- /app-wrap -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- CTX MENU -->
+<div class="ctx-wrap" id="ctx-wrap" style="display:none" onclick="closeCtx()">
+  <div class="ctx-menu" id="ctx-menu"></div>
+</div>
+
+<!-- MODAL: NUEVO ESTABLECIMIENTO -->
+<div class="modal-wrap" id="m-estab" onclick="closeIfOutside(event,'m-estab')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="m-estab-title">Nuevo establecimiento</div>
+    <div class="fg"><label>Nombre del establecimiento</label><input class="fi" id="e-nombre" placeholder="Ej: La Esperanza"></div>
+    <div class="fg"><label>RENSPA</label><input class="fi" id="e-renspa" placeholder="Ej: 11.111.1.11111/11"></div>
+    <div class="fg"><label>Ubicación</label><input class="fi" id="e-ubicacion" placeholder="Localidad, partido, provincia"></div>
+    <div class="fg">
+      <label>Contacto de referencia</label>
+      <div id="e-contacto-wrap"></div>
+      <button id="e-contacto-add-btn" onclick="showContactoForm()" style="display:flex;align-items:center;gap:8px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;margin-top:4px">+ Agregar contacto</button>
+    </div>
+    <div id="e-contacto-form" style="display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px;margin-bottom:14px">
+      <div class="fg" style="margin-bottom:8px"><label>Nombre y apellido</label><input class="fi" id="e-con-nombre" placeholder="Juan García"></div>
+      <div class="fg" style="margin-bottom:8px"><label>Celular</label><input class="fi" id="e-con-cel" placeholder="+54 9 11 1234-5678" type="tel"></div>
+      <div class="fg" style="margin-bottom:0"><label>Referencia</label><input class="fi" id="e-con-ref" placeholder="Ej: Propietario, Encargado..."></div>
+    </div>
+    <div class="fg"><label>Descripción</label><textarea class="fi" id="e-desc" rows="3" placeholder="Observaciones generales..."></textarea></div>
+    <button class="save-btn" onclick="saveEstab()">Guardar establecimiento</button>
+  </div>
+</div>
+
+<!-- MODAL: MENÚ EVENTO -->
+<div class="modal-wrap" id="m-evento" onclick="closeIfOutside(event,'m-evento')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Seleccioná el evento</div>
+    <div class="event-grid">
+      <div class="event-btn" onclick="closeModal('m-evento');openEvento('identificacion')">
+        <span class="event-btn-ico">🏷️</span>
+        <span class="event-btn-lbl">Identificación</span>
+      </div>
+      <div class="event-btn" onclick="closeModal('m-evento');openEvento('tacto')">
+        <span class="event-btn-ico">🤚</span>
+        <span class="event-btn-lbl">Tacto</span>
+      </div>
+      <div class="event-btn" onclick="closeModal('m-evento');openEvento('aplicacion')">
+        <span class="event-btn-ico">💉</span>
+        <span class="event-btn-lbl">Aplicación</span>
+      </div>
+      <div class="event-btn" onclick="closeModal('m-evento');openEvento('diagnostico')">
+        <span class="event-btn-ico">🔬</span>
+        <span class="event-btn-lbl">Diagnóstico</span>
+      </div>
+      <div class="event-btn" onclick="closeModal('m-evento');go('s-rodeo')">
+        <span class="event-btn-ico">🐄</span>
+        <span class="event-btn-lbl">Rodeo / Lote</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NUEVO RECORDATORIO -->
+<div class="modal-wrap" id="m-reminder" onclick="closeIfOutside(event,'m-reminder')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo recordatorio</div>
+    <div class="fg"><label>Motivo</label><input class="fi" id="rem-label" placeholder="Ej: Revisión lote 3, Vacunación..."></div>
+    <div class="fg"><label>Fecha</label><input type="date" class="fi" id="rem-date"></div>
+    <button class="save-btn" onclick="saveReminder()">Guardar recordatorio</button>
+  </div>
+</div>
+
+<!-- MODAL: LISTA TACTO -->
+<div class="modal-wrap" id="m-tacto-list" onclick="closeIfOutside(event,'m-tacto-list')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Animales registrados</div>
+    <div id="tacto-list-body" style="max-height:60vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- MODAL: MENÚ PRINCIPAL -->
+<div class="modal-wrap" id="m-mainmenu" onclick="closeIfOutside(event,'m-mainmenu')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Menú</div>
+    <div class="ctx-item" onclick="closeModal('m-mainmenu');window.location.href='app.html'"><span class="ctx-ico">🏥</span>Ir a VetNode Clínica</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item" style="color:var(--red)" onclick="localStorage.removeItem('vn_session');window.location.href='index.html'"><span class="ctx-ico">🚪</span>Cerrar sesión</div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  INFRASTRUCTURE (reutilizada de VetNode)
+// ══════════════════════════════════════════════════
+const SUPABASE_URL='https://kgbewrxrfxihtvqpduis.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnYmV3cnhyZnhpaHR2cXBkdWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDEyNzAsImV4cCI6MjA5MjAxNzI3MH0.2a92RkbuczQWZIPq5zs3Vo4KuPBpYkoK31FL8ztYo6s';
+
+function getSession(){try{return JSON.parse(localStorage.getItem('vn_session')||'null');}catch(e){return null;}}
+function getAuthHeaders(){const s=getSession();return{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+(s?.access_token||SUPABASE_ANON_KEY)};}
+function getUserId(){const s=getSession();return s?.user?.id||null;}
+
+async function refreshSession(){
+  const s=getSession();if(!s?.refresh_token)return false;
+  try{
+    const r=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY},body:JSON.stringify({refresh_token:s.refresh_token})});
+    if(!r.ok)return false;
+    const data=await r.json();
+    if(data.access_token){localStorage.setItem('vn_session',JSON.stringify({...s,...data}));return true;}
+  }catch(e){}
+  return false;
+}
+function isTokenExpired(){try{const s=getSession();if(!s?.access_token)return true;const p=JSON.parse(atob(s.access_token.split('.')[1]));return p.exp&&p.exp*1000<Date.now()+5*60*1000;}catch(e){return true;}}
+async function ensureValidSession(){if(!isTokenExpired())return true;const ok=await refreshSession();if(!ok){localStorage.removeItem('vn_session');window.location.href='index.html';return false;}return true;}
+
+// CACHE — prefijo 'vc_' para VetNode Campo (separado de VetNode clínica 'va_')
+const CACHE={
+  get(k){try{return JSON.parse(localStorage.getItem('vc_'+k)||'null');}catch(e){return null;}},
+  set(k,v){localStorage.setItem('vc_'+k,JSON.stringify(v));}
+};
+
+const PENDING_KEY='vc_pending_sync';
+function getPending(){try{return JSON.parse(localStorage.getItem(PENDING_KEY)||'[]');}catch{return[];}}
+function addPending(table,rows){
+  const q=getPending();
+  const idx=q.findIndex(x=>x.table===table);
+  if(idx>-1)q[idx].rows=rows;else q.push({table,rows});
+  localStorage.setItem(PENDING_KEY,JSON.stringify(q));
+}
+async function flushPending(){
+  const q=getPending();if(!q.length)return;
+  const remaining=[];
+  for(const item of q){
+    try{
+      const r=await fetch(`${SUPABASE_URL}/rest/v1/${item.table}`,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(item.rows)});
+      if(!r.ok)remaining.push(item);
+    }catch{remaining.push(item);}
+  }
+  localStorage.setItem(PENDING_KEY,JSON.stringify(remaining));
+  if(remaining.length<q.length)showToast(`${q.length-remaining.length} cambio${q.length-remaining.length>1?'s':''} sincronizado${q.length-remaining.length>1?'s':''} ✓`);
+}
+const _sbSave=async(table,rows,mapper)=>{
+  const uid=getUserId();if(!uid||!rows.length)return;
+  if(isTokenExpired())await refreshSession();
+  const mapped=rows.map(r=>mapper(r,uid));
+  if(!navigator.onLine){addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');return;}
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(mapped)});
+    if(!r.ok){addPending(table,mapped);}
+  }catch{addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');}
+};
+async function sbSelect(table,filters=''){
+  const uid=getUserId();if(!uid)return[];
+  const url=`${SUPABASE_URL}/rest/v1/${table}?user_id=eq.${uid}&${filters}&order=id.asc`;
+  const r=await fetch(url,{headers:{...getAuthHeaders(),'Accept':'application/json'}});
+  if(!r.ok)return[];return await r.json();
+}
+async function sbUpsert(table,rows){
+  const url=`${SUPABASE_URL}/rest/v1/${table}`;
+  const r=await fetch(url,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(Array.isArray(rows)?rows:[rows])});
+  if(!r.ok){console.error('sbUpsert ERROR',table,await r.text());return null;}return await r.json();
+}
+
+// ── Mappers ──
+const toEstab=r=>({id:r.id,nombre:r.nombre||'',renspa:r.renspa||'',ubicacion:r.ubicacion||'',desc:r.descripcion||'',contacto:r.contacto?JSON.parse(r.contacto):null});
+const fromEstab=(e,uid)=>{const o={user_id:uid,nombre:e.nombre||'',renspa:e.renspa||'',ubicacion:e.ubicacion||'',descripcion:e.desc||'',contacto:e.contacto?JSON.stringify(e.contacto):null};if(e.id)o.id=e.id;return o;};
+const toVisita=r=>({id:r.id,estabId:r.estab_id,fecha:r.fecha,notas:r.notas||'',attachments:r.attachments||[],audio:r.audio||null});
+const fromVisita=(v,uid)=>{const o={user_id:uid,estab_id:v.estabId,fecha:v.fecha,notas:v.notas||'',attachments:v.attachments||[],audio:v.audio||null};if(v.id)o.id=v.id;return o;};
+const toRodeo=r=>({id:r.id,estabId:r.estab_id,nombre:r.nombre||'',categoria:r.categoria||'',caravanas:r.caravanas||[],desc:r.descripcion||''});
+const fromRodeo=(r,uid)=>{const o={user_id:uid,estab_id:r.estabId,nombre:r.nombre||'',categoria:r.categoria||'',caravanas:r.caravanas||[],descripcion:r.desc||''};if(r.id)o.id=r.id;return o;};
+const toEvento=r=>({id:r.id,estabId:r.estab_id,tipo:r.tipo||'',fecha:r.fecha,datos:r.datos||{},caravanas:r.caravanas||[]});
+const fromEvento=(e,uid)=>{const o={user_id:uid,estab_id:e.estabId,tipo:e.tipo||'',fecha:e.fecha,datos:e.datos||{},caravanas:e.caravanas||[]};if(e.id)o.id=e.id;return o;};
+const toReminder=r=>({id:r.id,label:r.label||'',dueDate:new Date(r.due_date).getTime()});
+const fromReminder=(r,uid)=>{const o={user_id:uid,label:r.label||'',due_date:new Date(r.dueDate).toISOString()};if(r.id)o.id=r.id;return o;};
+
+// ── Accessors ──
+const getEstabs=()=>CACHE.get('c_estabs')||[];
+const saveEstabs=e=>{CACHE.set('c_estabs',e);_sbSave('c_estabs',e,fromEstab);};
+const getVisitas=()=>CACHE.get('c_visitas')||[];
+const saveVisitas=v=>{CACHE.set('c_visitas',v);_sbSave('c_visitas',v,fromVisita);};
+const getRodeos=()=>CACHE.get('c_rodeos')||[];
+const saveRodeos=r=>{CACHE.set('c_rodeos',r);_sbSave('c_rodeos',r,fromRodeo);};
+const getEventos=()=>CACHE.get('c_eventos')||[];
+const saveEventos=e=>{CACHE.set('c_eventos',e);_sbSave('c_eventos',e,fromEvento);};
+const getCReminders=()=>CACHE.get('c_reminders')||[];
+const saveCReminders=r=>{CACHE.set('c_reminders',r);_sbSave('c_reminders',r,fromReminder);};
+
+// ── Sync ──
+async function syncFromSupabase(){
+  if(!await ensureValidSession())return;
+  try{
+    const[estabs,visitas,rodeos,eventos,reminders]=await Promise.all([
+      sbSelect('c_estabs'),sbSelect('c_visitas'),sbSelect('c_rodeos'),sbSelect('c_eventos'),sbSelect('c_reminders')
+    ]);
+    if(estabs.length||!CACHE.get('c_estabs'))CACHE.set('c_estabs',estabs.map(toEstab));
+    if(visitas.length||!CACHE.get('c_visitas'))CACHE.set('c_visitas',visitas.map(toVisita));
+    if(rodeos.length||!CACHE.get('c_rodeos'))CACHE.set('c_rodeos',rodeos.map(toRodeo));
+    if(eventos.length||!CACHE.get('c_eventos'))CACHE.set('c_eventos',eventos.map(toEvento));
+    if(reminders.length||!CACHE.get('c_reminders'))CACHE.set('c_reminders',reminders.map(toReminder));
+    showToast('Datos sincronizados ✓');
+    flushPending();
+  }catch(e){console.error('Sync error',e);}
+}
+
+// ══════════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════════
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeIfOutside(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+function formatDate(ts){return new Date(ts).toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});}
+function formatDateShort(ts){return new Date(ts).toLocaleDateString('es-AR',{day:'numeric',month:'short',year:'numeric'});}
+function timeAgo(ts){const d=Math.floor((Date.now()-ts)/864e5);if(d===0)return'hoy';if(d===1)return'ayer';if(d<7)return`${d} días`;if(d<30)return`${Math.floor(d/7)} sem.`;return`${Math.floor(d/30)} mes`;}
+function todayISO(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+
+// ── Navigation ──
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id);if(el)el.classList.add('active');
+  if(id==='s-establecimientos')renderEstablecimientos();
+  if(id==='s-estab')renderEstabDetail();
+  if(id==='s-reminders')renderReminders();
+}
+
+// ── Context menu ──
+let ctxWrap=null,ctxMenu=null;
+function showCtx(e,html){
+  ctxWrap=document.getElementById('ctx-wrap');
+  ctxMenu=document.getElementById('ctx-menu');
+  ctxMenu.innerHTML=html;
+  const x=Math.min(e.clientX,window.innerWidth-200);
+  const y=Math.min(e.clientY,window.innerHeight-200);
+  ctxMenu.style.left=x+'px';ctxMenu.style.top=y+'px';
+  ctxWrap.style.display='block';
+}
+function closeCtx(){document.getElementById('ctx-wrap').style.display='none';}
+
+// ══════════════════════════════════════════════════
+//  ESTABLECIMIENTOS
+// ══════════════════════════════════════════════════
+let S={estabId:null,editEstabId:null};
+let contactoData=null;
+
+function renderEstablecimientos(){
+  const q=(document.getElementById('search-estab')?.value||'').toLowerCase();
+  const estabs=getEstabs().filter(e=>e.nombre.toLowerCase().includes(q)||(e.ubicacion||'').toLowerCase().includes(q));
+  const el=document.getElementById('estab-list');
+  if(!estabs.length){
+    el.innerHTML=`<div class="empty-state"><span class="emoji">🏡</span>${q?'Sin resultados.':'No hay establecimientos.<br>Tocá <strong>+</strong> para agregar el primero.'}</div>`;
+    return;
+  }
+  const visitas=getVisitas();
+  el.innerHTML=estabs.map(e=>{
+    const lastV=visitas.filter(v=>v.estabId===e.id).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))[0];
+    return`<div class="card" style="display:flex">
+      <div class="card-row" style="flex:1" onclick="openEstab('${e.id}')">
+        <div class="card-ico">🏡</div>
+        <div class="card-info">
+          <div class="card-name">${e.nombre}</div>
+          <div class="card-sub">${[e.ubicacion,e.renspa?'RENSPA: '+e.renspa:null,lastV?'Última visita: '+formatDateShort(new Date(lastV.fecha).getTime()):null].filter(Boolean).join(' · ')}</div>
+        </div>
+      </div>
+      <div class="opts-btn" onclick="event.stopPropagation();showEstabCtx(event,'${e.id}')"><span></span><span></span><span></span></div>
+    </div>`;
+  }).join('');
+}
+
+function openEstab(id){S.estabId=id;go('s-estab');}
+
+function showEstabCtx(e,id){
+  showCtx(e,`
+    <div class="ctx-item" onclick="closeCtx();openEditEstab('${id}')"><span class="ctx-ico">✏️</span>Modificar</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item red" onclick="closeCtx();deleteEstab('${id}')"><span class="ctx-ico">🗑️</span>Eliminar</div>
+  `);
+}
+
+function openNewEstab(){
+  S.editEstabId=null;contactoData=null;
+  document.getElementById('m-estab-title').textContent='Nuevo establecimiento';
+  ['e-nombre','e-renspa','e-ubicacion','e-desc','e-con-nombre','e-con-cel','e-con-ref'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('e-contacto-form').style.display='none';
+  document.getElementById('e-contacto-add-btn').style.display='flex';
+  document.getElementById('e-contacto-wrap').innerHTML='';
+  openModal('m-estab');
+}
+
+function openEditEstab(id){
+  const e=getEstabs().find(x=>x.id===id);if(!e)return;
+  S.editEstabId=id;contactoData=e.contacto||null;
+  document.getElementById('m-estab-title').textContent='Modificar establecimiento';
+  document.getElementById('e-nombre').value=e.nombre||'';
+  document.getElementById('e-renspa').value=e.renspa||'';
+  document.getElementById('e-ubicacion').value=e.ubicacion||'';
+  document.getElementById('e-desc').value=e.desc||'';
+  const cw=document.getElementById('e-contacto-wrap');
+  if(e.contacto){
+    document.getElementById('e-contacto-add-btn').style.display='none';
+    document.getElementById('e-contacto-form').style.display='none';
+    cw.innerHTML=renderContactoChip(e.contacto);
+  } else {
+    document.getElementById('e-contacto-add-btn').style.display='flex';
+    cw.innerHTML='';
+  }
+  openModal('m-estab');
+}
+
+function renderContactoChip(c){
+  return`<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--text)">${c.nombre}</div><div style="font-size:11px;color:var(--text3)">${[c.cel,c.ref].filter(Boolean).join(' · ')}</div></div>
+    <button onclick="clearContacto()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">✕</button>
+  </div>`;
+}
+
+function showContactoForm(){
+  document.getElementById('e-contacto-form').style.display='block';
+  document.getElementById('e-contacto-add-btn').style.display='none';
+}
+
+function clearContacto(){
+  contactoData=null;
+  document.getElementById('e-contacto-wrap').innerHTML='';
+  document.getElementById('e-contacto-add-btn').style.display='flex';
+}
+
+function saveEstab(){
+  const nombre=document.getElementById('e-nombre').value.trim();
+  if(!nombre){showToast('El nombre es obligatorio');return;}
+  // Capture contacto from form if open
+  const formVisible=document.getElementById('e-contacto-form').style.display!=='none';
+  if(formVisible){
+    const n=document.getElementById('e-con-nombre').value.trim();
+    if(n)contactoData={nombre:n,cel:document.getElementById('e-con-cel').value.trim(),ref:document.getElementById('e-con-ref').value.trim()};
+  }
+  const estabs=getEstabs();
+  const data={nombre,renspa:document.getElementById('e-renspa').value.trim(),ubicacion:document.getElementById('e-ubicacion').value.trim(),desc:document.getElementById('e-desc').value.trim(),contacto:contactoData};
+  if(S.editEstabId){const i=estabs.findIndex(x=>x.id===S.editEstabId);estabs[i]={...estabs[i],...data};}
+  else{const newId=crypto.randomUUID();estabs.unshift({...data,id:newId});S.estabId=newId;}
+  saveEstabs(estabs);closeModal('m-estab');
+  if(!S.editEstabId)go('s-estab');else renderEstablecimientos();
+  showToast(S.editEstabId?'Establecimiento actualizado ✓':'Establecimiento guardado ✓');
+}
+
+function deleteEstab(id){
+  if(!confirm('¿Eliminar este establecimiento y todos sus datos?'))return;
+  saveEstabs(getEstabs().filter(e=>e.id!==id));
+  saveVisitas(getVisitas().filter(v=>v.estabId!==id));
+  saveRodeos(getRodeos().filter(r=>r.estabId!==id));
+  saveEventos(getEventos().filter(e=>e.estabId!==id));
+  go('s-establecimientos');showToast('Establecimiento eliminado');
+}
+
+// ── Estab Detail ──
+function renderEstabDetail(){
+  const estab=getEstabs().find(e=>e.id===S.estabId);if(!estab)return;
+  document.getElementById('estab-hdr-name').textContent=estab.nombre;
+  document.getElementById('estab-hdr-sub').textContent=[estab.ubicacion,estab.renspa?'RENSPA: '+estab.renspa:null].filter(Boolean).join(' · ');
+  const visitas=getVisitas().filter(v=>v.estabId===S.estabId).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  const rodeos=getRodeos().filter(r=>r.estabId===S.estabId);
+  const eventos=getEventos().filter(e=>e.estabId===S.estabId).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  let html='';
+  // Contact info
+  if(estab.contacto){
+    html+=`<div style="margin:12px 16px 0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px">
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Contacto</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text)">${estab.contacto.nombre}</div>
+      <div style="font-size:11px;color:var(--text3)">${[estab.contacto.cel,estab.contacto.ref].filter(Boolean).join(' · ')}</div>
+    </div>`;
+  }
+  // Rodeos
+  if(rodeos.length){
+    html+=`<div class="list-section">Rodeos / Lotes (${rodeos.length})</div>`;
+    html+=rodeos.map(r=>`<div class="rodeo-chip">
+      <div class="rodeo-chip-body" onclick="openRodeoDetail('${r.id}')">
+        <div class="rodeo-name">🐄 ${r.nombre}</div>
+        <div class="rodeo-sub">${[r.categoria,r.caravanas?.length?r.caravanas.length+' animales':null].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div class="opts-btn" onclick="event.stopPropagation();showRodeoCtx(event,'${r.id}')"><span></span><span></span><span></span></div>
+    </div>`).join('');
+  }
+  // Eventos recientes
+  if(eventos.length){
+    html+=`<div class="list-section">Eventos recientes</div>`;
+    html+=eventos.slice(0,10).map(ev=>{
+      const ico={tacto:'🤚',aplicacion:'💉',identificacion:'🏷️',diagnostico:'🔬'}[ev.tipo]||'📋';
+      const lbl={tacto:'Tacto',aplicacion:'Aplicación',identificacion:'Identificación',diagnostico:'Diagnóstico'}[ev.tipo]||ev.tipo;
+      const sub=ev.tipo==='tacto'?`${ev.datos?.resultados?.filter(r=>r.resultado==='Preñada').length||0} preñadas, ${ev.datos?.resultados?.filter(r=>r.resultado==='Vacía').length||0} vacías`:(ev.caravanas?.length?ev.caravanas.length+' animales':'');
+      return`<div class="card"><div class="card-row" onclick="verEvento('${ev.id}')">
+        <div class="card-ico">${ico}</div>
+        <div class="card-info"><div class="card-name">${lbl}</div><div class="card-sub">${[formatDateShort(new Date(ev.fecha).getTime()),sub].filter(Boolean).join(' · ')}</div></div>
+      </div></div>`;
+    }).join('');
+  }
+  // Visitas
+  if(visitas.length){
+    html+=`<div class="list-section">Visitas (${visitas.length})</div>`;
+    html+='<div class="visit-wrap">'+visitas.map(v=>{
+      const attHtml=(v.attachments||[]).map(a=>a.type?.startsWith('image')?`<img class="attach-thumb" src="${a.data}" onclick="event.stopPropagation();previewImg('${a.data}')">`:a.type?.startsWith('audio')?`<div class="attach-audio-chip" onclick="event.stopPropagation();playAudioData('${a.data}')">🎙️ Audio</div>`:`<div class="attach-audio-chip">📎 ${(a.name||'').substring(0,16)}</div>`).join('');
+      return`<div class="visit-card" onclick="openEditVisita('${v.id}')">
+        <div class="visit-date">${formatDateShort(new Date(v.fecha).getTime())} <span style="color:var(--text3);font-size:10px">toca para editar</span></div>
+        ${v.notas?`<div class="visit-notes">${v.notas.substring(0,120)}${v.notas.length>120?'…':''}</div>`:''}
+        ${attHtml?`<div class="visit-attachments">${attHtml}</div>`:''}
+      </div>`;
+    }).join('')+'</div>';
+  }
+  if(!visitas.length&&!eventos.length&&!rodeos.length){
+    html+=`<div class="empty-state"><span class="emoji">📋</span>Sin registros aún.<br>Usá los botones de arriba para cargar una visita o evento.</div>`;
+  }
+  document.getElementById('estab-detail-body').innerHTML=html;
+}
+
+function openEventMenu(){openModal('m-evento');}
+function showMenu(){openModal('m-mainmenu');}
+
+// ══════════════════════════════════════════════════
+//  VISITAS
+// ══════════════════════════════════════════════════
+let visitaAttachments=[];let visitaAudio=null;let editingVisitaId=null;
+let mediaRecorder=null;let audioChunks=[];let isRecording=false;let recordedBlob=null;
+
+function openNewVisita(){
+  editingVisitaId=null;visitaAttachments=[];visitaAudio=null;recordedBlob=null;
+  document.getElementById('visita-title').textContent='Nueva visita';
+  document.getElementById('v-date').value=todayISO();
+  document.getElementById('v-notes').value='';
+  document.getElementById('v-attach-preview').innerHTML='';
+  document.getElementById('rec-status').textContent='Mantené para grabar';
+  document.getElementById('rec-btn').className='rec-btn idle';
+  document.getElementById('rec-play').style.display='none';
+  go('s-visita');
+}
+
+function openEditVisita(id){
+  const v=getVisitas().find(x=>x.id===id);if(!v)return;
+  editingVisitaId=id;
+  visitaAttachments=v.attachments||[];visitaAudio=v.audio||null;recordedBlob=null;
+  document.getElementById('visita-title').textContent='Editar visita';
+  document.getElementById('v-date').value=v.fecha;
+  document.getElementById('v-notes').value=v.notas||'';
+  renderAttachPreviews();
+  if(visitaAudio){document.getElementById('rec-status').textContent='Audio grabado ✓';document.getElementById('rec-play').style.display='flex';}
+  go('s-visita');
+}
+
+function saveVisita(){
+  const fecha=document.getElementById('v-date').value||todayISO();
+  const notas=document.getElementById('v-notes').value.trim();
+  if(recordedBlob){
+    const reader=new FileReader();
+    reader.onload=()=>{
+      visitaAudio=reader.result;
+      _doSaveVisita(fecha,notas);
+    };
+    reader.readAsDataURL(recordedBlob);
+  } else {
+    _doSaveVisita(fecha,notas);
+  }
+}
+
+function _doSaveVisita(fecha,notas){
+  const visitas=getVisitas();
+  if(editingVisitaId){
+    const i=visitas.findIndex(v=>v.id===editingVisitaId);
+    if(i>-1)visitas[i]={...visitas[i],fecha,notas,attachments:visitaAttachments,audio:visitaAudio};
+  } else {
+    visitas.unshift({id:crypto.randomUUID(),estabId:S.estabId,fecha,notas,attachments:visitaAttachments,audio:visitaAudio});
+  }
+  saveVisitas(visitas);go('s-estab');showToast('Visita guardada ✓');
+}
+
+// ── Audio recording ──
+async function toggleRecording(){
+  if(isRecording){
+    mediaRecorder?.stop();
+  } else {
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      audioChunks=[];
+      mediaRecorder=new MediaRecorder(stream);
+      mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data);};
+      mediaRecorder.onstop=()=>{
+        recordedBlob=new Blob(audioChunks,{type:'audio/webm'});
+        stream.getTracks().forEach(t=>t.stop());
+        document.getElementById('rec-status').textContent='Audio grabado ✓';
+        document.getElementById('rec-btn').className='rec-btn idle';
+        document.getElementById('rec-play').style.display='flex';
+        isRecording=false;
+      };
+      mediaRecorder.start();
+      isRecording=true;
+      document.getElementById('rec-btn').className='rec-btn recording';
+      document.getElementById('rec-status').textContent='Grabando...';
+      document.getElementById('rec-play').style.display='none';
+    }catch(e){showToast('No se pudo acceder al micrófono');}
+  }
+}
+
+function playRecording(){
+  if(recordedBlob){
+    const url=URL.createObjectURL(recordedBlob);
+    new Audio(url).play();
+  } else if(visitaAudio){
+    new Audio(visitaAudio).play();
+  }
+}
+
+function playAudioData(dataUrl){new Audio(dataUrl).play();}
+
+// ── Attachments ──
+function triggerAttach(type){document.getElementById(type==='image'?'attach-input-img':'attach-input-any').click();}
+function handleAttach(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    visitaAttachments.push({name:file.name,type:file.type,data:e.target.result});
+    renderAttachPreviews();
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+function renderAttachPreviews(){
+  const el=document.getElementById('v-attach-preview');
+  el.innerHTML=visitaAttachments.map((a,i)=>{
+    const inner=a.type?.startsWith('image')?`<img src="${a.data}" style="width:54px;height:54px;border-radius:9px;object-fit:cover;border:1px solid var(--border)">`:`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:10px;color:var(--text2)">📎 ${(a.name||'').substring(0,16)}</div>`;
+    return`<div class="attach-remove">${inner}<div class="attach-remove-x" onclick="removeAttach(${i})">✕</div></div>`;
+  }).join('');
+}
+function removeAttach(i){visitaAttachments.splice(i,1);renderAttachPreviews();}
+function previewImg(src){const w=window.open();w.document.write(`<img src="${src}" style="max-width:100%">`);}
+
+// ══════════════════════════════════════════════════
+//  RODEOS
+// ══════════════════════════════════════════════════
+let rodeoCaravanas=[];let editingRodeoId=null;
+
+function openRodeoNew(){
+  editingRodeoId=null;rodeoCaravanas=[];
+  document.getElementById('rodeo-title').textContent='Nuevo rodeo / Lote';
+  ['rod-nombre','rod-categoria','rod-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('rod-caravanas-wrap').innerHTML='';
+  go('s-rodeo');
+}
+
+function addCaravanaToRodeo(){
+  const input=document.getElementById('rod-car-input');
+  const val=input.value.trim();if(!val)return;
+  if(!rodeoCaravanas.includes(val)){rodeoCaravanas.push(val);renderCaravanasWrap('rod-caravanas-wrap',rodeoCaravanas,'rodeoCaravanas');}
+  input.value='';
+}
+
+function renderCaravanasWrap(wrapId,arr,arrName){
+  document.getElementById(wrapId).innerHTML=arr.map((c,i)=>`<span class="caravana-chip">${c} <span onclick="${arrName}.splice(${i},1);renderCaravanasWrap('${wrapId}',${arrName},'${arrName}')" style="cursor:pointer;margin-left:4px;color:var(--red)">✕</span></span>`).join('');
+}
+
+function saveRodeo(){
+  const nombre=document.getElementById('rod-nombre').value.trim();
+  if(!nombre){showToast('El nombre es obligatorio');return;}
+  const rodeos=getRodeos();
+  const data={nombre,categoria:document.getElementById('rod-categoria').value.trim(),caravanas:rodeoCaravanas,desc:document.getElementById('rod-desc').value.trim(),estabId:S.estabId};
+  if(editingRodeoId){const i=rodeos.findIndex(r=>r.id===editingRodeoId);rodeos[i]={...rodeos[i],...data};}
+  else rodeos.unshift({...data,id:crypto.randomUUID()});
+  saveRodeos(rodeos);go('s-estab');showToast('Rodeo guardado ✓');
+}
+
+function showRodeoCtx(e,id){
+  showCtx(e,`
+    <div class="ctx-item" onclick="closeCtx();editRodeo('${id}')"><span class="ctx-ico">✏️</span>Modificar</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item red" onclick="closeCtx();deleteRodeo('${id}')"><span class="ctx-ico">🗑️</span>Eliminar</div>
+  `);
+}
+
+function editRodeo(id){
+  const r=getRodeos().find(x=>x.id===id);if(!r)return;
+  editingRodeoId=id;rodeoCaravanas=[...(r.caravanas||[])];
+  document.getElementById('rodeo-title').textContent='Modificar rodeo';
+  document.getElementById('rod-nombre').value=r.nombre||'';
+  document.getElementById('rod-categoria').value=r.categoria||'';
+  document.getElementById('rod-desc').value=r.desc||'';
+  renderCaravanasWrap('rod-caravanas-wrap',rodeoCaravanas,'rodeoCaravanas');
+  go('s-rodeo');
+}
+
+function deleteRodeo(id){
+  if(!confirm('¿Eliminar este rodeo?'))return;
+  saveRodeos(getRodeos().filter(r=>r.id!==id));
+  renderEstabDetail();showToast('Rodeo eliminado');
+}
+
+function openRodeoDetail(id){
+  // Para futuro — por ahora muestra en contexto
+  editRodeo(id);
+}
+
+// ══════════════════════════════════════════════════
+//  EVENTOS
+// ══════════════════════════════════════════════════
+function openEvento(tipo){
+  const fecha=todayISO();
+  if(tipo==='identificacion'){
+    idCaravanas=[];
+    document.getElementById('id-fecha').value=fecha;
+    document.getElementById('id-denticion').value='';
+    document.getElementById('id-score').value='';
+    document.getElementById('id-desc').value='';
+    document.getElementById('id-caravanas-wrap').innerHTML='';
+    go('s-identificacion');
+  } else if(tipo==='tacto'){
+    tactoResultados=[];tactoCurrentCar='';tactoCurrentResult='';
+    document.getElementById('tacto-fecha').value=fecha;
+    document.getElementById('tacto-car-input').value='';
+    document.getElementById('tacto-desc').value='';
+    document.getElementById('ap-caravanas-wrap').innerHTML='';
+    ['tb-vacia','tb-prenada','tb-advertencia'].forEach(id=>document.getElementById(id).classList.remove('sel'));
+    renderTactoSummary();
+    go('s-tacto');
+  } else if(tipo==='aplicacion'){
+    apCaravanas=[];apProductos=[];
+    document.getElementById('ap-fecha').value=fecha;
+    document.getElementById('ap-cantidad').value='';
+    document.getElementById('ap-desc').value='';
+    document.getElementById('ap-caravanas-wrap').innerHTML='';
+    renderProductosList();
+    go('s-aplicacion');
+  } else if(tipo==='diagnostico'){
+    diagCaravanas=[];
+    document.getElementById('diag-fecha').value=fecha;
+    document.getElementById('diag-presuntivo').value='';
+    document.getElementById('diag-definitivo').value='';
+    document.getElementById('diag-desc').value='';
+    document.getElementById('diag-caravanas-wrap').innerHTML='';
+    go('s-diagnostico');
+  }
+}
+
+// ── Identificación ──
+let idCaravanas=[];
+function addCaravanaToId(){const i=document.getElementById('id-car-input');const v=i.value.trim();if(!v)return;if(!idCaravanas.includes(v)){idCaravanas.push(v);renderCaravanasWrap('id-caravanas-wrap',idCaravanas,'idCaravanas');}i.value='';}
+function saveIdentificacion(){
+  const fecha=document.getElementById('id-fecha').value||todayISO();
+  const datos={denticion:document.getElementById('id-denticion').value.trim(),score:document.getElementById('id-score').value.trim(),desc:document.getElementById('id-desc').value.trim()};
+  const eventos=getEventos();
+  eventos.unshift({id:crypto.randomUUID(),estabId:S.estabId,tipo:'identificacion',fecha,datos,caravanas:idCaravanas});
+  saveEventos(eventos);
+  registrarEventoEnCaravanas(idCaravanas,'identificacion',fecha,datos);
+  go('s-estab');showToast('Identificación guardada ✓');
+}
+
+// ── Tacto ──
+let tactoResultados=[];let tactoCurrentCar='';let tactoCurrentResult='';
+
+function setTactoResult(result){
+  tactoCurrentResult=result;
+  ['tb-vacia','tb-prenada','tb-advertencia'].forEach(id=>document.getElementById(id).classList.remove('sel'));
+  const map={'Vacía':'tb-vacia','Preñada':'tb-prenada','Advertencia':'tb-advertencia'};
+  if(map[result])document.getElementById(map[result]).classList.add('sel');
+}
+
+function searchCaravana(val){
+  const estabCars=getAllCaravanasDe(S.estabId);
+  const matches=estabCars.filter(c=>c.includes(val)&&val.length>0).slice(0,5);
+  const el=document.getElementById('tacto-car-suggestions');
+  el.innerHTML=matches.map(c=>`<div onclick="selectCaravanaTacto('${c}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;margin-bottom:4px">${c}</div>`).join('');
+}
+
+function selectCaravanaTacto(car){
+  document.getElementById('tacto-car-input').value=car;
+  document.getElementById('tacto-car-suggestions').innerHTML='';
+  tactoCurrentCar=car;
+}
+
+function tactoNext(){
+  const car=document.getElementById('tacto-car-input').value.trim();
+  if(!car){showToast('Ingresá el número de caravana');return;}
+  if(!tactoCurrentResult){showToast('Seleccioná un resultado');return;}
+  const desc=document.getElementById('tacto-desc').value.trim();
+  // Update if already exists
+  const existing=tactoResultados.findIndex(r=>r.caravana===car);
+  if(existing>-1)tactoResultados[existing]={caravana:car,resultado:tactoCurrentResult,desc};
+  else tactoResultados.push({caravana:car,resultado:tactoCurrentResult,desc});
+  // Reset for next
+  document.getElementById('tacto-car-input').value='';
+  document.getElementById('tacto-desc').value='';
+  ['tb-vacia','tb-prenada','tb-advertencia'].forEach(id=>document.getElementById(id).classList.remove('sel'));
+  tactoCurrentResult='';
+  renderTactoSummary();
+  showToast(`${car} → ${tactoCurrentResult||'guardado'} ✓`);
+}
+
+function renderTactoSummary(){
+  const prenadas=tactoResultados.filter(r=>r.resultado==='Preñada').length;
+  const vacias=tactoResultados.filter(r=>r.resultado==='Vacía').length;
+  const adv=tactoResultados.filter(r=>r.resultado==='Advertencia').length;
+  const total=tactoResultados.length;
+  document.getElementById('tacto-progress-hdr').textContent=total?`${total} animales registrados`:'';
+  document.getElementById('tacto-summary').innerHTML=`
+    <div class="ts-box prenada"><div class="ts-val">${prenadas}</div><div class="ts-lbl">Preñadas</div></div>
+    <div class="ts-box vacia"><div class="ts-val">${vacias}</div><div class="ts-lbl">Vacías</div></div>
+    <div class="ts-box advertencia"><div class="ts-val">${adv}</div><div class="ts-lbl">Advertencia</div></div>
+  `;
+}
+
+function openTactoList(){
+  const el=document.getElementById('tacto-list-body');
+  if(!tactoResultados.length){el.innerHTML=`<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Sin animales registrados aún.</div>`;openModal('m-tacto-list');return;}
+  el.innerHTML=tactoResultados.map((r,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="editTactoItem(${i})">
+    <span class="caravana-chip ${r.resultado.toLowerCase()}">${r.caravana}</span>
+    <span style="flex:1;font-size:12px;color:var(--text2)">${r.desc||''}</span>
+    <span style="font-size:11px;font-weight:700;color:${r.resultado==='Preñada'?'var(--green)':r.resultado==='Vacía'?'var(--yellow)':'var(--red)'}">${r.resultado}</span>
+  </div>`).join('');
+  openModal('m-tacto-list');
+}
+
+function editTactoItem(idx){
+  const r=tactoResultados[idx];
+  closeModal('m-tacto-list');
+  document.getElementById('tacto-car-input').value=r.caravana;
+  document.getElementById('tacto-desc').value=r.desc||'';
+  setTactoResult(r.resultado);
+  // Remove from list so it gets re-added on Next
+  tactoResultados.splice(idx,1);
+  renderTactoSummary();
+}
+
+function saveTacto(){
+  if(!tactoResultados.length){showToast('No hay animales registrados');return;}
+  const fecha=document.getElementById('tacto-fecha').value||todayISO();
+  const datos={resultados:tactoResultados};
+  const eventos=getEventos();
+  eventos.unshift({id:crypto.randomUUID(),estabId:S.estabId,tipo:'tacto',fecha,datos,caravanas:tactoResultados.map(r=>r.caravana)});
+  saveEventos(eventos);
+  tactoResultados.forEach(r=>registrarEventoEnCaravanas([r.caravana],'tacto',fecha,{resultado:r.resultado,desc:r.desc}));
+  go('s-estab');showToast(`Tacto guardado — ${tactoResultados.length} animales ✓`);
+}
+
+// ── Aplicación ──
+let apCaravanas=[];let apProductos=[];
+function addCaravanaToAp(){const i=document.getElementById('ap-car-input');const v=i.value.trim();if(!v)return;if(!apCaravanas.includes(v)){apCaravanas.push(v);renderCaravanasWrap('ap-caravanas-wrap',apCaravanas,'apCaravanas');}i.value='';}
+function addProducto(){
+  const input=document.getElementById('ap-prod-input');
+  const val=input.value.trim();if(!val)return;
+  if(!apProductos.includes(val)){apProductos.push(val);renderProductosList();}
+  input.value='';
+}
+function renderProductosList(){
+  document.getElementById('ap-prod-list').innerHTML=apProductos.map((p,i)=>`<div class="prod-item sel" onclick="removeProducto(${i})"><span class="prod-item-name">${p}</span><span class="prod-check">✓</span></div>`).join('');
+}
+function removeProducto(i){apProductos.splice(i,1);renderProductosList();}
+function saveAplicacion(){
+  const fecha=document.getElementById('ap-fecha').value||todayISO();
+  const datos={productos:apProductos,cantidad:document.getElementById('ap-cantidad').value.trim(),desc:document.getElementById('ap-desc').value.trim()};
+  const eventos=getEventos();
+  eventos.unshift({id:crypto.randomUUID(),estabId:S.estabId,tipo:'aplicacion',fecha,datos,caravanas:apCaravanas});
+  saveEventos(eventos);
+  if(apCaravanas.length)registrarEventoEnCaravanas(apCaravanas,'aplicacion',fecha,datos);
+  go('s-estab');showToast('Aplicación guardada ✓');
+}
+
+// ── Diagnóstico ──
+let diagCaravanas=[];
+function addCaravanaToDiag(){const i=document.getElementById('diag-car-input');const v=i.value.trim();if(!v)return;if(!diagCaravanas.includes(v)){diagCaravanas.push(v);renderCaravanasWrap('diag-caravanas-wrap',diagCaravanas,'diagCaravanas');}i.value='';}
+function saveDiagnostico(){
+  const fecha=document.getElementById('diag-fecha').value||todayISO();
+  const datos={presuntivo:document.getElementById('diag-presuntivo').value.trim(),definitivo:document.getElementById('diag-definitivo').value.trim(),desc:document.getElementById('diag-desc').value.trim()};
+  const eventos=getEventos();
+  eventos.unshift({id:crypto.randomUUID(),estabId:S.estabId,tipo:'diagnostico',fecha,datos,caravanas:diagCaravanas});
+  saveEventos(eventos);
+  if(diagCaravanas.length)registrarEventoEnCaravanas(diagCaravanas,'diagnostico',fecha,datos);
+  go('s-estab');showToast('Diagnóstico guardado ✓');
+}
+
+// ── Historial de caravanas ──
+function getAllCaravanasDe(estabId){
+  const cars=new Set();
+  getRodeos().filter(r=>r.estabId===estabId).forEach(r=>(r.caravanas||[]).forEach(c=>cars.add(c)));
+  getEventos().filter(e=>e.estabId===estabId).forEach(e=>(e.caravanas||[]).forEach(c=>cars.add(c)));
+  return[...cars].sort();
+}
+
+function registrarEventoEnCaravanas(caravanas,tipo,fecha,datos){
+  // Store caravana history in CACHE
+  const hist=CACHE.get('c_car_hist')||{};
+  caravanas.forEach(car=>{
+    if(!hist[car])hist[car]=[];
+    hist[car].unshift({tipo,fecha,datos,estabId:S.estabId});
+  });
+  CACHE.set('c_car_hist',hist);
+}
+
+function verEvento(id){
+  // Future: open event detail
+  showToast('Detalle de evento próximamente');
+}
+
+// ══════════════════════════════════════════════════
+//  RECORDATORIOS
+// ══════════════════════════════════════════════════
+function renderReminders(){
+  const rems=getCReminders().sort((a,b)=>a.dueDate-b.dueDate);
+  const el=document.getElementById('reminders-list');
+  if(!rems.length){el.innerHTML=`<div class="empty-state"><span class="emoji">🔔</span>Sin recordatorios.<br>Tocá <strong>+</strong> para agregar.</div>`;return;}
+  const now=Date.now();const week=now+7*864e5;
+  el.innerHTML=rems.map(r=>`<div class="rem-card ${r.dueDate<now?'urgent':r.dueDate<week?'soon':''}">
+    <div class="rem-info">
+      <div class="rem-label">🔔 ${r.label}</div>
+      <div class="rem-date">${formatDateShort(r.dueDate)}</div>
+    </div>
+    <button class="rem-del" onclick="deleteReminder('${r.id}')">🗑️</button>
+  </div>`).join('');
+}
+
+function openNewReminder(){
+  document.getElementById('rem-label').value='';
+  document.getElementById('rem-date').value=todayISO();
+  openModal('m-reminder');
+}
+
+function saveReminder(){
+  const label=document.getElementById('rem-label').value.trim();
+  const dateVal=document.getElementById('rem-date').value;
+  if(!label){showToast('El motivo es obligatorio');return;}
+  const rems=getCReminders();
+  rems.push({id:crypto.randomUUID(),label,dueDate:new Date(dateVal).getTime()});
+  saveCReminders(rems);closeModal('m-reminder');renderReminders();showToast('Recordatorio guardado ✓');
+}
+
+function deleteReminder(id){
+  saveCReminders(getCReminders().filter(r=>r.id!==id));
+  renderReminders();showToast('Recordatorio eliminado');
+}
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+// Auth guard: read VetNode session
+(async function checkAuth(){
+  const session=getSession();
+  if(!session?.access_token){window.location.href='index.html';return;}
+  if(isTokenExpired()){const ok=await refreshSession();if(!ok){localStorage.removeItem('vn_session');window.location.href='index.html';return;}}
+  // Set up proactive refresh
+  setInterval(async()=>{if(isTokenExpired())await refreshSession();},4*60*1000);
+  setInterval(async()=>{if(navigator.onLine&&getPending().length){if(isTokenExpired())await refreshSession();flushPending();}},5*60*1000);
+  // Show user info
+  const meta=session?.user?.user_metadata||{};
+  document.getElementById('home-clinic-name').textContent=meta.clinic_name||'VetNode Campo';
+  document.getElementById('home-clinic-sub').textContent=[meta.city,meta.state,meta.country].filter(Boolean).join(', ');
+  // Sync
+  syncFromSupabase();
+})();
+
+window.addEventListener('online',()=>{flushPending();showToast('Conexión restaurada 📶');});
+</script>
+</body>
+</html>
