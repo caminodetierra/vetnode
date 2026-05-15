@@ -1725,18 +1725,13 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
         <div class="modal-sub" id="m-appt-date-label"></div>
         <div class="fg"><label>Hora</label><input class="fi" id="appt-time" type="time"></div>
         <div class="fg">
-          <label>Tutor</label>
-          <input class="fi" id="appt-tutor-search" placeholder="🔍 Buscar tutor..." oninput="renderApptTutorSearch()" autocomplete="off" style="margin-bottom:6px">
-          <div id="appt-tutor-results" style="max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;display:none;"></div>
-          <input type="hidden" id="appt-tutor-id">
-          <div id="appt-tutor-selected" style="display:none"></div>
+          <label>Establecimiento</label>
+          <select class="fi fi-select" id="appt-estab">
+            <option value="">— Seleccioná un establecimiento —</option>
+          </select>
         </div>
-        <div class="fg">
-          <label>Mascota</label>
-          <select class="fi fi-select" id="appt-pet"><option value="">— Seleccioná primero un tutor —</option></select>
-        </div>
-        <div class="fg"><label>Procedimiento</label><input class="fi" id="appt-proc" placeholder="Ej: Control general, Vacunación, Cirugía…"></div>
-        <button class="save-btn yellow" onclick="saveAppt()">Guardar turno</button>
+        <div class="fg"><label>Descripción</label><input class="fi" id="appt-proc" placeholder="Ej: Tacto, Vacunación, Visita sanitaria…"></div>
+        <button class="save-btn yellow" onclick="saveApptCampo()">Guardar turno</button>
       </div>
     </div>
 
@@ -4808,6 +4803,31 @@ function renderHomeSearch(){
   if(!estabs.length){results.innerHTML=`<div class="hsr-item"><div class="hsr-info"><div class="hsr-name" style="color:var(--text3)">Sin resultados</div></div></div>`;results.classList.add('open');return;}
   results.innerHTML=estabs.slice(0,6).map(e=>`<div class="hsr-item" onclick="openEstab('${e.id}');document.getElementById('home-search').value='';document.getElementById('home-search-results').classList.remove('open')"><div class="hsr-ico">🏡</div><div class="hsr-info"><div class="hsr-name">${e.nombre}</div><div class="hsr-sub">${e.ubicacion||''}</div></div></div>`).join('');
   results.classList.add('open');
+}
+
+function openEventMenu(){openModal('m-evento');}
+
+function openNewAppt(){
+  if(!calSelected)calSelected=new Date();
+  document.getElementById('m-appt-date-label').textContent=calSelected.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('m-appt-title').textContent='Nuevo turno';
+  document.getElementById('appt-time').value='';
+  document.getElementById('appt-proc').value='';
+  const sel=document.getElementById('appt-estab');
+  sel.innerHTML='<option value="">— Seleccioná un establecimiento —</option>';
+  getEstabs().forEach(e=>{const o=document.createElement('option');o.value=e.id;o.textContent=e.nombre;sel.appendChild(o);});
+  openModal('m-appt');
+}
+
+function saveApptCampo(){
+  const estabId=document.getElementById('appt-estab').value;
+  const time=document.getElementById('appt-time').value;
+  const proc=document.getElementById('appt-proc').value.trim();
+  if(!proc){showToast('La descripción es obligatoria');return;}
+  const estab=getEstabs().find(e=>e.id===estabId);
+  const appts=getAppts();
+  appts.push({id:crypto.randomUUID(),date:calSelected.getTime(),time,tutorId:estabId,petId:null,proc,label:estab?estab.nombre:''});
+  saveAppts(appts);closeModal('m-appt');renderCalendar();showToast('Turno guardado ✓');
 }
 
 // ── Override go() para campo ──
