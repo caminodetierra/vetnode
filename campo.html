@@ -2019,11 +2019,13 @@ async function syncFromSupabase(){
   if(!await ensureValidSession())return;
   const uid=getUserId();if(!uid)return;
   try{
-    const [tutors,pets,visits,rems,appts,vets,contacts,customVaccsRaw,profile]=await Promise.all([
+    const [tutors,pets,visits,rems,appts,vets,contacts,customVaccsRaw,profile,
+           estabs,visitasCampo,rodeos,eventosCampo]=await Promise.all([
       sbSelect('tutors'),sbSelect('pets'),
       sbSelect('visits','order=visit_date.asc'),
       sbSelect('reminders'),sbSelect('appointments'),
-      sbSelect('vets'),sbSelect('contacts'),sbSelect('custom_vaccs'),sbSelectProfile()
+      sbSelect('vets'),sbSelect('contacts'),sbSelect('custom_vaccs'),sbSelectProfile(),
+      sbSelect('c_estabs'),sbSelect('c_visitas'),sbSelect('c_rodeos'),sbSelect('c_eventos')
     ]);
     if(tutors.length||!CACHE.get('tutors'))CACHE.set('tutors',tutors.map(toTutor));
     if(pets.length||!CACHE.get('pets'))CACHE.set('pets',pets.map(toPet));
@@ -2033,6 +2035,11 @@ async function syncFromSupabase(){
     if(vets.length||!CACHE.get('vets'))CACHE.set('vets',vets.map(toVet));
     if(contacts.length||!CACHE.get('contacts'))CACHE.set('contacts',contacts.map(toContact));
     if(customVaccsRaw.length)CACHE.set('custom_vaccs',customVaccsRaw.map(toCustomVacc));
+    // Campo tables
+    if(estabs.length||!CACHE.get('c_estabs'))CACHE.set('c_estabs',estabs.map(toEstab));
+    if(visitasCampo.length||!CACHE.get('c_visitas'))CACHE.set('c_visitas',visitasCampo.map(toVisitaCampo));
+    if(rodeos.length||!CACHE.get('c_rodeos'))CACHE.set('c_rodeos',rodeos.map(toRodeo));
+    if(eventosCampo.length||!CACHE.get('c_eventos'))CACHE.set('c_eventos',eventosCampo.map(toEventoCampo));
     if(profile){
       const s=CACHE.get('settings')||{};
       if(profile.clinic_name)s.clinic=profile.clinic_name;
@@ -4820,14 +4827,20 @@ function openNewAppt(){
 }
 
 function saveApptCampo(){
+  const time=document.getElementById('appt-time').value;if(!time){showToast('Seleccioná una hora');return;}
   const estabId=document.getElementById('appt-estab').value;
-  const time=document.getElementById('appt-time').value;
   const proc=document.getElementById('appt-proc').value.trim();
   if(!proc){showToast('La descripción es obligatoria');return;}
+  const dateKey=`${calSelected.getFullYear()}-${String(calSelected.getMonth()+1).padStart(2,'0')}-${String(calSelected.getDate()).padStart(2,'0')}`;
   const estab=getEstabs().find(e=>e.id===estabId);
   const appts=getAppts();
-  appts.push({id:crypto.randomUUID(),date:calSelected.getTime(),time,tutorId:estabId,petId:null,proc,label:estab?estab.nombre:''});
-  saveAppts(appts);closeModal('m-appt');renderCalendar();showToast('Turno guardado ✓');
+  appts.push({id:crypto.randomUUID(),date:dateKey,time,tutorId:estabId,petId:null,procedure:proc});
+  saveAppts(appts);
+  // Also create reminder
+  const rems=getReminders();
+  rems.push({id:crypto.randomUUID(),petId:null,tutorId:estabId,type:'manual',label:`Turno: ${proc}${estab?' — '+estab.nombre:''}`,dueDate:new Date(dateKey+'T'+time).getTime()});
+  saveReminders(rems);
+  closeModal('m-appt');renderCalendar();showToast('Turno guardado ✓');
 }
 
 // ── Override go() para campo ──
