@@ -2808,7 +2808,7 @@ function renderApptTutorSearch(){
   const tutors=getTutors().filter(t=>t.name.toLowerCase().includes(q));
   if(!tutors.length){res.style.display='block';res.innerHTML=`<div style="padding:10px;font-size:12px;color:var(--text3)">Sin resultados</div>`;return;}
   res.style.display='block';
-  res.innerHTML=tutors.map(t=>`<div class="gsearch-result" onclick="selectApptTutor(${t.id},'${t.name.replace(/'/g,"\\'")}')"><div class="tc-av" style="width:26px;height:26px;font-size:12px">👤</div><div style="font-size:13px;font-weight:700;color:var(--text)">${t.name}</div></div>`).join('');
+  res.innerHTML=tutors.map(t=>`<div class="gsearch-result" onclick="selectApptTutor('${t.id}','${t.name.replace(/'/g,"\\'")}')"><div class="tc-av" style="width:26px;height:26px;font-size:12px">👤</div><div style="font-size:13px;font-weight:700;color:var(--text)">${t.name}</div></div>`).join('');
 }
 function selectApptTutor(tutorId,tutorName){
   document.getElementById('appt-tutor-id').value=tutorId;
@@ -2818,7 +2818,7 @@ function selectApptTutor(tutorId,tutorName){
   sel.style.cssText='display:flex;align-items:center;justify-content:space-between;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:8px;padding:7px 11px;font-size:12px;color:var(--blue);font-weight:600;margin-top:4px;';
   sel.innerHTML=`<span>👤 ${tutorName}</span><span onclick="clearApptTutor()" style="cursor:pointer;font-size:14px">✕</span>`;
   // populate pets
-  const pets=getPets().filter(p=>p.tutorId===tutorId);
+  const pets=getPets().filter(p=>p.tutorId===tutorId||p.tutorId==tutorId);
   const petSel=document.getElementById('appt-pet');
   petSel.innerHTML='<option value="">— Seleccioná una mascota —</option>';
   pets.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=`${petEmoji(p.species)} ${p.name}`;petSel.appendChild(o);});
@@ -2830,8 +2830,8 @@ function clearApptTutor(){
 }
 function saveAppt(){
   const time=document.getElementById('appt-time').value;if(!time){showToast('Seleccioná una hora');return;}
-  const tutorId=parseInt(document.getElementById('appt-tutor-id').value)||null;
-  const petId=parseInt(document.getElementById('appt-pet').value)||null;
+  const tutorId=document.getElementById('appt-tutor-id').value||null;
+  const petId=document.getElementById('appt-pet').value||null;
   const procedure=document.getElementById('appt-proc').value.trim();
   const dateKey=`${calSelected.getFullYear()}-${String(calSelected.getMonth()+1).padStart(2,'0')}-${String(calSelected.getDate()).padStart(2,'0')}`;
   const appts=getAppts();
