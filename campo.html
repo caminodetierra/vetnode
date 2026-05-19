@@ -2087,8 +2087,13 @@ const _sbSave=async(table,rows,mapper)=>{
   if(!navigator.onLine){addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');return;}
   try{
     const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(mapped)});
-    if(!r.ok){addPending(table,mapped);showToast('Error al guardar — se reintentará al sincronizar');}
-  }catch{addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');}
+    if(!r.ok){
+      const errText=await r.text();
+      console.error('_sbSave error',table,errText);
+      showToast(`Error (${table}): ${errText.substring(0,100)}`);
+      addPending(table,mapped);
+    }
+  }catch(e){addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');}
 };
 
 // ── DB accessors ──
