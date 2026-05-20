@@ -2020,12 +2020,13 @@ async function syncFromSupabase(){
   const uid=getUserId();if(!uid)return;
   try{
     const [tutors,pets,visits,rems,appts,vets,contacts,customVaccsRaw,profile,
-           estabs,visitasCampo,rodeos,eventosCampo]=await Promise.all([
+           estabs,visitasCampo,rodeos,eventosCampo,apptsCampo]=await Promise.all([
       sbSelect('tutors'),sbSelect('pets'),
       sbSelect('visits','order=visit_date.asc'),
       sbSelect('reminders'),sbSelect('appointments'),
       sbSelect('vets'),sbSelect('contacts'),sbSelect('custom_vaccs'),sbSelectProfile(),
-      sbSelect('c_estabs'),sbSelect('c_visitas'),sbSelect('c_rodeos'),sbSelect('c_eventos')
+      sbSelect('c_estabs'),sbSelect('c_visitas'),sbSelect('c_rodeos'),sbSelect('c_eventos'),
+      sbSelect('c_appointments','order=appt_date.asc')
     ]);
     if(tutors.length||!CACHE.get('tutors'))CACHE.set('tutors',tutors.map(toTutor));
     if(pets.length||!CACHE.get('pets'))CACHE.set('pets',pets.map(toPet));
@@ -2040,6 +2041,13 @@ async function syncFromSupabase(){
     if(visitasCampo.length||!CACHE.get('c_visitas'))CACHE.set('c_visitas',visitasCampo.map(toVisitaCampo));
     if(rodeos.length||!CACHE.get('c_rodeos'))CACHE.set('c_rodeos',rodeos.map(toRodeo));
     if(eventosCampo.length||!CACHE.get('c_eventos'))CACHE.set('c_eventos',eventosCampo.map(toEventoCampo));
+    if(apptsCampo.length||!CACHE.get('c_appts')){
+      const mapped=apptsCampo.map(toApptCampo);
+      CACHE.set('c_appts',mapped);
+      // Merge into shared appts for calendar display
+      const existing=getAppts().filter(a=>!mapped.find(m=>m.id===a.id));
+      CACHE.set('appts',[...existing,...mapped.map(a=>({id:a.id,date:a.date,time:a.time,tutorId:a.estabId,petId:null,procedure:a.procedure}))]);
+    }
     if(profile){
       const s=CACHE.get('settings')||{};
       if(profile.clinic_name)s.clinic=profile.clinic_name;
@@ -4835,17 +4843,24 @@ function openNewAppt(){
   openModal('m-appt');
 }
 
+const getApptsCampo=()=>CACHE.get('c_appts')||[];
+const saveApptsCampo=a=>{CACHE.set('c_appts',a);_sbSave('c_appointments',a,fromApptCampo);};
+const toApptCampo=r=>({id:r.id,estabId:r.estab_id||null,date:r.appt_date,time:r.appt_time||'',procedure:r.procedure||''});
+const fromApptCampo=(a,uid)=>{const o={user_id:uid,estab_id:a.estabId||null,appt_date:a.date,appt_time:a.time||'',procedure:a.procedure||''};if(a.id)o.id=a.id;return o;};
+
 function saveApptCampo(){
   const time=document.getElementById('appt-time').value;if(!time){showToast('Seleccioná una hora');return;}
-  const estabId=document.getElementById('appt-estab').value;
+  const estabId=document.getElementById('appt-estab').value||null;
   const proc=document.getElementById('appt-proc').value.trim();
   if(!proc){showToast('La descripción es obligatoria');return;}
   const dateKey=`${calSelected.getFullYear()}-${String(calSelected.getMonth()+1).padStart(2,'0')}-${String(calSelected.getDate()).padStart(2,'0')}`;
-  const estab=getEstabs().find(e=>e.id===estabId);
-  // Save locally only — appointments table has FK to tutors, not estabs
-  const appts=getAppts();
-  appts.push({id:crypto.randomUUID(),date:dateKey,time,tutorId:estabId,petId:null,procedure:proc});
-  CACHE.set('appts',appts); // local only, no Supabase sync
+  const appts=getApptsCampo();
+  appts.push({id:crypto.randomUUID(),estabId,date:dateKey,time,procedure:proc});
+  saveApptsCampo(appts);
+  // Also save in shared appts cache for calendar display
+  const sharedAppts=getAppts();
+  sharedAppts.push({id:appts[appts.length-1].id,date:dateKey,time,tutorId:estabId,petId:null,procedure:proc});
+  CACHE.set('appts',sharedAppts);
   closeModal('m-appt');renderCalendar();showToast('Turno guardado ✓');
 }
 
