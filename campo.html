@@ -3440,13 +3440,17 @@ function renderCalEvents(){
   const dateLabel=calSelected.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
   if(!dayAppts.length){el.innerHTML=`<div class="cal-events-title">${dateLabel}</div><div class="empty-state" style="padding:24px 0;font-size:12px"><span class="emoji" style="font-size:28px">📅</span>Sin turnos para este día.<br>Tocá <strong>+</strong> para agregar uno.</div>`;return;}
   el.innerHTML=`<div class="cal-events-title">${dateLabel}</div>`+dayAppts.map(a=>{
-    const p=getPets().find(p=>p.id===a.petId);const t=getTutors().find(t=>t.id===a.tutorId);
+    const p=getPets().find(p=>p.id===a.petId);
+    const t=getTutors().find(t=>t.id===a.tutorId);
+    const estab=!p?getEstabs().find(e=>e.id===a.tutorId):null;
     const clickAction=a.petId?`openPetFromReminder('${a.petId}','${a.tutorId||null}')`:'';
+    const mainName=p?`${p.name} (${petEmoji(p.species)})`:estab?estab.nombre:'Sin especificar';
+    const subName=p&&t?t.name:estab?[estab.ubicacion].filter(Boolean).join(' · '):'';
     return`<div class="cal-event-card" ${clickAction?`onclick="${clickAction}" style="cursor:pointer"`:''}">
       <div class="cal-event-time">${a.time}</div>
       <div class="cal-event-info">
-        <div class="cal-event-name">${p?p.name:'Sin mascota'} ${p?'('+petEmoji(p.species)+')':''}</div>
-        <div class="cal-event-detail">${t?t.name:''} · ${a.procedure||'Consulta general'}</div>
+        <div class="cal-event-name">${mainName}</div>
+        <div class="cal-event-detail">${[subName,a.procedure||'Consulta general'].filter(Boolean).join(' · ')}</div>
       </div>
     </div>`;
   }).join('');
@@ -3951,7 +3955,7 @@ function renderRpEvents(){
   el.innerHTML=dayAppts.map(a=>{
     const p=getPets().find(p=>p.id===a.petId);const t=getTutors().find(t=>t.id===a.tutorId);
     const click=a.petId?`onclick="openPetFromReminder('${a.petId}','${a.tutorId||null}')"`:'' ;
-    return`<div class="rp-event" ${click}><div class="rp-event-time">${a.time}</div><div><div class="rp-event-name">${p?p.name:'Sin mascota'}</div><div class="rp-event-detail">${t?t.name:''} · ${a.procedure||''}</div></div></div>`;
+    return`<div class="rp-event" ${click}><div class="rp-event-time">${a.time}</div><div><div class="rp-event-name">${p?p.name:getEstabs().find(e=>e.id===a.tutorId)?.nombre||'Turno'}</div><div class="rp-event-detail">${t?t.name:''} · ${a.procedure||''}</div></div></div>`;
   }).join('');
 }
 
@@ -4838,13 +4842,10 @@ function saveApptCampo(){
   if(!proc){showToast('La descripción es obligatoria');return;}
   const dateKey=`${calSelected.getFullYear()}-${String(calSelected.getMonth()+1).padStart(2,'0')}-${String(calSelected.getDate()).padStart(2,'0')}`;
   const estab=getEstabs().find(e=>e.id===estabId);
+  // Save locally only — appointments table has FK to tutors, not estabs
   const appts=getAppts();
   appts.push({id:crypto.randomUUID(),date:dateKey,time,tutorId:estabId,petId:null,procedure:proc});
-  saveAppts(appts);
-  // Also create reminder
-  const rems=getReminders();
-  rems.push({id:crypto.randomUUID(),petId:null,tutorId:estabId,type:'manual',label:`Turno: ${proc}${estab?' — '+estab.nombre:''}`,dueDate:new Date(dateKey+'T'+time).getTime()});
-  saveReminders(rems);
+  CACHE.set('appts',appts); // local only, no Supabase sync
   closeModal('m-appt');renderCalendar();showToast('Turno guardado ✓');
 }
 
