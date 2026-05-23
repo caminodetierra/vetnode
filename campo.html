@@ -1680,16 +1680,15 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
       <div class="modal">
         <div class="modal-handle"></div>
         <div class="modal-title">Nuevo recordatorio</div>
-        <div class="fg"><label>Descripción</label><input class="fi" id="nr-label" placeholder="Ej: Control post-operatorio de Luna"></div>
+        <div class="fg"><label>Descripción</label><input class="fi" id="nr-label" placeholder="Ej: Visita sanitaria, Vacunación..."></div>
         <div class="fg">
-          <label>Mascota (opcional)</label>
-          <input class="fi" id="nr-pet-search" placeholder="🔍 Buscar mascota o tutor..." oninput="renderNrPetSearch()" autocomplete="off" style="margin-bottom:6px">
-          <div id="nr-pet-results" style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;display:none;"></div>
-          <input type="hidden" id="nr-pet-id">
-          <div id="nr-pet-selected" style="display:none;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:8px;padding:7px 11px;font-size:12px;color:var(--blue);font-weight:600;display:flex;align-items:center;justify-content:space-between;"></div>
+          <label>Establecimiento (opcional)</label>
+          <select class="fi fi-select" id="nr-estab">
+            <option value="">— Sin establecimiento —</option>
+          </select>
         </div>
         <div class="fg"><label>Fecha</label><input class="fi" id="nr-date" type="date"></div>
-        <button class="save-btn green" onclick="saveManualReminder()">Guardar recordatorio</button>
+        <button class="save-btn green" onclick="saveManualReminderCampo()">Guardar recordatorio</button>
       </div>
     </div>
 
@@ -2796,13 +2795,19 @@ function renderReminders(){
 }
 function openNewReminderModal(){
   document.getElementById('nr-label').value='';
-  document.getElementById('nr-pet-search').value='';
-  document.getElementById('nr-pet-id').value='';
-  document.getElementById('nr-pet-results').style.display='none';
-  document.getElementById('nr-pet-selected').style.display='none';
+  const sel=document.getElementById('nr-estab');
+  if(sel){sel.innerHTML='<option value="">— Sin establecimiento —</option>';getEstabs().forEach(e=>{const o=document.createElement('option');o.value=e.id;o.textContent=e.nombre;sel.appendChild(o);});}
   const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
   document.getElementById('nr-date').value=tomorrow.toISOString().split('T')[0];
   openModal('m-new-reminder');
+}
+function saveManualReminderCampo(){
+  const label=v('nr-label');if(!label){showToast('La descripción es obligatoria');return;}
+  const dateVal=document.getElementById('nr-date').value;if(!dateVal){showToast('Seleccioná una fecha');return;}
+  const estabId=document.getElementById('nr-estab')?.value||null;
+  const rems=getReminders();
+  rems.push({id:crypto.randomUUID(),petId:null,tutorId:estabId,type:'manual',label,dueDate:new Date(dateVal+'T12:00').getTime()});
+  saveReminders(rems);closeModal('m-new-reminder');renderReminders();showToast('Recordatorio guardado ✓');
 }
 function renderNrPetSearch(){
   const q=(document.getElementById('nr-pet-search').value||'').toLowerCase();
@@ -4466,10 +4471,13 @@ function renderEstabDetail(){
   }
   if(visitas.length){
     html+=`<div class="list-section">Visitas (${visitas.length})</div><div style="padding:0 16px">`;
-    html+=visitas.map(v=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;padding:14px 16px;cursor:pointer" onclick="openEditVisita('${v.id}')">
-      <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:6px">${formatDateShort(new Date(v.fecha).getTime())} <span style="color:var(--text3);font-size:10px">toca para editar</span></div>
-      ${v.notas?`<div style="font-size:13px;color:var(--text2)">${v.notas.substring(0,120)}${v.notas.length>120?'…':''}</div>`:''}
-      ${v.audio?`<div style="margin-top:8px"><span onclick="event.stopPropagation();playAudioData('${v.audio}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--text2);cursor:pointer">🎙️ Reproducir audio</span></div>`:''}
+    html+=visitas.map(v=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;display:flex;align-items:stretch">
+      <div style="flex:1;padding:14px 16px;cursor:pointer" onclick="openEditVisita('${v.id}')">
+        <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:6px">${formatDateShort(new Date(v.fecha).getTime())} <span style="color:var(--text3);font-size:10px">toca para editar</span></div>
+        ${v.notas?`<div style="font-size:13px;color:var(--text2)">${v.notas.substring(0,120)}${v.notas.length>120?'…':''}</div>`:''}
+        ${v.audio?`<div style="margin-top:8px"><span onclick="event.stopPropagation();playAudioData('${v.audio}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--text2);cursor:pointer">🎙️ Reproducir audio</span></div>`:''}
+      </div>
+      <div class="opts-btn" onclick="event.stopPropagation();showVisitaCtx(event,'${v.id}')"><span></span><span></span><span></span></div>
     </div>`).join('');
     html+='</div>';
   }
@@ -4477,6 +4485,19 @@ function renderEstabDetail(){
   document.getElementById('estab-detail-body').innerHTML=html;
 }
 
+function showVisitaCtx(e,id){
+  document.getElementById('ctx-wrap').style.display='none';
+  const menu=document.getElementById('ctx-menu');
+  menu.innerHTML=`<div class="ctx-item" onclick="closeCtx();openEditVisita('${id}')"><span class="ctx-ico">✏️</span>Modificar</div><div class="ctx-divider"></div><div class="ctx-item red" onclick="closeCtx();deleteVisitaCampo('${id}')"><span class="ctx-ico">🗑️</span>Eliminar</div>`;
+  const x=Math.min(e.clientX,window.innerWidth-200);const y=Math.min(e.clientY,window.innerHeight-150);
+  menu.style.left=x+'px';menu.style.top=y+'px';
+  document.getElementById('ctx-wrap').style.display='block';
+}
+function deleteVisitaCampo(id){
+  if(!confirm('¿Eliminar esta visita?'))return;
+  saveVisitasCampo(getVisitasCampo().filter(v=>v.id!==id));
+  renderEstabDetail();showToast('Visita eliminada');
+}
 function showEventoCtx(e,id){
   document.querySelectorAll('.ctx-wrap').forEach(x=>x.style.display='none');
   const menu=document.getElementById('ctx-menu');
@@ -4854,13 +4875,18 @@ function saveApptCampo(){
   const proc=document.getElementById('appt-proc').value.trim();
   if(!proc){showToast('La descripción es obligatoria');return;}
   const dateKey=`${calSelected.getFullYear()}-${String(calSelected.getMonth()+1).padStart(2,'0')}-${String(calSelected.getDate()).padStart(2,'0')}`;
+  const estab=getEstabs().find(e=>e.id===estabId);
+  const newId=crypto.randomUUID();
   const appts=getApptsCampo();
-  appts.push({id:crypto.randomUUID(),estabId,date:dateKey,time,procedure:proc});
+  appts.push({id:newId,estabId,date:dateKey,time,procedure:proc});
   saveApptsCampo(appts);
-  // Also save in shared appts cache for calendar display
   const sharedAppts=getAppts();
-  sharedAppts.push({id:appts[appts.length-1].id,date:dateKey,time,tutorId:estabId,petId:null,procedure:proc});
+  sharedAppts.push({id:newId,date:dateKey,time,tutorId:estabId,petId:null,procedure:proc});
   CACHE.set('appts',sharedAppts);
+  // Create reminder
+  const rems=getReminders();
+  rems.push({id:crypto.randomUUID(),petId:null,tutorId:estabId,type:'manual',label:`Turno: ${proc}${estab?' — '+estab.nombre:''}`,dueDate:new Date(dateKey+'T'+(time||'08:00')).getTime()});
+  saveReminders(rems);
   closeModal('m-appt');renderCalendar();showToast('Turno guardado ✓');
 }
 
