@@ -193,11 +193,15 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .fs-pill{padding:6px 10px;border-radius:8px;font-weight:700;border:1px solid var(--border2);background:var(--surface2);color:var(--text3);cursor:pointer;min-width:32px;text-align:center;}
 .fs-pill.on{background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue);}
 
-@media(min-width:1100px){
+@media(min-width:700px){
   .sidebar{display:flex;}
-  .right-panel{display:flex;}
-  .app{max-width:none;flex:1;border-left:1px solid var(--border);border-right:1px solid var(--border);}
+  .app{border-left:1px solid var(--border);border-right:1px solid var(--border);}
   .desktop-wrap{justify-content:stretch;}
+}
+@media(min-width:1100px){
+  .right-panel{display:flex;}
+  .app{max-width:none;flex:1;}
+  /* header stretches full width — achieved by desktop-wrap being full width */
 }
 
 /* ── SCREENS ── */
@@ -287,10 +291,10 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 }
 /* Notif dropdown */
 .notif-dropdown{
-  position:fixed;top:64px;right:14px;left:14px;
+  position:fixed;top:68px;right:14px;left:14px;
   background:var(--surface);border:1px solid var(--border2);
   border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.35);
-  z-index:300;max-height:380px;overflow:hidden;
+  z-index:9999;max-height:380px;overflow:hidden;
   display:flex;flex-direction:column;
 }
 .notif-dropdown.hidden{display:none;}
@@ -991,20 +995,6 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
       </div>
     </div>
 
-    </div>
-
-    <!-- NOTIFICATIONS DROPDOWN -->
-    <div class="notif-dropdown hidden" id="notif-dropdown">
-      <div class="notif-dd-header">
-        <div class="notif-dd-title">🔔 Novedades</div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <div class="notif-dd-mark" onclick="markAllNotifsRead()">Leídas ✓</div>
-          <div class="notif-dd-mark" onclick="openNotifScreen()">Ver todas →</div>
-        </div>
-      </div>
-      <div class="notif-dd-list" id="notif-dd-list">
-        <div class="notif-dd-empty">Sin notificaciones</div>
-      </div>
     </div>
 
     <!-- NOTIFICATIONS SCREEN -->
@@ -4356,5 +4346,19 @@ syncFromSupabase().then(()=>{
   if(!getSettings().clinic)setTimeout(()=>showMainMenu(),800);
 });
 setTimeout(renderRightPanel,100);</script>
+
+<!-- NOTIFICATIONS DROPDOWN (fixed, outside .app) -->
+<div class="notif-dropdown hidden" id="notif-dropdown">
+  <div class="notif-dd-header">
+    <div class="notif-dd-title">🔔 Novedades</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="notif-dd-mark" onclick="markAllNotifsRead()">Leídas ✓</div>
+      <div class="notif-dd-mark" onclick="openNotifScreen()">Ver todas →</div>
+    </div>
+  </div>
+  <div class="notif-dd-list" id="notif-dd-list">
+    <div class="notif-dd-empty">Sin notificaciones</div>
+  </div>
+</div>
 </body>
 </html>
