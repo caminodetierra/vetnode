@@ -628,6 +628,10 @@ footer span{color:var(--orange);font-weight:700;}
       <input type="checkbox" id="reg-terms" style="margin-top:3px;flex-shrink:0;accent-color:var(--orange);">
       <span>Acepto los <a href="/terminos.html" target="_blank" style="color:var(--cyan2)">Términos y Condiciones</a> y la <a href="/privacidad.html" target="_blank" style="color:var(--cyan2)">Política de Privacidad</a></span>
     </label>
+    <label style="display:flex;align-items:flex-start;gap:10px;margin:0 0 14px;cursor:pointer;font-size:13px;color:var(--text2);line-height:1.5">
+      <input type="checkbox" id="reg-email-notif" style="margin-top:3px;flex-shrink:0;accent-color:var(--orange);" checked>
+      <span>Quiero recibir novedades y actualizaciones de VetNode por email <span style="font-size:11px;color:var(--text3)">(opcional)</span></span>
+    </label>
     <button class="auth-btn" id="register-btn" onclick="handleRegister()">Crear cuenta gratis →</button>
     <p class="auth-switch">¿Ya tenés cuenta? <a onclick="switchToLogin()">Iniciar sesión</a></p>
   </div>
@@ -753,6 +757,7 @@ async function handleRegister() {
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
   const password2 = document.getElementById('reg-password2').value;
+  const emailNotif = document.getElementById('reg-email-notif').checked;
   hideError('register-error');
   if (!lastname||!firstname||!email||!password) { showError('register-error','Completá todos los campos obligatorios.'); return; }
   if (password.length < 8) { showError('register-error','La contraseña debe tener al menos 8 caracteres.'); return; }
@@ -770,12 +775,36 @@ async function handleRegister() {
       btn.disabled = false; btn.textContent = 'Crear cuenta gratis →';
       return;
     }
-    showSuccess('register-success', '✓ Cuenta creada. Revisá tu email para confirmar y luego iniciá sesión.');
-    btn.textContent = '✓ ¡Listo!';
-    setTimeout(() => { switchToLogin(); btn.disabled=false; btn.textContent='Crear cuenta gratis →'; }, 2500);
+    // Guardar email y preferencia de notificaciones en user_emails
+    if (data?.user?.id) {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/user_emails`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({
+            user_id: data.user.id,
+            email: email,
+            firstname: firstname,
+            lastname: lastname,
+            country: country.toLowerCase(),
+            state: state,
+            email_notifications: emailNotif,
+            registered_at: new Date().toISOString()
+          })
+        });
+      } catch(e2) { console.warn('user_emails insert error', e2); }
+    }
+    showSuccess('register-success', '\u2713 Cuenta creada. Revis\u00e1 tu email para confirmar y luego inici\u00e1 sesi\u00f3n.');
+    btn.textContent = '\u2713 \u00a1Listo!';
+    setTimeout(() => { switchToLogin(); btn.disabled=false; btn.textContent='Crear cuenta gratis \u2192'; }, 2500);
   } catch(e) {
-    showError('register-error', 'Error de conexión. Revisá tu internet.');
-    btn.disabled = false; btn.textContent = 'Crear cuenta gratis →';
+    showError('register-error', 'Error de conexi\u00f3n. Revis\u00e1 tu internet.');
+    btn.disabled = false; btn.textContent = 'Crear cuenta gratis \u2192';
   }
 }
 
