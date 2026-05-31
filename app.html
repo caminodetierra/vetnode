@@ -193,15 +193,11 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .fs-pill{padding:6px 10px;border-radius:8px;font-weight:700;border:1px solid var(--border2);background:var(--surface2);color:var(--text3);cursor:pointer;min-width:32px;text-align:center;}
 .fs-pill.on{background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue);}
 
-@media(min-width:700px){
-  .sidebar{display:flex;}
-  .app{border-left:1px solid var(--border);border-right:1px solid var(--border);}
-  .desktop-wrap{justify-content:stretch;}
-}
 @media(min-width:1100px){
+  .sidebar{display:flex;}
   .right-panel{display:flex;}
-  .app{max-width:none;flex:1;}
-  /* header stretches full width — achieved by desktop-wrap being full width */
+  .app{max-width:none;flex:1;border-left:1px solid var(--border);border-right:1px solid var(--border);}
+  .desktop-wrap{justify-content:stretch;}
 }
 
 /* ── SCREENS ── */
