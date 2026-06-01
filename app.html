@@ -3986,13 +3986,8 @@ let _notifCache=[];
 
 async function loadNotifications(){
   try{
-    // Tabla pública de lectura — sin filtro de user_id
     const r=await fetch(`${SUPABASE_URL}/rest/v1/notifications?order=created_at.desc&limit=30`,{
-      headers:{
-        'apikey':SUPABASE_ANON_KEY,
-        'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,
-        'Accept':'application/json'
-      }
+      headers:sbHeaders()
     });
     if(!r.ok)return;
     _notifCache=await r.json();
