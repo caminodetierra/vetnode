@@ -3987,10 +3987,12 @@ let _notifCache=[];
 async function loadNotifications(){
   try{
     const r=await fetch(`${SUPABASE_URL}/rest/v1/notifications?order=created_at.desc&limit=30`,{
-      headers:sbHeaders()
+      headers:getAuthHeaders()
     });
+    const txt=await r.text();
+    console.log('Notifs status:',r.status,'body:',txt);
     if(!r.ok)return;
-    _notifCache=await r.json();
+    _notifCache=JSON.parse(txt);
     updateNotifBadge();
     renderNotifDropdown();
   }catch(e){console.warn('Notifs load error',e);}
