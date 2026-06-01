@@ -2035,6 +2035,7 @@ function go(id){
     const map={'s-patients':2,'s-reminders':3,'s-calendar':4,'s-stats':5};
     if(map[id]!==undefined)navInner.querySelectorAll('.sidebar-item')[map[id]]?.classList.add('active');
   }
+  if(id==='s-home')updateNotifBadge();
   if(id==='s-patients')renderTutors();
   if(id==='s-reminders'){renderReminders();setTimeout(renderRpReminders,50);}
   if(id==='s-tutor')renderTutorProfile();
@@ -3989,10 +3990,8 @@ async function loadNotifications(){
     const r=await fetch(`${SUPABASE_URL}/rest/v1/notifications?order=created_at.desc&limit=30`,{
       headers:getAuthHeaders()
     });
-    const txt=await r.text();
-    console.log('Notifs status:',r.status,'body:',txt);
     if(!r.ok)return;
-    _notifCache=JSON.parse(txt);
+    _notifCache=await r.json();
     updateNotifBadge();
     renderNotifDropdown();
   }catch(e){console.warn('Notifs load error',e);}
