@@ -4000,11 +4000,13 @@ async function loadNotifications(){
 function updateNotifBadge(){
   const readAt=getNotifReadAt();
   const unread=_notifCache.filter(n=>new Date(n.created_at).getTime()>readAt);
+  console.log('Badge update — cache:',_notifCache.length,'unread:',unread.length,'readAt:',readAt);
   const badge=document.getElementById('notif-badge');
-  if(!badge)return;
+  if(!badge){console.warn('Badge element not found');return;}
   if(unread.length>0){
     badge.textContent=unread.length>9?'9+':String(unread.length);
     badge.style.display='flex';
+    badge.style.visibility='visible';
   } else {
     badge.style.display='none';
   }
