@@ -539,10 +539,11 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 
 /* Segundero */
 .timer-display{
-  font-size:min(160px, 38vw);font-weight:800;color:var(--blue);
-  text-align:center;line-height:1;letter-spacing:-4px;
+  font-size:35vw;font-weight:800;color:var(--blue);
+  text-align:center;line-height:1;letter-spacing:-2px;
   padding:10px 0 6px;font-variant-numeric:tabular-nums;
 }
+@media(min-width:500px){.timer-display{font-size:160px;}}
 .timer-sub{text-align:center;font-size:11px;color:var(--text3);font-weight:600;margin-bottom:4px;}
 
 /* Conversor m2 */
@@ -605,8 +606,15 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 }
 
 /* ── AUDIO / DICTADO — botón micrófono popup ── */
-.notes-wrap{position:relative;margin-bottom:6px;}
+.notes-wrap{position:relative;margin-bottom:9px;}
 .mic-popup-wrap{position:absolute;bottom:10px;right:10px;}
+.clip-fab{
+  position:absolute;top:10px;right:10px;
+  width:30px;height:30px;
+  background:var(--blue-dim);border:1px solid var(--blue-border);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:15px;cursor:pointer;
+}
 .mic-fab{
   width:30px;height:30px;
   background:var(--purple-dim);border:1px solid rgba(155,114,232,0.35);
@@ -633,14 +641,6 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .mic-popup-item:hover{background:var(--surface2);color:var(--text);}
 .mic-popup-item.active{color:var(--red);background:var(--red-dim);}
 .mic-popup-item-ico{font-size:16px;width:22px;text-align:center;}
-/* clip-fab separado debajo del textarea */
-.clip-fab-row{display:flex;justify-content:flex-end;margin-bottom:9px;}
-.clip-fab{
-  width:30px;height:30px;
-  background:var(--blue-dim);border:1px solid var(--blue-border);
-  border-radius:9px;display:flex;align-items:center;justify-content:center;
-  font-size:15px;cursor:pointer;
-}
 
 /* Grabados */
 .rec-audios{display:flex;flex-direction:column;gap:7px;margin-top:9px;}
@@ -662,7 +662,7 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .notes-area{
   width:100%;min-height:140px;background:var(--surface2);
   border:1px solid var(--border2);border-radius:12px;
-  padding:11px 42px 11px 13px;color:var(--text);
+  padding:11px 48px 11px 13px;color:var(--text);
   font-size:13px;font-family:var(--font);outline:none;resize:none;line-height:1.6;
 }
 .notes-area::placeholder{color:var(--text3);}
@@ -1159,7 +1159,7 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
     </div>
 
     <!-- MODAL CONTACTO -->
-    <div class="modal-wrap" id="modal-contact" onclick="closeIfOutside(event,'modal-contact')">
+    <div class="modal-wrap" id="modal-contact" onclick="if(!_contactActionPending)closeIfOutside(event,'modal-contact')">
       <div class="modal">
         <div class="modal-handle"></div>
         <div class="modal-title" id="contact-modal-title">Nuevo contacto</div>
@@ -1336,9 +1336,10 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           <div class="vacc-chip-info"><div class="vacc-chip-name" id="vacc-chip-name"></div><div class="vacc-chip-rem" id="vacc-chip-rem"></div></div>
           <div class="vacc-chip-x" onclick="removeVacc()">✕</div>
         </div>
-        <!-- NOTAS + mic flotante dentro, clip afuera abajo -->
+        <!-- NOTAS: 📎 arriba-derecha, 🎙️ abajo-derecha, ambos dentro del textarea -->
         <div class="notes-wrap">
           <textarea class="notes-area" id="v-notes" placeholder="Síntomas, diagnóstico, tratamiento indicado…" rows="6"></textarea>
+          <div class="clip-fab" onclick="toggleAttach()">📎</div>
           <div class="mic-popup-wrap">
             <div class="mic-fab" id="mic-fab" onclick="toggleMicPopup(event)">🎙️</div>
             <div class="mic-popup" id="mic-popup">
@@ -1350,9 +1351,6 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
               </div>
             </div>
           </div>
-        </div>
-        <div class="clip-fab-row">
-          <div class="clip-fab" onclick="toggleAttach()">📎</div>
         </div>
         <!-- Audios grabados -->
         <div class="rec-audios" id="rec-audios-list"></div>
@@ -4705,8 +4703,8 @@ function renderAgenda(){
       <div class="contact-chip-menu">
         <button class="contact-chip-dots" onclick="event.stopPropagation();toggleContactMenu(event,'cmenu-${c.id}')">⋯</button>
         <div class="contact-dropdown" id="cmenu-${c.id}">
-          <div class="contact-dd-item" onclick="event.stopPropagation();closeAllContactMenus();setTimeout(()=>openEditContact('${c.id}'),50)">✏️ Modificar</div>
-          <div class="contact-dd-item danger" onclick="event.stopPropagation();closeAllContactMenus();setTimeout(()=>deleteContact('${c.id}'),50)">🗑️ Eliminar</div>
+          <div class="contact-dd-item" onclick="event.stopPropagation();doContactAction(()=>openEditContact('${c.id}'))">✏️ Modificar</div>
+          <div class="contact-dd-item danger" onclick="event.stopPropagation();doContactAction(()=>deleteContact('${c.id}'))">🗑️ Eliminar</div>
         </div>
       </div>
     </div>`).join('')}</div>`;
@@ -4721,7 +4719,17 @@ function toggleContactMenu(e,id){
   closeAllContactMenus();
   if(!isOpen)document.getElementById(id)?.classList.add('open');
 }
-document.addEventListener('click',()=>closeAllContactMenus());
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.contact-chip-menu'))closeAllContactMenus();
+});
+
+let _contactActionPending=false;
+function doContactAction(fn){
+  _contactActionPending=true;
+  closeAllContactMenus();
+  fn();
+  setTimeout(()=>{_contactActionPending=false;},200);
+}
 
 function openContactModal(){
   editingContactId=null;
