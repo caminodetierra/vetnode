@@ -539,11 +539,11 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 
 /* Segundero */
 .timer-display{
-  font-size:35vw;font-weight:800;color:var(--blue);
+  font-size:35vw!important;font-weight:800;color:var(--blue);
   text-align:center;line-height:1;letter-spacing:-2px;
   padding:10px 0 6px;font-variant-numeric:tabular-nums;
 }
-@media(min-width:500px){.timer-display{font-size:160px;}}
+@media(min-width:500px){.timer-display{font-size:160px!important;}}
 .timer-sub{text-align:center;font-size:11px;color:var(--text3);font-weight:600;margin-bottom:4px;}
 
 /* Conversor m2 */
@@ -1159,7 +1159,7 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
     </div>
 
     <!-- MODAL CONTACTO -->
-    <div class="modal-wrap" id="modal-contact" onclick="if(!_contactActionPending)closeIfOutside(event,'modal-contact')">
+    <div class="modal-wrap" id="modal-contact" onclick="closeIfOutside(event,'modal-contact')">
       <div class="modal">
         <div class="modal-handle"></div>
         <div class="modal-title" id="contact-modal-title">Nuevo contacto</div>
@@ -4701,10 +4701,10 @@ function renderAgenda(){
         </div>
       </div>
       <div class="contact-chip-menu">
-        <button class="contact-chip-dots" onclick="event.stopPropagation();toggleContactMenu(event,'cmenu-${c.id}')">⋯</button>
+        <button class="contact-chip-dots" data-menuid="cmenu-${c.id}" onclick="toggleContactMenu(event,this.dataset.menuid)">⋯</button>
         <div class="contact-dropdown" id="cmenu-${c.id}">
-          <div class="contact-dd-item" onclick="event.stopPropagation();doContactAction(()=>openEditContact('${c.id}'))">✏️ Modificar</div>
-          <div class="contact-dd-item danger" onclick="event.stopPropagation();doContactAction(()=>deleteContact('${c.id}'))">🗑️ Eliminar</div>
+          <div class="contact-dd-item" data-cid="${c.id}" data-action="edit">✏️ Modificar</div>
+          <div class="contact-dd-item danger" data-cid="${c.id}" data-action="delete">🗑️ Eliminar</div>
         </div>
       </div>
     </div>`).join('')}</div>`;
@@ -4719,8 +4719,19 @@ function toggleContactMenu(e,id){
   closeAllContactMenus();
   if(!isOpen)document.getElementById(id)?.classList.add('open');
 }
+// Event delegation para items del dropdown — evita problemas de comillas en onclick
 document.addEventListener('click',function(e){
+  // Cerrar dropdowns al tocar fuera
   if(!e.target.closest('.contact-chip-menu'))closeAllContactMenus();
+  // Acciones del dropdown
+  const item=e.target.closest('.contact-dd-item[data-action]');
+  if(!item)return;
+  e.stopPropagation();
+  const cid=item.dataset.cid;
+  const action=item.dataset.action;
+  closeAllContactMenus();
+  if(action==='edit')openEditContact(cid);
+  else if(action==='delete')deleteContact(cid);
 });
 
 let _contactActionPending=false;
