@@ -4719,19 +4719,20 @@ function toggleContactMenu(e,id){
   closeAllContactMenus();
   if(!isOpen)document.getElementById(id)?.classList.add('open');
 }
-// Event delegation para items del dropdown — evita problemas de comillas en onclick
+// Event delegation para items del dropdown
 document.addEventListener('click',function(e){
+  const item=e.target.closest('.contact-dd-item[data-action]');
+  if(item){
+    e.stopPropagation();
+    const cid=item.dataset.cid;
+    const action=item.dataset.action;
+    closeAllContactMenus();
+    if(action==='edit')openEditContact(cid);
+    else if(action==='delete')deleteContact(cid);
+    return;
+  }
   // Cerrar dropdowns al tocar fuera
   if(!e.target.closest('.contact-chip-menu'))closeAllContactMenus();
-  // Acciones del dropdown
-  const item=e.target.closest('.contact-dd-item[data-action]');
-  if(!item)return;
-  e.stopPropagation();
-  const cid=item.dataset.cid;
-  const action=item.dataset.action;
-  closeAllContactMenus();
-  if(action==='edit')openEditContact(cid);
-  else if(action==='delete')deleteContact(cid);
 });
 
 let _contactActionPending=false;
