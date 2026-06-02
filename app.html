@@ -507,18 +507,161 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 /* ── NEW VISIT ── */
 .visit-form{flex:1;overflow-y:auto;padding:12px 18px 20px;}
 .visit-form::-webkit-scrollbar{width:3px;}
-.vitals-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:9px;}
+.vitals-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:9px;}
 .v-label{font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-bottom:3px;display:block;}
 .v-input{
   width:100%;background:var(--surface2);
   border:1px solid var(--border2);border-radius:9px;
-  padding:9px 5px;color:var(--text);font-size:12px;
+  padding:9px 3px;color:var(--text);font-size:11px;
   font-family:var(--font);outline:none;text-align:center;
 }
-.v-input::placeholder{color:var(--text3);font-size:10px;}
+.v-input::placeholder{color:var(--text3);font-size:9px;}
 .v-input:focus{border-color:var(--blue);}
-.presion-row{margin-bottom:9px;}
-.presion-row .v-input{text-align:left;padding:9px 12px;font-size:13px;}
+
+/* ── TOOL BUTTONS ── */
+.tools-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px;}
+.tool-btn{
+  flex:1;min-width:0;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:8px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;transition:.15s;font-family:var(--font);
+}
+.tool-btn:hover{border-color:var(--blue-border);background:var(--blue-dim);}
+.tool-btn.active{border-color:var(--blue-border);background:var(--blue-dim);}
+.tool-btn-ico{font-size:16px;line-height:1;}
+.tool-btn-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;text-align:center;line-height:1.2;}
+.tool-btn.active .tool-btn-lbl{color:var(--blue);}
+
+/* ── TOOL PANELS ── */
+.tool-panel{display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:14px 16px;margin-bottom:9px;}
+.tool-panel.open{display:block;}
+
+/* Segundero */
+.timer-display{
+  font-size:64px;font-weight:800;color:var(--blue);
+  text-align:center;line-height:1;letter-spacing:-2px;
+  padding:10px 0 6px;
+}
+.timer-arc-wrap{display:flex;justify-content:center;margin-bottom:10px;}
+.timer-sub{text-align:center;font-size:11px;color:var(--text3);font-weight:600;margin-bottom:4px;}
+
+/* Conversor m2 */
+.tool-result{
+  background:var(--blue-dim);border:1px solid var(--blue-border);
+  border-radius:10px;padding:10px 14px;margin-top:10px;
+  font-size:15px;font-weight:800;color:var(--blue);text-align:center;
+}
+.tool-species-row{display:flex;gap:7px;margin-bottom:10px;}
+.tool-species-btn{
+  flex:1;background:var(--surface);border:1px solid var(--border2);
+  border-radius:9px;padding:8px 4px;font-size:12px;font-weight:700;
+  color:var(--text2);cursor:pointer;text-align:center;font-family:var(--font);
+}
+.tool-species-btn.active{background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue);}
+
+/* Escala dolor */
+.pain-scale{display:flex;gap:4px;margin:10px 0;}
+.pain-btn{
+  flex:1;padding:8px 2px;border-radius:8px;font-size:12px;font-weight:800;
+  text-align:center;cursor:pointer;border:1.5px solid var(--border2);
+  background:var(--surface);color:var(--text2);font-family:var(--font);
+  transition:.12s;
+}
+.pain-btn.sel{border-color:var(--red-border);background:var(--red-dim);color:var(--red);}
+.pain-desc{font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:8px;}
+
+/* Calculador dosis */
+.dose-result{
+  background:var(--green-dim);border:1px solid var(--green-border);
+  border-radius:10px;padding:10px 14px;margin-top:10px;
+  font-size:15px;font-weight:800;color:var(--green);text-align:center;
+}
+
+/* Fluidos */
+.fluid-result{
+  background:var(--purple-dim);border:1px solid rgba(155,114,232,0.3);
+  border-radius:10px;padding:12px 14px;margin-top:10px;
+}
+.fluid-result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.fluid-result-lbl{font-size:11px;color:var(--text3);font-weight:600;}
+.fluid-result-val{font-size:14px;font-weight:800;color:var(--purple);}
+
+/* Agenda en visita */
+.visit-contact-list{display:flex;flex-direction:column;gap:7px;max-height:200px;overflow-y:auto;}
+.visit-contact-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:11px;padding:10px 12px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.visit-contact-name{font-size:13px;font-weight:700;color:var(--text);}
+.visit-contact-ref{font-size:10px;color:var(--text3);}
+.visit-contact-phone{font-size:12px;color:var(--blue);font-weight:600;}
+.visit-contact-wa{
+  background:var(--green-dim);border:1px solid var(--green-border);
+  border-radius:8px;padding:5px 9px;font-size:11px;color:var(--green);
+  font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font);
+}
+
+/* ── AUDIO RECORDER ── */
+.audio-toggle-btn{
+  width:100%;background:var(--surface2);border:1.5px dashed var(--border2);
+  border-radius:11px;padding:10px 14px;
+  display:flex;align-items:center;gap:10px;
+  cursor:pointer;margin-bottom:7px;font-family:var(--font);
+  color:var(--text2);font-size:13px;font-weight:700;
+}
+.audio-toggle-btn:hover{border-color:var(--blue-border);color:var(--blue);background:var(--blue-dim);}
+.audio-toggle-ico{font-size:18px;}
+.audio-panel{display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:12px 14px;margin-bottom:7px;}
+.audio-panel.open{display:block;}
+.audio-panel-tabs{display:flex;gap:6px;margin-bottom:12px;}
+.audio-tab{
+  flex:1;padding:8px;border-radius:9px;font-size:12px;font-weight:700;
+  text-align:center;cursor:pointer;border:1px solid var(--border2);
+  background:var(--surface);color:var(--text3);font-family:var(--font);
+}
+.audio-tab.active{background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue);}
+.audio-sub-panel{display:none;}
+.audio-sub-panel.open{display:block;}
+
+/* Grabador */
+.rec-status{text-align:center;font-size:12px;color:var(--text3);font-weight:600;margin-bottom:10px;min-height:18px;}
+.rec-timer{font-size:28px;font-weight:800;color:var(--red);text-align:center;font-variant-numeric:tabular-nums;margin-bottom:12px;display:none;}
+.rec-timer.visible{display:block;}
+.rec-controls{display:flex;gap:8px;justify-content:center;margin-bottom:12px;}
+.rec-btn{
+  padding:10px 20px;border-radius:11px;font-size:13px;font-weight:700;
+  cursor:pointer;border:none;font-family:var(--font);
+}
+.rec-btn.start{background:var(--red);color:#fff;}
+.rec-btn.stop{background:var(--surface);border:1px solid var(--border2);color:var(--text2);}
+.rec-btn:disabled{opacity:.4;cursor:default;}
+.rec-audios{display:flex;flex-direction:column;gap:7px;}
+.rec-audio-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:9px 12px;
+  display:flex;align-items:center;gap:10px;
+}
+.rec-audio-name{font-size:11px;color:var(--text3);font-weight:600;flex:1;}
+.rec-audio-play{font-size:16px;cursor:pointer;flex-shrink:0;}
+.rec-audio-del{font-size:14px;cursor:pointer;color:var(--red);flex-shrink:0;padding:2px 4px;}
+.rec-audio-player{width:100%;margin-top:6px;height:28px;}
+
+/* Dictado */
+.dictate-status{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:10px;padding:9px 12px;margin-bottom:10px;
+  font-size:12px;color:var(--text3);text-align:center;font-weight:600;
+}
+.dictate-btn{
+  width:100%;padding:12px;border-radius:11px;font-size:13px;font-weight:700;
+  cursor:pointer;border:none;font-family:var(--font);
+  background:var(--blue);color:#fff;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.dictate-btn.active{background:var(--red);}
+.dictate-btn:disabled{opacity:.4;cursor:default;}
 .vacc-chip{display:flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:11px;padding:9px 12px;margin-bottom:9px;}
 .vacc-chip-info{flex:1;}
 .vacc-chip-name{font-size:12px;color:var(--green);font-weight:700;}
@@ -1073,8 +1216,9 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           <div><label class="v-label">Peso</label><input class="v-input" id="q-peso" placeholder="kg"></div>
           <div><label class="v-label">FC</label><input class="v-input" id="q-fc" placeholder="lpm"></div>
           <div><label class="v-label">FR</label><input class="v-input" id="q-fr" placeholder="rpm"></div>
+          <div><label class="v-label">PA</label><input class="v-input" id="q-presion" placeholder="120/80"></div>
+          <div><label class="v-label">BCS</label><input class="v-input" id="q-bcs" placeholder="1-5"></div>
         </div>
-        <div class="presion-row"><label class="v-label">Presión arterial</label><input class="v-input" id="q-presion" placeholder="120/80 mmHg"></div>
         <div class="notes-wrap">
           <textarea class="notes-area" id="q-notes" placeholder="Síntomas, diagnóstico, tratamiento…" rows="5"></textarea>
           <div class="clip-fab" onclick="toggleAttachQ()">📎</div>
@@ -1156,11 +1300,78 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
       <div class="visit-form">
         <div class="vitals-grid">
           <div><label class="v-label">T°</label><input class="v-input" id="v-temp" placeholder="38.5"></div>
-          <div><label class="v-label">Peso</label><input class="v-input" id="v-peso" placeholder="kg"></div>
+          <div><label class="v-label">Peso</label><input class="v-input" id="v-peso" placeholder="kg" oninput="updateToolsFromPeso()"></div>
           <div><label class="v-label">FC</label><input class="v-input" id="v-fc" placeholder="lpm"></div>
           <div><label class="v-label">FR</label><input class="v-input" id="v-fr" placeholder="rpm"></div>
+          <div><label class="v-label">PA</label><input class="v-input" id="v-presion" placeholder="120/80"></div>
+          <div><label class="v-label">BCS</label><input class="v-input" id="v-bcs" placeholder="1-5"></div>
         </div>
-        <div class="presion-row"><label class="v-label">Presión arterial</label><input class="v-input" id="v-presion" placeholder="120/80 mmHg"></div>
+        <!-- HERRAMIENTAS -->
+        <div class="tools-row">
+          <button class="tool-btn" id="tool-btn-timer" onclick="toggleTool('timer')"><span class="tool-btn-ico">⏱</span><span class="tool-btn-lbl">Segundero</span></button>
+          <button class="tool-btn" id="tool-btn-m2" onclick="toggleTool('m2')"><span class="tool-btn-ico">⚖️</span><span class="tool-btn-lbl">kg→m²</span></button>
+          <button class="tool-btn" id="tool-btn-dose" onclick="toggleTool('dose')"><span class="tool-btn-ico">💊</span><span class="tool-btn-lbl">Dosis</span></button>
+          <button class="tool-btn" id="tool-btn-fluid" onclick="toggleTool('fluid')"><span class="tool-btn-ico">💧</span><span class="tool-btn-lbl">Fluidos</span></button>
+          <button class="tool-btn" id="tool-btn-pain" onclick="toggleTool('pain')"><span class="tool-btn-ico">🩹</span><span class="tool-btn-lbl">Dolor</span></button>
+          <button class="tool-btn" id="tool-btn-agenda" onclick="toggleTool('agenda')"><span class="tool-btn-ico">📋</span><span class="tool-btn-lbl">Agenda</span></button>
+        </div>
+        <!-- Panel Segundero (reemplaza curva de peso en desktop) -->
+        <div class="tool-panel" id="tool-panel-timer">
+          <div class="timer-display" id="timer-display">0</div>
+          <div class="timer-arc-wrap">
+            <svg width="120" height="8"><rect x="0" y="0" width="120" height="8" rx="4" fill="var(--border2)"/><rect id="timer-bar" x="0" y="0" width="0" height="8" rx="4" fill="var(--blue)"/></svg>
+          </div>
+          <div class="timer-sub">Presioná de nuevo para cerrar</div>
+        </div>
+        <!-- Panel kg→m² -->
+        <div class="tool-panel" id="tool-panel-m2">
+          <div class="tool-species-row">
+            <button class="tool-species-btn active" id="m2-dog" onclick="selectM2Species('dog')">🐕 Canino</button>
+            <button class="tool-species-btn" id="m2-cat" onclick="selectM2Species('cat')">🐈 Felino</button>
+          </div>
+          <div style="margin-bottom:8px"><label class="v-label">Peso (kg)</label><input class="v-input" id="m2-peso" placeholder="kg" oninput="calcM2()" style="text-align:left;padding:9px 12px"></div>
+          <div class="tool-result" id="m2-result" style="display:none"></div>
+        </div>
+        <!-- Panel Dosis -->
+        <div class="tool-panel" id="tool-panel-dose">
+          <div style="margin-bottom:8px"><label class="v-label">mg/kg a administrar</label><input class="v-input" id="dose-mgkg" placeholder="ej: 5" oninput="calcDose()" style="text-align:left;padding:9px 12px"></div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Peso tomado del campo visita: <span id="dose-peso-lbl" style="color:var(--blue);font-weight:700">—</span> kg</div>
+          <div class="dose-result" id="dose-result" style="display:none"></div>
+        </div>
+        <!-- Panel Fluidos -->
+        <div class="tool-panel" id="tool-panel-fluid">
+          <div style="margin-bottom:8px"><label class="v-label">% Deshidratación</label><input class="v-input" id="fluid-dehid" placeholder="ej: 8" oninput="calcFluid()" style="text-align:left;padding:9px 12px"></div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Peso: <span id="fluid-peso-lbl" style="color:var(--blue);font-weight:700">—</span> kg</div>
+          <div class="fluid-result" id="fluid-result" style="display:none">
+            <div class="fluid-result-row"><span class="fluid-result-lbl">Mantenimiento 24hs</span><span class="fluid-result-val" id="fluid-mant">—</span></div>
+            <div class="fluid-result-row"><span class="fluid-result-lbl">Déficit a reponer</span><span class="fluid-result-val" id="fluid-deficit">—</span></div>
+            <div class="fluid-result-row" style="border-top:1px solid var(--border);padding-top:6px;margin-top:4px"><span class="fluid-result-lbl" style="font-weight:800;color:var(--text)">Total 24hs</span><span class="fluid-result-val" style="font-size:17px" id="fluid-total">—</span></div>
+            <div class="fluid-result-row"><span class="fluid-result-lbl">Velocidad</span><span class="fluid-result-val" id="fluid-rate">—</span></div>
+          </div>
+        </div>
+        <!-- Panel Dolor -->
+        <div class="tool-panel" id="tool-panel-pain">
+          <div class="pain-desc">Estimá el nivel de dolor basándote en postura, vocalización, respuesta a la palpación y comportamiento general.</div>
+          <div class="pain-scale" id="pain-scale">
+            <button class="pain-btn" onclick="selectPain(0,this)">0</button>
+            <button class="pain-btn" onclick="selectPain(1,this)">1</button>
+            <button class="pain-btn" onclick="selectPain(2,this)">2</button>
+            <button class="pain-btn" onclick="selectPain(3,this)">3</button>
+            <button class="pain-btn" onclick="selectPain(4,this)">4</button>
+            <button class="pain-btn" onclick="selectPain(5,this)">5</button>
+            <button class="pain-btn" onclick="selectPain(6,this)">6</button>
+            <button class="pain-btn" onclick="selectPain(7,this)">7</button>
+            <button class="pain-btn" onclick="selectPain(8,this)">8</button>
+            <button class="pain-btn" onclick="selectPain(9,this)">9</button>
+            <button class="pain-btn" onclick="selectPain(10,this)">10</button>
+          </div>
+          <div id="pain-desc-result" style="font-size:12px;color:var(--text2);font-weight:600;text-align:center;min-height:16px;"></div>
+        </div>
+        <!-- Panel Agenda -->
+        <div class="tool-panel" id="tool-panel-agenda">
+          <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:8px">Contactos de referencia</div>
+          <div class="visit-contact-list" id="visit-contact-list"></div>
+        </div>
         <div class="vacc-chip" id="vacc-chip" style="display:none">
           <span style="font-size:16px">💉</span>
           <div class="vacc-chip-info"><div class="vacc-chip-name" id="vacc-chip-name"></div><div class="vacc-chip-rem" id="vacc-chip-rem"></div></div>
@@ -1169,6 +1380,33 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
         <div class="notes-wrap">
           <textarea class="notes-area" id="v-notes" placeholder="Síntomas, diagnóstico, tratamiento indicado…" rows="6"></textarea>
           <div class="clip-fab" onclick="toggleAttach()">📎</div>
+        </div>
+        <!-- AUDIO / DICTADO -->
+        <div class="audio-toggle-btn" onclick="toggleAudioPanel()">
+          <span class="audio-toggle-ico">🎙️</span>
+          <span>Audio y dictado</span>
+          <span style="margin-left:auto;font-size:12px;color:var(--text3)" id="audio-toggle-arrow">▼</span>
+        </div>
+        <div class="audio-panel" id="audio-panel">
+          <div class="audio-panel-tabs">
+            <div class="audio-tab active" id="audio-tab-rec" onclick="switchAudioTab('rec')">🔴 Grabar audio</div>
+            <div class="audio-tab" id="audio-tab-dict" onclick="switchAudioTab('dict')">🎤 Dictado</div>
+          </div>
+          <!-- Grabador -->
+          <div class="audio-sub-panel open" id="audio-sub-rec">
+            <div class="rec-status" id="rec-status">Listo para grabar</div>
+            <div class="rec-timer" id="rec-timer">0:00</div>
+            <div class="rec-controls">
+              <button class="rec-btn start" id="rec-start-btn" onclick="startRecording()">⏺ Grabar</button>
+              <button class="rec-btn stop" id="rec-stop-btn" onclick="stopRecording()" disabled>⏹ Detener</button>
+            </div>
+            <div class="rec-audios" id="rec-audios-list"></div>
+          </div>
+          <!-- Dictado -->
+          <div class="audio-sub-panel" id="audio-sub-dict">
+            <div class="dictate-status" id="dictate-status">Presioná el botón para empezar a dictar. El texto se agregará al campo de notas.</div>
+            <button class="dictate-btn" id="dictate-btn" onclick="toggleDictation()">🎤 Iniciar dictado</button>
+          </div>
         </div>
         <div id="attach-menu" style="display:none" class="attach-menu">
           <div class="attach-opt" onclick="triggerVisitFile('camera')"><div class="attach-ico cam">📷</div><div><div class="attach-text">Cámara</div><div class="attach-sub">Sacar foto ahora</div></div></div>
@@ -1307,8 +1545,9 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           <div><label class="v-label">Peso</label><input class="v-input" id="ve-peso" placeholder="kg"></div>
           <div><label class="v-label">FC</label><input class="v-input" id="ve-fc" placeholder="lpm"></div>
           <div><label class="v-label">FR</label><input class="v-input" id="ve-fr" placeholder="rpm"></div>
+          <div><label class="v-label">PA</label><input class="v-input" id="ve-presion" placeholder="120/80"></div>
+          <div><label class="v-label">BCS</label><input class="v-input" id="ve-bcs" placeholder="1-5"></div>
         </div>
-        <div class="presion-row"><label class="v-label">Presión arterial</label><input class="v-input" id="ve-presion" placeholder="120/80 mmHg"></div>
         <div class="notes-wrap">
           <textarea class="notes-area" id="ve-notes" placeholder="Síntomas, diagnóstico, tratamiento indicado…" rows="6"></textarea>
         </div>
@@ -1846,8 +2085,8 @@ const toTutor=r=>({id:r.id,name:r.name,phone:r.phone||'',address:r.address||'',c
 const fromTutor=(t,uid)=>{const o={user_id:uid,name:t.name,phone:t.phone||'',address:t.address||'',city:t.city||'',alert_text:t.alertText||'',alert_active:!!t.alertActive,quick_entry:!!t.quickEntry};if(t.id)o.id=t.id;return o;};
 const toPet=r=>(({id:r.id,tutorId:r.tutor_id,name:r.name,species:r.species||'',breed:r.breed||'',dob:r.dob||'',chip:r.chip||'',sex:r.sex||'',castrated:!!r.castrated,deceased:!!r.deceased,alertText:r.alert_text||'',alertActive:!!r.alert_active,quickEntry:!!r.quick_entry}));
 const fromPet=(p,uid)=>{const o={user_id:uid,tutor_id:p.tutorId,name:p.name,species:p.species||'',breed:p.breed||'',dob:p.dob||'',chip:p.chip||'',sex:p.sex||'',castrated:!!p.castrated,deceased:!!p.deceased,alert_text:p.alertText||'',alert_active:!!p.alertActive,quick_entry:!!p.quickEntry};if(p.id)o.id=p.id;return o;};
-const toVisit=r=>(({id:r.id,petId:r.pet_id,vetId:r.vet_id,date:new Date(r.visit_date).getTime(),temp:r.temp||'',peso:r.peso||'',fc:r.fc||'',fr:r.fr||'',presion:r.presion||'',notes:r.notes||'',vacc:r.vacc||null,organs:r.organs||[],symptoms:r.symptoms||[],diagPresuntivo:r.diag_presuntivo||'',diagDefinitivo:r.diag_definitivo||'',confMethod:r.conf_method||'',confStatus:r.conf_status||'',attachments:r.attachments||[],quick:!!r.quick}));
-const fromVisit=(v,uid)=>{const o={user_id:uid,pet_id:v.petId,vet_id:v.vetId||null,visit_date:new Date(v.date).toISOString(),temp:v.temp||'',peso:v.peso||'',fc:v.fc||'',fr:v.fr||'',presion:v.presion||'',notes:v.notes||'',vacc:v.vacc||null,organs:v.organs||[],symptoms:v.symptoms||[],diag_presuntivo:v.diagPresuntivo||'',diag_definitivo:v.diagDefinitivo||'',conf_method:v.confMethod||'',conf_status:v.confStatus||'',attachments:v.attachments||[],quick:!!v.quick};if(v.id)o.id=v.id;return o;};
+const toVisit=r=>(({id:r.id,petId:r.pet_id,vetId:r.vet_id,date:new Date(r.visit_date).getTime(),temp:r.temp||'',peso:r.peso||'',fc:r.fc||'',fr:r.fr||'',presion:r.presion||'',bcs:r.bcs||'',notes:r.notes||'',vacc:r.vacc||null,organs:r.organs||[],symptoms:r.symptoms||[],diagPresuntivo:r.diag_presuntivo||'',diagDefinitivo:r.diag_definitivo||'',confMethod:r.conf_method||'',confStatus:r.conf_status||'',attachments:r.attachments||[],quick:!!r.quick}));
+const fromVisit=(v,uid)=>{const o={user_id:uid,pet_id:v.petId,vet_id:v.vetId||null,visit_date:new Date(v.date).toISOString(),temp:v.temp||'',peso:v.peso||'',fc:v.fc||'',fr:v.fr||'',presion:v.presion||'',bcs:v.bcs||'',notes:v.notes||'',vacc:v.vacc||null,organs:v.organs||[],symptoms:v.symptoms||[],diag_presuntivo:v.diagPresuntivo||'',diag_definitivo:v.diagDefinitivo||'',conf_method:v.confMethod||'',conf_status:v.confStatus||'',attachments:v.attachments||[],quick:!!v.quick};if(v.id)o.id=v.id;return o;};
 const toReminder=r=>(({id:r.id,petId:r.pet_id,tutorId:r.tutor_id,type:r.type||'manual',label:r.label||'',dueDate:new Date(r.due_date).getTime()}));
 const fromReminder=(r,uid)=>{const o={user_id:uid,pet_id:r.petId||null,tutor_id:r.tutorId||null,type:r.type||'manual',label:r.label||'',due_date:new Date(r.dueDate).toISOString()};if(r.id)o.id=r.id;return o;};
 const toAppt=r=>(({id:r.id,petId:r.pet_id,tutorId:r.tutor_id,date:r.appt_date,time:r.appt_time||'',procedure:r.procedure||''}));
@@ -2441,7 +2680,7 @@ function renderPetProfile(){
   let html='<div class="v-spacer"></div>';
   if(!visits.length)html+=`<div class="empty-state" style="padding:24px 0"><span class="emoji">📋</span>Sin visitas aún.<br>Tocá <strong>+</strong> para registrar la primera.</div>`;
   else html+=visits.map(vt=>{
-    const vitals=[vt.temp?`<div class="v-pill">T° ${vt.temp}</div>`:'',vt.peso?`<div class="v-pill">${vt.peso} kg</div>`:'',vt.fc?`<div class="v-pill">FC ${vt.fc}</div>`:'',vt.fr?`<div class="v-pill">FR ${vt.fr}</div>`:'',vt.vacc?`<div class="v-pill green">💉 ${vt.vacc}</div>`:''].join('');
+    const vitals=[vt.temp?`<div class="v-pill">T° ${vt.temp}</div>`:'',vt.peso?`<div class="v-pill">${vt.peso} kg</div>`:'',vt.fc?`<div class="v-pill">FC ${vt.fc}</div>`:'',vt.fr?`<div class="v-pill">FR ${vt.fr}</div>`:'',vt.presion?`<div class="v-pill">PA ${vt.presion}</div>`:'',vt.bcs?`<div class="v-pill">BCS ${vt.bcs}</div>`:'',vt.vacc?`<div class="v-pill green">💉 ${vt.vacc}</div>`:''].join('');
     const attachHtml=(vt.attachments||[]).map((a,ai)=>a.type?.startsWith('image')?`<img class="attach-thumb" src="${a.data}" onclick="event.stopPropagation();previewAttachment('${vt.id}',${ai})">`:`<div class="attach-audio" onclick="event.stopPropagation();previewAttachment('${vt.id}',${ai})" style="cursor:pointer">📎 ${(a.name||'').substring(0,16)}</div>`).join('');
     const vt2=getVets().find(vv=>vv.id===vt.vetId);
     const vetTooltip=vt2?vt2.name:'';
@@ -2523,8 +2762,19 @@ function deletePet(){
 //  VISITS
 // ══════════════════════════════════════════════════
 function openNewVisit(){
-  S.vacc=null;S.vaccDays=0;visitAttachments=[];
-  ['v-temp','v-peso','v-fc','v-fr','v-presion'].forEach(id=>document.getElementById(id).value='');
+  S.vacc=null;S.vaccDays=0;visitAttachments=[];visitAudios=[];
+  ['v-temp','v-peso','v-fc','v-fr','v-presion','v-bcs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('v-notes').value='';
+  document.getElementById('vacc-chip').style.display='none';
+  document.getElementById('attach-menu').style.display='none';
+  document.getElementById('visit-attachments-preview').innerHTML='';
+  // Reset tools
+  document.querySelectorAll('.tool-panel').forEach(p=>p.classList.remove('open'));
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  stopTimerTool();
+  renderRecAudios();
+  document.getElementById('audio-panel').classList.remove('open');
+  document.getElementById('audio-toggle-arrow').textContent='▼';
   document.getElementById('v-notes').value='';
   document.getElementById('vacc-chip').style.display='none';
   document.getElementById('attach-menu').style.display='none';
@@ -2542,7 +2792,10 @@ function openNewVisit(){
 }
 function saveVisit(){
   const activeVet=getActiveVet();
-  const visit={id:crypto.randomUUID(),petId:S.petId,date:Date.now(),vetId:activeVet?activeVet.id:null,temp:v('v-temp'),peso:v('v-peso'),fc:v('v-fc'),fr:v('v-fr'),presion:v('v-presion'),notes:v('v-notes'),vacc:S.vacc,attachments:visitAttachments.slice()};
+  // include audio storage URLs in attachments
+  const audioAttachments=visitAudios.filter(a=>a.storageUrl).map(a=>({name:a.name,type:'audio/webm',data:a.storageUrl,isAudio:true}));
+  const visit={id:crypto.randomUUID(),petId:S.petId,date:Date.now(),vetId:activeVet?activeVet.id:null,temp:v('v-temp'),peso:v('v-peso'),fc:v('v-fc'),fr:v('v-fr'),presion:v('v-presion'),bcs:v('v-bcs'),notes:v('v-notes'),vacc:S.vacc,attachments:[...visitAttachments,...audioAttachments].slice()};
+  stopDictation();
   const visits=getVisits();visits.push(visit);saveVisits(visits);
   visitAttachments=[];renderAttachPreviews();
   if(S.vacc){
@@ -3882,6 +4135,7 @@ function openVisitDetail(id){
   document.getElementById('ve-fc').value=vt.fc||'';
   document.getElementById('ve-fr').value=vt.fr||'';
   document.getElementById('ve-presion').value=vt.presion||'';
+  document.getElementById('ve-bcs').value=vt.bcs||'';
   document.getElementById('ve-notes').value=vt.notes||'';
   const hasSurvey=vt.organs?.length||vt.symptoms?.length||vt.diagPresuntivo;
   const survSec=document.getElementById('ve-survey-section');
@@ -3912,6 +4166,7 @@ function saveVisitEditFull(){
   visits[i].fc=document.getElementById('ve-fc').value.trim();
   visits[i].fr=document.getElementById('ve-fr').value.trim();
   visits[i].presion=document.getElementById('ve-presion').value.trim();
+  visits[i].bcs=document.getElementById('ve-bcs').value.trim();
   visits[i].notes=document.getElementById('ve-notes').value.trim();
   saveVisits(visits);go('s-pet');showToast('Visita actualizada ✓');
 }
@@ -4105,6 +4360,279 @@ function formatNotifDate(iso){
 function escHtml(s){
   return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+// ══════════════════════════════════════════════════
+//  HERRAMIENTAS DE VISITA
+// ══════════════════════════════════════════════════
+
+// ── Estado global de herramientas ──
+let _timerInterval=null;
+let _timerSec=0;
+let _m2Species='dog';
+let visitAudios=[]; // {id, name, blob, url}
+let _mediaRecorder=null;
+let _recChunks=[];
+let _recInterval=null;
+let _recSec=0;
+let _recognition=null;
+let _dictating=false;
+
+function toggleTool(name){
+  const btn=document.getElementById('tool-btn-'+name);
+  const panel=document.getElementById('tool-panel-'+name);
+  const isOpen=panel.classList.contains('open');
+  // close all
+  document.querySelectorAll('.tool-panel').forEach(p=>p.classList.remove('open'));
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  stopTimerTool();
+  if(!isOpen){
+    panel.classList.add('open');
+    btn.classList.add('active');
+    if(name==='timer')startTimerTool();
+    if(name==='dose'||name==='fluid'||name==='m2')updateToolsFromPeso();
+    if(name==='agenda')renderVisitAgenda();
+  }
+}
+
+// ── Segundero ──
+function startTimerTool(){
+  _timerSec=0;
+  updateTimerDisplay();
+  _timerInterval=setInterval(()=>{
+    _timerSec=(_timerSec+1)%61;
+    if(_timerSec===60)_timerSec=0;
+    updateTimerDisplay();
+  },1000);
+}
+function stopTimerTool(){
+  if(_timerInterval){clearInterval(_timerInterval);_timerInterval=null;}
+  _timerSec=0;
+}
+function updateTimerDisplay(){
+  const el=document.getElementById('timer-display');
+  const bar=document.getElementById('timer-bar');
+  if(!el)return;
+  el.textContent=_timerSec;
+  if(bar)bar.setAttribute('width',String((_timerSec/60)*120));
+}
+
+// ── Conversor kg→m² ──
+function selectM2Species(sp){
+  _m2Species=sp;
+  document.getElementById('m2-dog').classList.toggle('active',sp==='dog');
+  document.getElementById('m2-cat').classList.toggle('active',sp==='cat');
+  calcM2();
+}
+function calcM2(){
+  const peso=parseFloat(document.getElementById('m2-peso')?.value||'0');
+  const res=document.getElementById('m2-result');if(!res)return;
+  if(!peso||peso<=0){res.style.display='none';return;}
+  // Fórmula estándar: m² = K × peso^(2/3) / 10000
+  // Canino: K=10.1, Felino: K=10.0 (aproximado)
+  const k=_m2Species==='dog'?10.1:10.0;
+  const m2=(k*Math.pow(peso,2/3)/10000).toFixed(3);
+  res.style.display='block';
+  res.textContent=`SC = ${m2} m²`;
+}
+function updateToolsFromPeso(){
+  const peso=document.getElementById('v-peso')?.value||'';
+  const el=document.getElementById('m2-peso');if(el&&!el.value)el.value=peso;
+  const dosePl=document.getElementById('dose-peso-lbl');if(dosePl)dosePl.textContent=peso||'—';
+  const fluidPl=document.getElementById('fluid-peso-lbl');if(fluidPl)fluidPl.textContent=peso||'—';
+  calcM2();calcDose();calcFluid();
+}
+
+// ── Calculador de dosis ──
+function calcDose(){
+  const mgkg=parseFloat(document.getElementById('dose-mgkg')?.value||'0');
+  const peso=parseFloat(document.getElementById('v-peso')?.value||'0');
+  const res=document.getElementById('dose-result');if(!res)return;
+  if(!mgkg||!peso){res.style.display='none';return;}
+  const total=(mgkg*peso).toFixed(2);
+  res.style.display='block';
+  res.textContent=`Dosis total: ${total} mg`;
+}
+
+// ── Calculador de fluidos ──
+function calcFluid(){
+  const dehid=parseFloat(document.getElementById('fluid-dehid')?.value||'0');
+  const peso=parseFloat(document.getElementById('v-peso')?.value||'0');
+  const res=document.getElementById('fluid-result');if(!res)return;
+  if(!peso){res.style.display='none';return;}
+  const mant=60*peso;
+  const deficit=peso*(dehid||0)*10;
+  const total=mant+deficit;
+  const rate=total/24;
+  res.style.display='block';
+  document.getElementById('fluid-mant').textContent=mant.toFixed(0)+' ml';
+  document.getElementById('fluid-deficit').textContent=deficit.toFixed(0)+' ml';
+  document.getElementById('fluid-total').textContent=total.toFixed(0)+' ml';
+  document.getElementById('fluid-rate').textContent=rate.toFixed(1)+' ml/h';
+}
+
+// ── Escala de dolor ──
+const PAIN_LABELS=['Sin dolor','Mínimo','Leve','Leve-moderado','Moderado','Moderado','Moderado-severo','Severo','Severo','Muy severo','Dolor máximo'];
+function selectPain(val,btn){
+  document.querySelectorAll('.pain-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const desc=document.getElementById('pain-desc-result');
+  if(desc)desc.textContent=`${val}/10 — ${PAIN_LABELS[val]}`;
+}
+
+// ── Agenda en visita ──
+function renderVisitAgenda(){
+  const el=document.getElementById('visit-contact-list');if(!el)return;
+  const contacts=getContacts();
+  if(!contacts.length){el.innerHTML=`<div style="text-align:center;font-size:12px;color:var(--text3);padding:12px">Sin contactos en agenda. Agregalos desde la sección Agenda.</div>`;return;}
+  el.innerHTML=contacts.map(c=>`
+    <div class="visit-contact-item">
+      <div>
+        <div class="visit-contact-name">${escHtml(c.name)}${c.ref?` <span class="visit-contact-ref">(${escHtml(c.ref)})</span>`:''}</div>
+        ${c.phone?`<div class="visit-contact-phone">${escHtml(c.phone)}</div>`:''}
+      </div>
+      ${c.phone?`<button class="visit-contact-wa" onclick="window.open('https://wa.me/${c.phone.replace(/\D/g,'')}','_blank')">WhatsApp</button>`:''}
+    </div>`).join('');
+}
+
+// ── Audio Panel toggle ──
+function toggleAudioPanel(){
+  const panel=document.getElementById('audio-panel');
+  const arrow=document.getElementById('audio-toggle-arrow');
+  const isOpen=panel.classList.contains('open');
+  panel.classList.toggle('open',!isOpen);
+  if(arrow)arrow.textContent=isOpen?'▼':'▲';
+}
+function switchAudioTab(tab){
+  ['rec','dict'].forEach(t=>{
+    document.getElementById('audio-tab-'+t).classList.toggle('active',t===tab);
+    document.getElementById('audio-sub-'+t).classList.toggle('open',t===tab);
+  });
+}
+
+// ── Grabador de audio ──
+function startRecording(){
+  if(!navigator.mediaDevices?.getUserMedia){showToast('Grabación no soportada en este dispositivo');return;}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    _recChunks=[];_recSec=0;
+    _mediaRecorder=new MediaRecorder(stream);
+    _mediaRecorder.ondataavailable=e=>{if(e.data.size>0)_recChunks.push(e.data);};
+    _mediaRecorder.onstop=()=>{
+      const blob=new Blob(_recChunks,{type:'audio/webm'});
+      const url=URL.createObjectURL(blob);
+      const id=crypto.randomUUID();
+      const name=`Audio ${visitAudios.length+1} (${formatRecTime(_recSec)})`;
+      visitAudios.push({id,name,blob,url});
+      renderRecAudios();
+      // Upload to Supabase Storage
+      uploadVisitAudio(id,blob,name);
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    _mediaRecorder.start(100);
+    document.getElementById('rec-start-btn').disabled=true;
+    document.getElementById('rec-stop-btn').disabled=false;
+    document.getElementById('rec-status').textContent='Grabando...';
+    document.getElementById('rec-timer').classList.add('visible');
+    _recInterval=setInterval(()=>{
+      _recSec++;
+      const el=document.getElementById('rec-timer');
+      if(el)el.textContent=formatRecTime(_recSec);
+    },1000);
+  }).catch(()=>showToast('No se pudo acceder al micrófono'));
+}
+function stopRecording(){
+  if(_mediaRecorder&&_mediaRecorder.state!=='inactive')_mediaRecorder.stop();
+  if(_recInterval){clearInterval(_recInterval);_recInterval=null;}
+  document.getElementById('rec-start-btn').disabled=false;
+  document.getElementById('rec-stop-btn').disabled=true;
+  document.getElementById('rec-status').textContent='Audio guardado ✓';
+  document.getElementById('rec-timer').classList.remove('visible');
+}
+function formatRecTime(s){return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
+function renderRecAudios(){
+  const el=document.getElementById('rec-audios-list');if(!el)return;
+  if(!visitAudios.length){el.innerHTML='';return;}
+  el.innerHTML=visitAudios.map(a=>`
+    <div class="rec-audio-item" id="raudio-${a.id}">
+      <span class="rec-audio-name">${escHtml(a.name)}</span>
+      <span class="rec-audio-play" onclick="toggleAudioPlay('${a.id}')">▶</span>
+      <span class="rec-audio-del" onclick="removeVisitAudio('${a.id}')">✕</span>
+    </div>
+    <audio id="aplayer-${a.id}" src="${a.url}" style="display:none" onended="document.getElementById('aplayer-${a.id}').currentTime=0;document.querySelector('[onclick=\\'toggleAudioPlay(\\\\u0022${a.id}\\\\u0022)\\']').textContent='▶'"></audio>`).join('');
+}
+function toggleAudioPlay(id){
+  const player=document.getElementById('aplayer-'+id);if(!player)return;
+  const btn=document.querySelector(`[onclick="toggleAudioPlay('${id}')"]`);
+  if(player.paused){player.play();if(btn)btn.textContent='⏸';}
+  else{player.pause();if(btn)btn.textContent='▶';}
+}
+function removeVisitAudio(id){
+  visitAudios=visitAudios.filter(a=>a.id!==id);
+  renderRecAudios();
+}
+async function uploadVisitAudio(id,blob,name){
+  try{
+    const s=getSession();if(!s?.access_token)return;
+    const uid=getUserId();if(!uid)return;
+    const path=`${uid}/${id}.webm`;
+    const r=await fetch(`${SUPABASE_URL}/storage/v1/object/visit-audios/${path}`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+s.access_token,'Content-Type':'audio/webm','x-upsert':'true'},
+      body:blob
+    });
+    if(r.ok){
+      // store public URL in attachments
+      const publicUrl=`${SUPABASE_URL}/storage/v1/object/public/visit-audios/${path}`;
+      const idx=visitAudios.findIndex(a=>a.id===id);
+      if(idx>-1)visitAudios[idx].storageUrl=publicUrl;
+    }
+  }catch(e){console.warn('Audio upload error',e);}
+}
+
+// ── Dictado por voz ──
+function toggleDictation(){
+  if(_dictating){stopDictation();return;}
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){showToast('Dictado no soportado en este navegador');return;}
+  _recognition=new SpeechRecognition();
+  _recognition.lang='es-AR';
+  _recognition.continuous=true;
+  _recognition.interimResults=true;
+  _recognition.onresult=e=>{
+    let interim='';let final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';
+      else interim+=e.results[i][0].transcript;
+    }
+    if(final){
+      const ta=document.getElementById('v-notes');
+      if(ta)ta.value=(ta.value+final).trim()+' ';
+    }
+    const st=document.getElementById('dictate-status');
+    if(st&&interim)st.textContent='🎤 '+interim;
+  };
+  _recognition.onerror=e=>{
+    showToast('Error de dictado: '+e.error);
+    stopDictation();
+  };
+  _recognition.onend=()=>{if(_dictating)_recognition.start();};
+  _recognition.start();
+  _dictating=true;
+  const btn=document.getElementById('dictate-btn');
+  if(btn){btn.textContent='⏹ Detener dictado';btn.classList.add('active');}
+  const st=document.getElementById('dictate-status');
+  if(st)st.textContent='🔴 Escuchando... hablá ahora';
+}
+function stopDictation(){
+  _dictating=false;
+  if(_recognition){try{_recognition.stop();}catch(e){}_recognition=null;}
+  const btn=document.getElementById('dictate-btn');
+  if(btn){btn.textContent='🎤 Iniciar dictado';btn.classList.remove('active');}
+  const st=document.getElementById('dictate-status');
+  if(st)st.textContent='Dictado finalizado.';
+}
+
+// ── Panel derecho: mostrar segundero en lugar de curva cuando tool activo ──
+// (el segundero vive en el form de visita, el right panel sigue igual)
 
 // ══════════════════════════════════════════════════
 //  INIT
