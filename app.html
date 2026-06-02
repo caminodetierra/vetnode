@@ -4820,7 +4820,14 @@ syncFromSupabase().then(()=>{
   setTimeout(renderRightPanel,50);
   if(!getSettings().clinic)setTimeout(()=>showMainMenu(),800);
 });
-setTimeout(renderRightPanel,100);</script>
+setTimeout(renderRightPanel,100);
+// Pegá esto en la consola del browser
+document.addEventListener('click', function(e){
+  console.log('click target:', e.target);
+  console.log('closest dd-item:', e.target.closest('.contact-dd-item'));
+  console.log('dataset:', e.target.closest('.contact-dd-item')?.dataset);
+});
+</script>
 
 <!-- NOTIFICATIONS DROPDOWN (fixed, outside .app) -->
 <div class="notif-dropdown hidden" id="notif-dropdown">
