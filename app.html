@@ -539,7 +539,7 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 
 /* Segundero */
 .timer-display{
-  font-size:160px;font-weight:800;color:var(--blue);
+  font-size:min(160px, 38vw);font-weight:800;color:var(--blue);
   text-align:center;line-height:1;letter-spacing:-4px;
   padding:10px 0 6px;font-variant-numeric:tabular-nums;
 }
@@ -605,9 +605,8 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 }
 
 /* ── AUDIO / DICTADO — botón micrófono popup ── */
-.notes-wrap{position:relative;margin-bottom:9px;}
-.notes-actions{position:absolute;bottom:10px;right:10px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-.mic-popup-wrap{position:relative;}
+.notes-wrap{position:relative;margin-bottom:6px;}
+.mic-popup-wrap{position:absolute;bottom:10px;right:10px;}
 .mic-fab{
   width:30px;height:30px;
   background:var(--purple-dim);border:1px solid rgba(155,114,232,0.35);
@@ -634,6 +633,14 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .mic-popup-item:hover{background:var(--surface2);color:var(--text);}
 .mic-popup-item.active{color:var(--red);background:var(--red-dim);}
 .mic-popup-item-ico{font-size:16px;width:22px;text-align:center;}
+/* clip-fab separado debajo del textarea */
+.clip-fab-row{display:flex;justify-content:flex-end;margin-bottom:9px;}
+.clip-fab{
+  width:30px;height:30px;
+  background:var(--blue-dim);border:1px solid var(--blue-border);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:15px;cursor:pointer;
+}
 
 /* Grabados */
 .rec-audios{display:flex;flex-direction:column;gap:7px;margin-top:9px;}
@@ -660,12 +667,6 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 }
 .notes-area::placeholder{color:var(--text3);}
 .notes-area:focus{border-color:var(--blue);}
-.clip-fab{
-  position:absolute;bottom:10px;right:10px;width:30px;height:30px;
-  background:var(--blue-dim);border:1px solid var(--blue-border);
-  border-radius:9px;display:flex;align-items:center;justify-content:center;
-  font-size:15px;cursor:pointer;
-}
 .action-row{display:flex;gap:8px;margin-bottom:9px;}
 .vacc-btn{
   flex:1;background:var(--green-dim);border:1px solid var(--green-border);
@@ -1305,11 +1306,7 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
         </div>
         <!-- Panel kg→m² -->
         <div class="tool-panel" id="tool-panel-m2">
-          <div class="tool-species-row">
-            <button class="tool-species-btn active" id="m2-dog" onclick="selectM2Species('dog')">🐕 Canino</button>
-            <button class="tool-species-btn" id="m2-cat" onclick="selectM2Species('cat')">🐈 Felino</button>
-          </div>
-          <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Peso del campo visita: <span id="m2-peso-lbl" style="color:var(--blue);font-weight:700">—</span> kg</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Peso: <span id="m2-peso-lbl" style="color:var(--blue);font-weight:700">—</span> kg</div>
           <div class="tool-result" id="m2-result" style="display:none"></div>
         </div>
         <!-- Panel Dosis -->
@@ -1339,24 +1336,23 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           <div class="vacc-chip-info"><div class="vacc-chip-name" id="vacc-chip-name"></div><div class="vacc-chip-rem" id="vacc-chip-rem"></div></div>
           <div class="vacc-chip-x" onclick="removeVacc()">✕</div>
         </div>
-        <!-- NOTAS + botones flotantes (clip + mic) -->
+        <!-- NOTAS + mic flotante dentro, clip afuera abajo -->
         <div class="notes-wrap">
           <textarea class="notes-area" id="v-notes" placeholder="Síntomas, diagnóstico, tratamiento indicado…" rows="6"></textarea>
-          <div class="notes-actions">
-            <!-- Mic popup -->
-            <div class="mic-popup-wrap">
-              <div class="mic-fab" id="mic-fab" onclick="toggleMicPopup(event)">🎙️</div>
-              <div class="mic-popup" id="mic-popup">
-                <div class="mic-popup-item" id="mic-item-rec" onclick="toggleRecording()">
-                  <span class="mic-popup-item-ico">⏺</span>Grabar audio
-                </div>
-                <div class="mic-popup-item" id="mic-item-dict" onclick="toggleDictation()">
-                  <span class="mic-popup-item-ico">🎤</span>Dictado
-                </div>
+          <div class="mic-popup-wrap">
+            <div class="mic-fab" id="mic-fab" onclick="toggleMicPopup(event)">🎙️</div>
+            <div class="mic-popup" id="mic-popup">
+              <div class="mic-popup-item" id="mic-item-rec" onclick="toggleRecording()">
+                <span class="mic-popup-item-ico">⏺</span>Grabar audio
+              </div>
+              <div class="mic-popup-item" id="mic-item-dict" onclick="toggleDictation()">
+                <span class="mic-popup-item-ico">🎤</span>Dictado
               </div>
             </div>
-            <div class="clip-fab" onclick="toggleAttach()">📎</div>
           </div>
+        </div>
+        <div class="clip-fab-row">
+          <div class="clip-fab" onclick="toggleAttach()">📎</div>
         </div>
         <!-- Audios grabados -->
         <div class="rec-audios" id="rec-audios-list"></div>
@@ -4355,19 +4351,12 @@ function stopTimerTool(){if(_timerInterval){clearInterval(_timerInterval);_timer
 function updateTimerDisplay(){const el=document.getElementById('timer-display');if(el)el.textContent=_timerSec;}
 
 // ── Conversor kg→m² ──
-function selectM2Species(sp){
-  _m2Species=sp;
-  document.getElementById('m2-dog').classList.toggle('active',sp==='dog');
-  document.getElementById('m2-cat').classList.toggle('active',sp==='cat');
-  calcM2();
-}
 function calcM2(){
   const pesoStr=document.getElementById('v-peso')?.value||'';
   const peso=parseFloat(pesoStr);
   const lbl=document.getElementById('m2-peso-lbl');if(lbl)lbl.textContent=pesoStr||'—';
   const res=document.getElementById('m2-result');if(!res)return;
   if(!peso||peso<=0){res.style.display='none';return;}
-  // Fórmula: SC(m²) = 0.101 × peso^(2/3)
   const m2=(0.101*Math.pow(peso,2/3)).toFixed(3);
   res.style.display='block';
   res.textContent=`SC = ${m2} m²`;
@@ -4716,8 +4705,8 @@ function renderAgenda(){
       <div class="contact-chip-menu">
         <button class="contact-chip-dots" onclick="event.stopPropagation();toggleContactMenu(event,'cmenu-${c.id}')">⋯</button>
         <div class="contact-dropdown" id="cmenu-${c.id}">
-          <div class="contact-dd-item" onclick="event.stopPropagation();closeAllContactMenus();openEditContact('${c.id}')">✏️ Modificar</div>
-          <div class="contact-dd-item danger" onclick="event.stopPropagation();closeAllContactMenus();deleteContact('${c.id}')">🗑️ Eliminar</div>
+          <div class="contact-dd-item" onclick="event.stopPropagation();closeAllContactMenus();setTimeout(()=>openEditContact('${c.id}'),50)">✏️ Modificar</div>
+          <div class="contact-dd-item danger" onclick="event.stopPropagation();closeAllContactMenus();setTimeout(()=>deleteContact('${c.id}'),50)">🗑️ Eliminar</div>
         </div>
       </div>
     </div>`).join('')}</div>`;
