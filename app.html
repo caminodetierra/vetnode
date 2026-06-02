@@ -539,11 +539,10 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 
 /* Segundero */
 .timer-display{
-  font-size:64px;font-weight:800;color:var(--blue);
-  text-align:center;line-height:1;letter-spacing:-2px;
-  padding:10px 0 6px;
+  font-size:160px;font-weight:800;color:var(--blue);
+  text-align:center;line-height:1;letter-spacing:-4px;
+  padding:10px 0 6px;font-variant-numeric:tabular-nums;
 }
-.timer-arc-wrap{display:flex;justify-content:center;margin-bottom:10px;}
 .timer-sub{text-align:center;font-size:11px;color:var(--text3);font-weight:600;margin-bottom:4px;}
 
 /* Conversor m2 */
@@ -588,80 +587,65 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .fluid-result-val{font-size:14px;font-weight:800;color:var(--purple);}
 
 /* Agenda en visita */
-.visit-contact-list{display:flex;flex-direction:column;gap:7px;max-height:200px;overflow-y:auto;}
+.visit-contact-list{display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto;}
 .visit-contact-item{
   background:var(--surface);border:1px solid var(--border);
   border-radius:11px;padding:10px 12px;
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
 }
+.visit-contact-info{flex:1;min-width:0;}
 .visit-contact-name{font-size:13px;font-weight:700;color:var(--text);}
 .visit-contact-ref{font-size:10px;color:var(--text3);}
-.visit-contact-phone{font-size:12px;color:var(--blue);font-weight:600;}
+.visit-contact-detail{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.5;}
 .visit-contact-wa{
   background:var(--green-dim);border:1px solid var(--green-border);
   border-radius:8px;padding:5px 9px;font-size:11px;color:var(--green);
   font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font);
+  flex-shrink:0;align-self:center;
 }
 
-/* ── AUDIO RECORDER ── */
-.audio-toggle-btn{
-  width:100%;background:var(--surface2);border:1.5px dashed var(--border2);
-  border-radius:11px;padding:10px 14px;
+/* ── AUDIO / DICTADO — botón micrófono popup ── */
+.notes-wrap{position:relative;margin-bottom:9px;}
+.notes-actions{position:absolute;bottom:10px;right:10px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.mic-popup-wrap{position:relative;}
+.mic-fab{
+  width:30px;height:30px;
+  background:var(--purple-dim);border:1px solid rgba(155,114,232,0.35);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:15px;cursor:pointer;position:relative;z-index:2;
+}
+.mic-fab.recording{background:rgba(240,106,106,0.2);border-color:var(--red-border);animation:recPulse 1s ease-in-out infinite;}
+.mic-fab.dictating{background:rgba(74,144,226,0.2);border-color:var(--blue-border);animation:recPulse 1s ease-in-out infinite;}
+@keyframes recPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.mic-popup{
+  position:absolute;bottom:38px;right:0;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:14px;padding:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+  display:none;z-index:10;min-width:160px;
+}
+.mic-popup.open{display:block;animation:slideUp .15s ease;}
+.mic-popup-item{
   display:flex;align-items:center;gap:10px;
-  cursor:pointer;margin-bottom:7px;font-family:var(--font);
-  color:var(--text2);font-size:13px;font-weight:700;
+  padding:10px 12px;border-radius:10px;cursor:pointer;
+  font-size:13px;font-weight:700;color:var(--text2);font-family:var(--font);
+  white-space:nowrap;
 }
-.audio-toggle-btn:hover{border-color:var(--blue-border);color:var(--blue);background:var(--blue-dim);}
-.audio-toggle-ico{font-size:18px;}
-.audio-panel{display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:12px 14px;margin-bottom:7px;}
-.audio-panel.open{display:block;}
-.audio-panel-tabs{display:flex;gap:6px;margin-bottom:12px;}
-.audio-tab{
-  flex:1;padding:8px;border-radius:9px;font-size:12px;font-weight:700;
-  text-align:center;cursor:pointer;border:1px solid var(--border2);
-  background:var(--surface);color:var(--text3);font-family:var(--font);
-}
-.audio-tab.active{background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue);}
-.audio-sub-panel{display:none;}
-.audio-sub-panel.open{display:block;}
+.mic-popup-item:hover{background:var(--surface2);color:var(--text);}
+.mic-popup-item.active{color:var(--red);background:var(--red-dim);}
+.mic-popup-item-ico{font-size:16px;width:22px;text-align:center;}
 
-/* Grabador */
-.rec-status{text-align:center;font-size:12px;color:var(--text3);font-weight:600;margin-bottom:10px;min-height:18px;}
-.rec-timer{font-size:28px;font-weight:800;color:var(--red);text-align:center;font-variant-numeric:tabular-nums;margin-bottom:12px;display:none;}
-.rec-timer.visible{display:block;}
-.rec-controls{display:flex;gap:8px;justify-content:center;margin-bottom:12px;}
-.rec-btn{
-  padding:10px 20px;border-radius:11px;font-size:13px;font-weight:700;
-  cursor:pointer;border:none;font-family:var(--font);
-}
-.rec-btn.start{background:var(--red);color:#fff;}
-.rec-btn.stop{background:var(--surface);border:1px solid var(--border2);color:var(--text2);}
-.rec-btn:disabled{opacity:.4;cursor:default;}
-.rec-audios{display:flex;flex-direction:column;gap:7px;}
+/* Grabados */
+.rec-audios{display:flex;flex-direction:column;gap:7px;margin-top:9px;}
 .rec-audio-item{
-  background:var(--surface);border:1px solid var(--border);
+  background:var(--surface2);border:1px solid var(--border);
   border-radius:10px;padding:9px 12px;
   display:flex;align-items:center;gap:10px;
 }
-.rec-audio-name{font-size:11px;color:var(--text3);font-weight:600;flex:1;}
+.rec-audio-name{font-size:11px;color:var(--text3);font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .rec-audio-play{font-size:16px;cursor:pointer;flex-shrink:0;}
 .rec-audio-del{font-size:14px;cursor:pointer;color:var(--red);flex-shrink:0;padding:2px 4px;}
-.rec-audio-player{width:100%;margin-top:6px;height:28px;}
-
-/* Dictado */
-.dictate-status{
-  background:var(--surface);border:1px solid var(--border2);
-  border-radius:10px;padding:9px 12px;margin-bottom:10px;
-  font-size:12px;color:var(--text3);text-align:center;font-weight:600;
-}
-.dictate-btn{
-  width:100%;padding:12px;border-radius:11px;font-size:13px;font-weight:700;
-  cursor:pointer;border:none;font-family:var(--font);
-  background:var(--blue);color:#fff;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.dictate-btn.active{background:var(--red);}
-.dictate-btn:disabled{opacity:.4;cursor:default;}
+.rec-timer-inline{font-size:11px;color:var(--red);font-weight:700;font-variant-numeric:tabular-nums;margin-left:4px;}
 .vacc-chip{display:flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:11px;padding:9px 12px;margin-bottom:9px;}
 .vacc-chip-info{flex:1;}
 .vacc-chip-name{font-size:12px;color:var(--green);font-weight:700;}
@@ -1308,20 +1292,16 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
         </div>
         <!-- HERRAMIENTAS -->
         <div class="tools-row">
-          <button class="tool-btn" id="tool-btn-timer" onclick="toggleTool('timer')"><span class="tool-btn-ico">⏱</span><span class="tool-btn-lbl">Segundero</span></button>
+          <button class="tool-btn" id="tool-btn-timer" onclick="toggleTool('timer')"><span class="tool-btn-ico">⏱</span><span class="tool-btn-lbl">Crono</span></button>
           <button class="tool-btn" id="tool-btn-m2" onclick="toggleTool('m2')"><span class="tool-btn-ico">⚖️</span><span class="tool-btn-lbl">kg→m²</span></button>
           <button class="tool-btn" id="tool-btn-dose" onclick="toggleTool('dose')"><span class="tool-btn-ico">💊</span><span class="tool-btn-lbl">Dosis</span></button>
           <button class="tool-btn" id="tool-btn-fluid" onclick="toggleTool('fluid')"><span class="tool-btn-ico">💧</span><span class="tool-btn-lbl">Fluidos</span></button>
-          <button class="tool-btn" id="tool-btn-pain" onclick="toggleTool('pain')"><span class="tool-btn-ico">🩹</span><span class="tool-btn-lbl">Dolor</span></button>
           <button class="tool-btn" id="tool-btn-agenda" onclick="toggleTool('agenda')"><span class="tool-btn-ico">📋</span><span class="tool-btn-lbl">Agenda</span></button>
         </div>
-        <!-- Panel Segundero (reemplaza curva de peso en desktop) -->
+        <!-- Panel Crono -->
         <div class="tool-panel" id="tool-panel-timer">
           <div class="timer-display" id="timer-display">0</div>
-          <div class="timer-arc-wrap">
-            <svg width="120" height="8"><rect x="0" y="0" width="120" height="8" rx="4" fill="var(--border2)"/><rect id="timer-bar" x="0" y="0" width="0" height="8" rx="4" fill="var(--blue)"/></svg>
-          </div>
-          <div class="timer-sub">Presioná de nuevo para cerrar</div>
+          <div class="timer-sub">Presioná CRONO de nuevo para cerrar</div>
         </div>
         <!-- Panel kg→m² -->
         <div class="tool-panel" id="tool-panel-m2">
@@ -1329,13 +1309,13 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
             <button class="tool-species-btn active" id="m2-dog" onclick="selectM2Species('dog')">🐕 Canino</button>
             <button class="tool-species-btn" id="m2-cat" onclick="selectM2Species('cat')">🐈 Felino</button>
           </div>
-          <div style="margin-bottom:8px"><label class="v-label">Peso (kg)</label><input class="v-input" id="m2-peso" placeholder="kg" oninput="calcM2()" style="text-align:left;padding:9px 12px"></div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Peso del campo visita: <span id="m2-peso-lbl" style="color:var(--blue);font-weight:700">—</span> kg</div>
           <div class="tool-result" id="m2-result" style="display:none"></div>
         </div>
         <!-- Panel Dosis -->
         <div class="tool-panel" id="tool-panel-dose">
           <div style="margin-bottom:8px"><label class="v-label">mg/kg a administrar</label><input class="v-input" id="dose-mgkg" placeholder="ej: 5" oninput="calcDose()" style="text-align:left;padding:9px 12px"></div>
-          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Peso tomado del campo visita: <span id="dose-peso-lbl" style="color:var(--blue);font-weight:700">—</span> kg</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Peso: <span id="dose-peso-lbl" style="color:var(--blue);font-weight:700">—</span> kg</div>
           <div class="dose-result" id="dose-result" style="display:none"></div>
         </div>
         <!-- Panel Fluidos -->
@@ -1349,24 +1329,6 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
             <div class="fluid-result-row"><span class="fluid-result-lbl">Velocidad</span><span class="fluid-result-val" id="fluid-rate">—</span></div>
           </div>
         </div>
-        <!-- Panel Dolor -->
-        <div class="tool-panel" id="tool-panel-pain">
-          <div class="pain-desc">Estimá el nivel de dolor basándote en postura, vocalización, respuesta a la palpación y comportamiento general.</div>
-          <div class="pain-scale" id="pain-scale">
-            <button class="pain-btn" onclick="selectPain(0,this)">0</button>
-            <button class="pain-btn" onclick="selectPain(1,this)">1</button>
-            <button class="pain-btn" onclick="selectPain(2,this)">2</button>
-            <button class="pain-btn" onclick="selectPain(3,this)">3</button>
-            <button class="pain-btn" onclick="selectPain(4,this)">4</button>
-            <button class="pain-btn" onclick="selectPain(5,this)">5</button>
-            <button class="pain-btn" onclick="selectPain(6,this)">6</button>
-            <button class="pain-btn" onclick="selectPain(7,this)">7</button>
-            <button class="pain-btn" onclick="selectPain(8,this)">8</button>
-            <button class="pain-btn" onclick="selectPain(9,this)">9</button>
-            <button class="pain-btn" onclick="selectPain(10,this)">10</button>
-          </div>
-          <div id="pain-desc-result" style="font-size:12px;color:var(--text2);font-weight:600;text-align:center;min-height:16px;"></div>
-        </div>
         <!-- Panel Agenda -->
         <div class="tool-panel" id="tool-panel-agenda">
           <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:8px">Contactos de referencia</div>
@@ -1377,41 +1339,30 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           <div class="vacc-chip-info"><div class="vacc-chip-name" id="vacc-chip-name"></div><div class="vacc-chip-rem" id="vacc-chip-rem"></div></div>
           <div class="vacc-chip-x" onclick="removeVacc()">✕</div>
         </div>
+        <!-- NOTAS + botones flotantes (clip + mic) -->
         <div class="notes-wrap">
           <textarea class="notes-area" id="v-notes" placeholder="Síntomas, diagnóstico, tratamiento indicado…" rows="6"></textarea>
-          <div class="clip-fab" onclick="toggleAttach()">📎</div>
-        </div>
-        <!-- AUDIO / DICTADO -->
-        <div class="audio-toggle-btn" onclick="toggleAudioPanel()">
-          <span class="audio-toggle-ico">🎙️</span>
-          <span>Audio y dictado</span>
-          <span style="margin-left:auto;font-size:12px;color:var(--text3)" id="audio-toggle-arrow">▼</span>
-        </div>
-        <div class="audio-panel" id="audio-panel">
-          <div class="audio-panel-tabs">
-            <div class="audio-tab active" id="audio-tab-rec" onclick="switchAudioTab('rec')">🔴 Grabar audio</div>
-            <div class="audio-tab" id="audio-tab-dict" onclick="switchAudioTab('dict')">🎤 Dictado</div>
-          </div>
-          <!-- Grabador -->
-          <div class="audio-sub-panel open" id="audio-sub-rec">
-            <div class="rec-status" id="rec-status">Listo para grabar</div>
-            <div class="rec-timer" id="rec-timer">0:00</div>
-            <div class="rec-controls">
-              <button class="rec-btn start" id="rec-start-btn" onclick="startRecording()">⏺ Grabar</button>
-              <button class="rec-btn stop" id="rec-stop-btn" onclick="stopRecording()" disabled>⏹ Detener</button>
+          <div class="notes-actions">
+            <!-- Mic popup -->
+            <div class="mic-popup-wrap">
+              <div class="mic-fab" id="mic-fab" onclick="toggleMicPopup(event)">🎙️</div>
+              <div class="mic-popup" id="mic-popup">
+                <div class="mic-popup-item" id="mic-item-rec" onclick="toggleRecording()">
+                  <span class="mic-popup-item-ico">⏺</span>Grabar audio
+                </div>
+                <div class="mic-popup-item" id="mic-item-dict" onclick="toggleDictation()">
+                  <span class="mic-popup-item-ico">🎤</span>Dictado
+                </div>
+              </div>
             </div>
-            <div class="rec-audios" id="rec-audios-list"></div>
-          </div>
-          <!-- Dictado -->
-          <div class="audio-sub-panel" id="audio-sub-dict">
-            <div class="dictate-status" id="dictate-status">Presioná el botón para empezar a dictar. El texto se agregará al campo de notas.</div>
-            <button class="dictate-btn" id="dictate-btn" onclick="toggleDictation()">🎤 Iniciar dictado</button>
+            <div class="clip-fab" onclick="toggleAttach()">📎</div>
           </div>
         </div>
+        <!-- Audios grabados -->
+        <div class="rec-audios" id="rec-audios-list"></div>
         <div id="attach-menu" style="display:none" class="attach-menu">
           <div class="attach-opt" onclick="triggerVisitFile('camera')"><div class="attach-ico cam">📷</div><div><div class="attach-text">Cámara</div><div class="attach-sub">Sacar foto ahora</div></div></div>
           <div class="attach-opt" onclick="triggerVisitFile('image')"><div class="attach-ico file">🖼️</div><div><div class="attach-text">Imagen / Archivo</div><div class="attach-sub">Desde el dispositivo</div></div></div>
-          <div class="attach-opt" onclick="triggerVisitFile('audio')"><div class="attach-ico mic">🎙️</div><div><div class="attach-text">Audio</div><div class="attach-sub">Clip de audio</div></div></div>
         </div>
         <div id="visit-attachments-preview" class="visit-attachments"></div>
         <input type="file" id="visit-file-input" style="display:none" onchange="handleVisitFile(this)">
@@ -2772,9 +2723,10 @@ function openNewVisit(){
   document.querySelectorAll('.tool-panel').forEach(p=>p.classList.remove('open'));
   document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
   stopTimerTool();
+  if(_isRecording)stopRecording();
+  stopDictation();
   renderRecAudios();
-  document.getElementById('audio-panel').classList.remove('open');
-  document.getElementById('audio-toggle-arrow').textContent='▼';
+  document.getElementById('mic-popup')?.classList.remove('open');
   document.getElementById('v-notes').value='';
   document.getElementById('vacc-chip').style.display='none';
   document.getElementById('attach-menu').style.display='none';
@@ -4365,23 +4317,23 @@ function escHtml(s){
 //  HERRAMIENTAS DE VISITA
 // ══════════════════════════════════════════════════
 
-// ── Estado global de herramientas ──
 let _timerInterval=null;
 let _timerSec=0;
 let _m2Species='dog';
-let visitAudios=[]; // {id, name, blob, url}
+let visitAudios=[];
 let _mediaRecorder=null;
 let _recChunks=[];
 let _recInterval=null;
 let _recSec=0;
+let _isRecording=false;
 let _recognition=null;
 let _dictating=false;
 
+// ── Herramientas toggle ──
 function toggleTool(name){
   const btn=document.getElementById('tool-btn-'+name);
   const panel=document.getElementById('tool-panel-'+name);
   const isOpen=panel.classList.contains('open');
-  // close all
   document.querySelectorAll('.tool-panel').forEach(p=>p.classList.remove('open'));
   document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
   stopTimerTool();
@@ -4394,27 +4346,13 @@ function toggleTool(name){
   }
 }
 
-// ── Segundero ──
+// ── Crono ──
 function startTimerTool(){
-  _timerSec=0;
-  updateTimerDisplay();
-  _timerInterval=setInterval(()=>{
-    _timerSec=(_timerSec+1)%61;
-    if(_timerSec===60)_timerSec=0;
-    updateTimerDisplay();
-  },1000);
+  _timerSec=0;updateTimerDisplay();
+  _timerInterval=setInterval(()=>{_timerSec=(_timerSec+1)%60;updateTimerDisplay();},1000);
 }
-function stopTimerTool(){
-  if(_timerInterval){clearInterval(_timerInterval);_timerInterval=null;}
-  _timerSec=0;
-}
-function updateTimerDisplay(){
-  const el=document.getElementById('timer-display');
-  const bar=document.getElementById('timer-bar');
-  if(!el)return;
-  el.textContent=_timerSec;
-  if(bar)bar.setAttribute('width',String((_timerSec/60)*120));
-}
+function stopTimerTool(){if(_timerInterval){clearInterval(_timerInterval);_timerInterval=null;}_timerSec=0;}
+function updateTimerDisplay(){const el=document.getElementById('timer-display');if(el)el.textContent=_timerSec;}
 
 // ── Conversor kg→m² ──
 function selectM2Species(sp){
@@ -4424,19 +4362,18 @@ function selectM2Species(sp){
   calcM2();
 }
 function calcM2(){
-  const peso=parseFloat(document.getElementById('m2-peso')?.value||'0');
+  const pesoStr=document.getElementById('v-peso')?.value||'';
+  const peso=parseFloat(pesoStr);
+  const lbl=document.getElementById('m2-peso-lbl');if(lbl)lbl.textContent=pesoStr||'—';
   const res=document.getElementById('m2-result');if(!res)return;
   if(!peso||peso<=0){res.style.display='none';return;}
-  // Fórmula estándar: m² = K × peso^(2/3) / 10000
-  // Canino: K=10.1, Felino: K=10.0 (aproximado)
-  const k=_m2Species==='dog'?10.1:10.0;
-  const m2=(k*Math.pow(peso,2/3)/10000).toFixed(3);
+  // Fórmula: SC(m²) = 0.101 × peso^(2/3)
+  const m2=(0.101*Math.pow(peso,2/3)).toFixed(3);
   res.style.display='block';
   res.textContent=`SC = ${m2} m²`;
 }
 function updateToolsFromPeso(){
   const peso=document.getElementById('v-peso')?.value||'';
-  const el=document.getElementById('m2-peso');if(el&&!el.value)el.value=peso;
   const dosePl=document.getElementById('dose-peso-lbl');if(dosePl)dosePl.textContent=peso||'—';
   const fluidPl=document.getElementById('fluid-peso-lbl');if(fluidPl)fluidPl.textContent=peso||'—';
   calcM2();calcDose();calcFluid();
@@ -4448,9 +4385,8 @@ function calcDose(){
   const peso=parseFloat(document.getElementById('v-peso')?.value||'0');
   const res=document.getElementById('dose-result');if(!res)return;
   if(!mgkg||!peso){res.style.display='none';return;}
-  const total=(mgkg*peso).toFixed(2);
   res.style.display='block';
-  res.textContent=`Dosis total: ${total} mg`;
+  res.textContent=`Dosis total: ${(mgkg*peso).toFixed(2)} mg`;
 }
 
 // ── Calculador de fluidos ──
@@ -4462,58 +4398,52 @@ function calcFluid(){
   const mant=60*peso;
   const deficit=peso*(dehid||0)*10;
   const total=mant+deficit;
-  const rate=total/24;
   res.style.display='block';
   document.getElementById('fluid-mant').textContent=mant.toFixed(0)+' ml';
   document.getElementById('fluid-deficit').textContent=deficit.toFixed(0)+' ml';
   document.getElementById('fluid-total').textContent=total.toFixed(0)+' ml';
-  document.getElementById('fluid-rate').textContent=rate.toFixed(1)+' ml/h';
-}
-
-// ── Escala de dolor ──
-const PAIN_LABELS=['Sin dolor','Mínimo','Leve','Leve-moderado','Moderado','Moderado','Moderado-severo','Severo','Severo','Muy severo','Dolor máximo'];
-function selectPain(val,btn){
-  document.querySelectorAll('.pain-btn').forEach(b=>b.classList.remove('sel'));
-  btn.classList.add('sel');
-  const desc=document.getElementById('pain-desc-result');
-  if(desc)desc.textContent=`${val}/10 — ${PAIN_LABELS[val]}`;
+  document.getElementById('fluid-rate').textContent=(total/24).toFixed(1)+' ml/h';
 }
 
 // ── Agenda en visita ──
 function renderVisitAgenda(){
   const el=document.getElementById('visit-contact-list');if(!el)return;
   const contacts=getContacts();
-  if(!contacts.length){el.innerHTML=`<div style="text-align:center;font-size:12px;color:var(--text3);padding:12px">Sin contactos en agenda. Agregalos desde la sección Agenda.</div>`;return;}
+  if(!contacts.length){
+    el.innerHTML=`<div style="text-align:center;font-size:12px;color:var(--text3);padding:12px">Sin contactos. Agregalos desde Agenda.</div>`;
+    return;
+  }
   el.innerHTML=contacts.map(c=>`
     <div class="visit-contact-item">
-      <div>
-        <div class="visit-contact-name">${escHtml(c.name)}${c.ref?` <span class="visit-contact-ref">(${escHtml(c.ref)})</span>`:''}</div>
-        ${c.phone?`<div class="visit-contact-phone">${escHtml(c.phone)}</div>`:''}
+      <div class="visit-contact-info">
+        <div><span class="visit-contact-name">${escHtml(c.name)}</span>${c.ref?` <span class="visit-contact-ref">(${escHtml(c.ref)})</span>`:''}</div>
+        <div class="visit-contact-detail">${[c.phone?'📱 '+escHtml(c.phone):'',c.address?'📍 '+escHtml(c.address):''].filter(Boolean).join(' · ')}</div>
       </div>
       ${c.phone?`<button class="visit-contact-wa" onclick="window.open('https://wa.me/${c.phone.replace(/\D/g,'')}','_blank')">WhatsApp</button>`:''}
     </div>`).join('');
 }
 
-// ── Audio Panel toggle ──
-function toggleAudioPanel(){
-  const panel=document.getElementById('audio-panel');
-  const arrow=document.getElementById('audio-toggle-arrow');
-  const isOpen=panel.classList.contains('open');
-  panel.classList.toggle('open',!isOpen);
-  if(arrow)arrow.textContent=isOpen?'▼':'▲';
+// ── Mic popup ──
+function toggleMicPopup(e){
+  e.stopPropagation();
+  const popup=document.getElementById('mic-popup');
+  popup.classList.toggle('open');
 }
-function switchAudioTab(tab){
-  ['rec','dict'].forEach(t=>{
-    document.getElementById('audio-tab-'+t).classList.toggle('active',t===tab);
-    document.getElementById('audio-sub-'+t).classList.toggle('open',t===tab);
-  });
-}
+document.addEventListener('click',function(e){
+  const popup=document.getElementById('mic-popup');
+  if(popup&&!popup.closest('.mic-popup-wrap')?.contains(e.target)){
+    popup.classList.remove('open');
+  }
+});
 
-// ── Grabador de audio ──
+// ── Grabador ──
+function toggleRecording(){
+  if(_isRecording){stopRecording();}else{startRecording();}
+}
 function startRecording(){
   if(!navigator.mediaDevices?.getUserMedia){showToast('Grabación no soportada en este dispositivo');return;}
   navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-    _recChunks=[];_recSec=0;
+    _recChunks=[];_recSec=0;_isRecording=true;
     _mediaRecorder=new MediaRecorder(stream);
     _mediaRecorder.ondataavailable=e=>{if(e.data.size>0)_recChunks.push(e.data);};
     _mediaRecorder.onstop=()=>{
@@ -4523,49 +4453,68 @@ function startRecording(){
       const name=`Audio ${visitAudios.length+1} (${formatRecTime(_recSec)})`;
       visitAudios.push({id,name,blob,url});
       renderRecAudios();
-      // Upload to Supabase Storage
       uploadVisitAudio(id,blob,name);
       stream.getTracks().forEach(t=>t.stop());
     };
     _mediaRecorder.start(100);
-    document.getElementById('rec-start-btn').disabled=true;
-    document.getElementById('rec-stop-btn').disabled=false;
-    document.getElementById('rec-status').textContent='Grabando...';
-    document.getElementById('rec-timer').classList.add('visible');
+    // UI
+    const fab=document.getElementById('mic-fab');
+    const item=document.getElementById('mic-item-rec');
+    if(fab)fab.classList.add('recording');
+    if(item){item.classList.add('active');item.innerHTML='<span class="mic-popup-item-ico">⏹</span>Detener <span class="rec-timer-inline" id="rec-timer-inline">0:00</span>';}
+    document.getElementById('mic-popup').classList.remove('open');
     _recInterval=setInterval(()=>{
       _recSec++;
-      const el=document.getElementById('rec-timer');
-      if(el)el.textContent=formatRecTime(_recSec);
+      const t=document.getElementById('rec-timer-inline');
+      if(t)t.textContent=formatRecTime(_recSec);
     },1000);
   }).catch(()=>showToast('No se pudo acceder al micrófono'));
 }
 function stopRecording(){
+  _isRecording=false;
   if(_mediaRecorder&&_mediaRecorder.state!=='inactive')_mediaRecorder.stop();
   if(_recInterval){clearInterval(_recInterval);_recInterval=null;}
-  document.getElementById('rec-start-btn').disabled=false;
-  document.getElementById('rec-stop-btn').disabled=true;
-  document.getElementById('rec-status').textContent='Audio guardado ✓';
-  document.getElementById('rec-timer').classList.remove('visible');
+  const fab=document.getElementById('mic-fab');
+  const item=document.getElementById('mic-item-rec');
+  if(fab)fab.classList.remove('recording');
+  if(item){item.classList.remove('active');item.innerHTML='<span class="mic-popup-item-ico">⏺</span>Grabar audio';}
+  showToast('Audio guardado ✓');
 }
 function formatRecTime(s){return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
+
 function renderRecAudios(){
   const el=document.getElementById('rec-audios-list');if(!el)return;
   if(!visitAudios.length){el.innerHTML='';return;}
   el.innerHTML=visitAudios.map(a=>`
     <div class="rec-audio-item" id="raudio-${a.id}">
+      <span class="rec-audio-play" id="play-btn-${a.id}" onclick="toggleAudioPlay('${a.id}')">▶</span>
       <span class="rec-audio-name">${escHtml(a.name)}</span>
-      <span class="rec-audio-play" onclick="toggleAudioPlay('${a.id}')">▶</span>
       <span class="rec-audio-del" onclick="removeVisitAudio('${a.id}')">✕</span>
     </div>
-    <audio id="aplayer-${a.id}" src="${a.url}" style="display:none" onended="document.getElementById('aplayer-${a.id}').currentTime=0;document.querySelector('[onclick=\\'toggleAudioPlay(\\\\u0022${a.id}\\\\u0022)\\']').textContent='▶'"></audio>`).join('');
+    <audio id="aplayer-${a.id}" src="${a.url}" style="display:none"></audio>`).join('');
+  // bind onended
+  visitAudios.forEach(a=>{
+    const player=document.getElementById('aplayer-'+a.id);
+    if(player)player.onended=()=>{const b=document.getElementById('play-btn-'+a.id);if(b)b.textContent='▶';};
+  });
 }
 function toggleAudioPlay(id){
-  const player=document.getElementById('aplayer-'+id);if(!player)return;
-  const btn=document.querySelector(`[onclick="toggleAudioPlay('${id}')"]`);
+  // pause all others
+  visitAudios.forEach(a=>{
+    if(a.id!==id){
+      const p=document.getElementById('aplayer-'+a.id);
+      if(p&&!p.paused){p.pause();p.currentTime=0;const b=document.getElementById('play-btn-'+a.id);if(b)b.textContent='▶';}
+    }
+  });
+  const player=document.getElementById('aplayer-'+id);
+  const btn=document.getElementById('play-btn-'+id);
+  if(!player)return;
   if(player.paused){player.play();if(btn)btn.textContent='⏸';}
   else{player.pause();if(btn)btn.textContent='▶';}
 }
 function removeVisitAudio(id){
+  // stop if playing
+  const p=document.getElementById('aplayer-'+id);if(p)p.pause();
   visitAudios=visitAudios.filter(a=>a.id!==id);
   renderRecAudios();
 }
@@ -4580,7 +4529,6 @@ async function uploadVisitAudio(id,blob,name){
       body:blob
     });
     if(r.ok){
-      // store public URL in attachments
       const publicUrl=`${SUPABASE_URL}/storage/v1/object/public/visit-audios/${path}`;
       const idx=visitAudios.findIndex(a=>a.id===id);
       if(idx>-1)visitAudios[idx].storageUrl=publicUrl;
@@ -4588,51 +4536,42 @@ async function uploadVisitAudio(id,blob,name){
   }catch(e){console.warn('Audio upload error',e);}
 }
 
-// ── Dictado por voz ──
+// ── Dictado ──
 function toggleDictation(){
-  if(_dictating){stopDictation();return;}
+  if(_dictating){stopDictation();}else{startDictation();}
+}
+function startDictation(){
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SpeechRecognition){showToast('Dictado no soportado en este navegador');return;}
   _recognition=new SpeechRecognition();
-  _recognition.lang='es-AR';
-  _recognition.continuous=true;
-  _recognition.interimResults=true;
+  _recognition.lang='es-AR';_recognition.continuous=true;_recognition.interimResults=false;
   _recognition.onresult=e=>{
-    let interim='';let final='';
+    let final='';
     for(let i=e.resultIndex;i<e.results.length;i++){
       if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';
-      else interim+=e.results[i][0].transcript;
     }
-    if(final){
-      const ta=document.getElementById('v-notes');
-      if(ta)ta.value=(ta.value+final).trim()+' ';
-    }
-    const st=document.getElementById('dictate-status');
-    if(st&&interim)st.textContent='🎤 '+interim;
+    if(final){const ta=document.getElementById('v-notes');if(ta)ta.value=(ta.value+final).trimStart();}
   };
-  _recognition.onerror=e=>{
-    showToast('Error de dictado: '+e.error);
-    stopDictation();
-  };
+  _recognition.onerror=()=>stopDictation();
   _recognition.onend=()=>{if(_dictating)_recognition.start();};
   _recognition.start();
   _dictating=true;
-  const btn=document.getElementById('dictate-btn');
-  if(btn){btn.textContent='⏹ Detener dictado';btn.classList.add('active');}
-  const st=document.getElementById('dictate-status');
-  if(st)st.textContent='🔴 Escuchando... hablá ahora';
+  const fab=document.getElementById('mic-fab');
+  const item=document.getElementById('mic-item-dict');
+  if(fab)fab.classList.add('dictating');
+  if(item){item.classList.add('active');item.innerHTML='<span class="mic-popup-item-ico">⏹</span>Detener dictado';}
+  document.getElementById('mic-popup').classList.remove('open');
+  showToast('Dictado activo 🎤');
 }
 function stopDictation(){
   _dictating=false;
   if(_recognition){try{_recognition.stop();}catch(e){}_recognition=null;}
-  const btn=document.getElementById('dictate-btn');
-  if(btn){btn.textContent='🎤 Iniciar dictado';btn.classList.remove('active');}
-  const st=document.getElementById('dictate-status');
-  if(st)st.textContent='Dictado finalizado.';
+  const fab=document.getElementById('mic-fab');
+  const item=document.getElementById('mic-item-dict');
+  if(fab)fab.classList.remove('dictating');
+  if(item){item.classList.remove('active');item.innerHTML='<span class="mic-popup-item-ico">🎤</span>Dictado';}
+  showToast('Dictado finalizado');
 }
-
-// ── Panel derecho: mostrar segundero en lugar de curva cuando tool activo ──
-// (el segundero vive en el form de visita, el right panel sigue igual)
 
 // ══════════════════════════════════════════════════
 //  INIT
@@ -4775,21 +4714,25 @@ function renderAgenda(){
         </div>
       </div>
       <div class="contact-chip-menu">
-        <button class="contact-chip-dots" onclick="toggleContactMenu(event,'cmenu-${c.id}')">⋯</button>
+        <button class="contact-chip-dots" onclick="event.stopPropagation();toggleContactMenu(event,'cmenu-${c.id}')">⋯</button>
         <div class="contact-dropdown" id="cmenu-${c.id}">
-          <div class="contact-dd-item" onclick="openEditContact('${c.id}')">✏️ Modificar</div>
-          <div class="contact-dd-item danger" onclick="deleteContact('${c.id}')">🗑️ Eliminar</div>
+          <div class="contact-dd-item" onclick="event.stopPropagation();closeAllContactMenus();openEditContact('${c.id}')">✏️ Modificar</div>
+          <div class="contact-dd-item danger" onclick="event.stopPropagation();closeAllContactMenus();deleteContact('${c.id}')">🗑️ Eliminar</div>
         </div>
       </div>
     </div>`).join('')}</div>`;
 }
 
+function closeAllContactMenus(){
+  document.querySelectorAll('.contact-dropdown').forEach(d=>d.classList.remove('open'));
+}
 function toggleContactMenu(e,id){
   e.stopPropagation();
-  document.querySelectorAll('.contact-dropdown').forEach(d=>{if(d.id!==id)d.classList.remove('open');});
-  document.getElementById(id)?.classList.toggle('open');
+  const isOpen=document.getElementById(id)?.classList.contains('open');
+  closeAllContactMenus();
+  if(!isOpen)document.getElementById(id)?.classList.add('open');
 }
-document.addEventListener('click',()=>document.querySelectorAll('.contact-dropdown').forEach(d=>d.classList.remove('open')));
+document.addEventListener('click',()=>closeAllContactMenus());
 
 function openContactModal(){
   editingContactId=null;
