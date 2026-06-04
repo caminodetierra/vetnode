@@ -445,6 +445,85 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
   display:flex;align-items:center;justify-content:center;z-index:10;
 }
 
+/* ── FAB TABLES BUTTON ── */
+.fab-tables{
+  position:absolute;bottom:22px;left:20px;
+  height:38px;
+  background:var(--surface);
+  border:1.5px solid var(--blue-border);
+  border-radius:13px;color:var(--blue);font-size:12px;font-weight:700;
+  cursor:pointer;box-shadow:0 4px 16px rgba(74,144,226,0.18);
+  display:flex;align-items:center;gap:6px;padding:0 13px;z-index:10;
+  font-family:var(--font);white-space:nowrap;
+}
+.fab-tables:hover{background:var(--blue-dim);}
+/* Panel flotante de tablas */
+.pt-tray{
+  position:absolute;bottom:70px;left:20px;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,0.32);
+  padding:10px;z-index:11;min-width:220px;max-width:290px;
+  display:none;
+}
+.pt-tray.open{display:block;}
+.pt-tray-title{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:2px 6px 8px;}
+.pt-chip{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:9px 10px;margin-bottom:6px;
+  cursor:pointer;transition:.15s;
+}
+.pt-chip:hover{border-color:var(--blue-border);background:var(--blue-dim);}
+.pt-chip-name{flex:1;font-size:12px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pt-chip-dots{
+  padding:4px 6px;border-radius:7px;font-size:15px;color:var(--text3);
+  cursor:pointer;flex-shrink:0;background:transparent;border:none;font-family:var(--font);
+}
+.pt-chip-dots:hover{background:var(--blue-dim);color:var(--blue);}
+.pt-new-btn{
+  width:100%;background:var(--blue-dim);border:1.5px dashed var(--blue-border);
+  border-radius:10px;padding:9px;color:var(--blue);font-size:12px;
+  font-weight:700;font-family:var(--font);cursor:pointer;text-align:center;
+}
+/* Param table screen */
+.pt-toolbar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;
+  flex-wrap:wrap;
+}
+.pt-tool-btn{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:9px;padding:7px 13px;font-size:12px;font-weight:700;
+  color:var(--text2);cursor:pointer;font-family:var(--font);white-space:nowrap;
+}
+.pt-tool-btn:hover{border-color:var(--blue-border);color:var(--blue);background:var(--blue-dim);}
+.pt-tool-btn.green{border-color:var(--green-border);color:var(--green);background:var(--green-dim);}
+.pt-tool-btn.excel{border-color:rgba(82,201,122,.4);color:var(--green);background:var(--green-dim);}
+.pt-scroll{flex:1;overflow:auto;padding:14px;}
+.pt-scroll::-webkit-scrollbar{width:3px;height:3px;}
+.pt-scroll::-webkit-scrollbar-thumb{background:var(--text3);border-radius:2px;}
+.pt-table{border-collapse:collapse;min-width:100%;}
+.pt-table th{
+  background:var(--surface2);border:1px solid var(--border2);
+  padding:0;min-width:110px;position:relative;
+}
+.pt-table th input{
+  width:100%;background:transparent;border:none;outline:none;
+  padding:9px 10px;font-size:11px;font-weight:700;color:var(--blue);
+  font-family:var(--font);text-align:center;
+}
+.pt-table th:first-child input{color:var(--text3);}
+.pt-table td{
+  border:1px solid var(--border2);padding:0;min-width:110px;
+}
+.pt-table td input{
+  width:100%;background:transparent;border:none;outline:none;
+  padding:9px 10px;font-size:12px;color:var(--text);
+  font-family:var(--font);
+}
+.pt-table td input:focus,.pt-table th input:focus{background:var(--blue-dim);}
+.pt-table tr:hover td{background:rgba(74,144,226,0.03);}
+
 /* ── TUTOR PROFILE ── */
 .profile-pad{padding:10px 18px;flex:1;overflow-y:auto;}
 .profile-pad::-webkit-scrollbar{width:3px;}
@@ -1276,7 +1355,33 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
         </div>
       </div>
       <div class="visits-wrap" id="visits-list"></div>
+      <!-- Tray de tablas -->
+      <div class="pt-tray" id="pt-tray">
+        <div class="pt-tray-title">📊 Tablas de seguimiento</div>
+        <div id="pt-chips-list"></div>
+        <button class="pt-new-btn" onclick="openNewParamTable()">+ Nueva tabla</button>
+      </div>
+      <button class="fab-tables" id="fab-tables-btn" onclick="togglePtTray(event)">📊 Tablas de seguimiento</button>
       <button class="fab" onclick="openNewVisit()">+</button>
+    </div>
+
+    <!-- PARAM TABLE SCREEN -->
+    <div class="screen" id="s-param-table">
+      <div class="screen-header">
+        <button class="back-btn" onclick="closePtScreen()">←</button>
+        <div class="hdr-info"><div class="hdr-title-sm" id="pt-screen-title">Nueva tabla</div><div class="hdr-sub" id="pt-screen-sub"></div></div>
+        <div class="hdr-actions" style="gap:6px;">
+          <button class="pt-tool-btn excel" onclick="ptDownloadExcel()">⬇ Excel</button>
+          <button class="save-sm" onclick="savePtScreen()">Guardar</button>
+        </div>
+      </div>
+      <div class="pt-toolbar">
+        <button class="pt-tool-btn" onclick="ptAddRow()">+ Fila</button>
+        <button class="pt-tool-btn" onclick="ptAddCol()">+ Columna</button>
+      </div>
+      <div class="pt-scroll">
+        <table class="pt-table" id="pt-table"></table>
+      </div>
     </div>
 
     <!-- NEW VISIT -->
@@ -1505,6 +1610,17 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           <div id="ve-survey-content" style="font-size:12px;color:var(--text2);line-height:1.7;"></div>
         </div>
         <button class="del-btn" onclick="deleteVisitFull()">Eliminar visita</button>
+      </div>
+    </div>
+
+    <!-- RENAME PARAM TABLE -->
+    <div class="modal-wrap" id="m-pt-rename" onclick="closeIfOutside(event,'m-pt-rename')">
+      <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Cambiar nombre</div>
+        <input type="hidden" id="pt-rename-id">
+        <div class="fg"><label>Nombre de la tabla</label><input class="fi" id="pt-rename-input" placeholder="Ej: Hemograma, Orina..."></div>
+        <button class="save-btn" onclick="confirmPtRename()">Guardar</button>
       </div>
     </div>
 
@@ -2083,6 +2199,7 @@ async function syncFromSupabase(){
     flushPending();
     pushStatsGlobal();
     loadNotifications();
+    syncParamTables();
     maybeShowWelcome();
   }catch(e){console.error('Sync error',e);}
 }
@@ -2229,7 +2346,7 @@ function go(id){
   if(id==='s-tutor')renderTutorProfile();
   if(id==='s-pet'){renderPetProfile();setTimeout(()=>{setRpPetMode(true);},50);}
   if(id==='s-newvisit')setTimeout(()=>{setRpPetMode(true);},50);
-  if(id==='s-survey1'||id==='s-survey2'||id==='s-visitdetail')setTimeout(()=>{setRpPetMode(true);},50);
+  if(id==='s-survey1'||id==='s-survey2'||id==='s-visitdetail'||id==='s-param-table')setTimeout(()=>{setRpPetMode(true);},50);
   if(id==='s-survey2')renderSymptoms();
   if(id==='s-stats'){statsView={level:'organs',organ:null,diag:null,tab:statsView.tab||'personal',species:statsView.species||''};renderStats();}
   if(id==='s-calendar'){renderCalendar();setTimeout(renderRpCalendar,50);}
@@ -4200,6 +4317,255 @@ function skipFollowup(){
   S.pendingFollowupPet=null; S.pendingFollowupTutor=null;
   closeModal('m-followup-date');
   go('s-pet'); showToast('Visita guardada ✓');
+}
+
+// ══════════════════════════════════════════════════
+//  PARAM TABLES
+// ══════════════════════════════════════════════════
+
+// ── State ──
+let _ptEditId=null;        // null = nueva, uuid = editando existente
+let _ptCols=[];            // [{id, label}]
+let _ptRows=[];            // [{id, cells:{colId:valor}}]
+
+// ── Helpers ──
+function _todayStr(){const d=new Date();return`${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;}
+function _ptEmpty(){
+  const colId=crypto.randomUUID();
+  _ptCols=[{id:colId,label:_todayStr()}];
+  _ptRows=[{id:crypto.randomUUID(),cells:{}}];
+}
+
+// ── CACHE + Supabase ──
+const getParamTables=()=>CACHE.get('param_tables')||[];
+async function saveParamTables(tables){
+  CACHE.set('param_tables',tables);
+  const uid=getUserId();if(!uid)return;
+  // upsert all at once
+  const mapped=tables.map(t=>({
+    id:t.id,user_id:uid,pet_id:t.petId,
+    name:t.name||'Comparación parámetros',
+    columns:t.cols,rows:t.rows
+  }));
+  if(mapped.length)await sbUpsert('param_tables',mapped);
+}
+async function deleteParamTable(id){
+  const tables=getParamTables().filter(t=>t.id!==id);
+  CACHE.set('param_tables',tables);
+  const uid=getUserId();if(!uid)return;
+  await fetch(`${SUPABASE_URL}/rest/v1/param_tables?id=eq.${id}`,{method:'DELETE',headers:getAuthHeaders()});
+}
+async function syncParamTables(){
+  const uid=getUserId();if(!uid)return;
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/param_tables?user_id=eq.${uid}&order=created_at.asc`,{headers:{...getAuthHeaders(),'Accept':'application/json'}});
+    if(!r.ok)return;
+    const rows=await r.json();
+    const mapped=rows.map(r=>({id:r.id,petId:r.pet_id,name:r.name,cols:r.columns||[],rows:r.rows||[]}));
+    CACHE.set('param_tables',mapped);
+  }catch(e){console.warn('param_tables sync error',e);}
+}
+
+// ── Tray (s-pet) ──
+function togglePtTray(e){
+  e.stopPropagation();
+  const tray=document.getElementById('pt-tray');
+  const isOpen=tray.classList.contains('open');
+  if(!isOpen){renderPtChips();tray.classList.add('open');}
+  else tray.classList.remove('open');
+}
+document.addEventListener('click',function(e){
+  const tray=document.getElementById('pt-tray');
+  const btn=document.getElementById('fab-tables-btn');
+  if(!tray||tray.classList.contains('open')===false)return;
+  if(!tray.contains(e.target)&&!btn.contains(e.target))tray.classList.remove('open');
+});
+function renderPtChips(){
+  const el=document.getElementById('pt-chips-list');if(!el)return;
+  const tables=getParamTables().filter(t=>t.petId===S.petId);
+  if(!tables.length){el.innerHTML='';return;}
+  el.innerHTML=tables.map(t=>`
+    <div class="pt-chip">
+      <span class="pt-chip-name" onclick="openExistingPt('${t.id}')">${escHtml(t.name)}</span>
+      <button class="pt-chip-dots" onclick="showPtChipMenu(event,'${t.id}')">⋯</button>
+    </div>`).join('');
+}
+function showPtChipMenu(e,id){
+  e.stopPropagation();
+  // context menu inline
+  document.querySelectorAll('.pt-ctx').forEach(m=>m.remove());
+  const rect=e.target.getBoundingClientRect();
+  const menu=document.createElement('div');
+  menu.className='ctx-menu pt-ctx';
+  menu.style.cssText=`position:fixed;top:${rect.bottom+4}px;right:${window.innerWidth-rect.right}px;z-index:200;`;
+  menu.innerHTML=`
+    <div class="ctx-item" onclick="openPtRename('${id}')"><span class="ctx-ico">✏️</span>Cambiar nombre</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item red" onclick="confirmDeletePt('${id}')"><span class="ctx-ico">🗑️</span>Eliminar</div>`;
+  document.body.appendChild(menu);
+  setTimeout(()=>document.addEventListener('click',function h(){menu.remove();document.removeEventListener('click',h);},{once:true}),10);
+}
+function openPtRename(id){
+  const t=getParamTables().find(x=>x.id===id);if(!t)return;
+  document.getElementById('pt-rename-id').value=id;
+  document.getElementById('pt-rename-input').value=t.name||'';
+  openModal('m-pt-rename');
+}
+async function confirmPtRename(){
+  const id=document.getElementById('pt-rename-id').value;
+  const name=document.getElementById('pt-rename-input').value.trim();
+  if(!name){showToast('El nombre no puede estar vacío');return;}
+  const tables=getParamTables();
+  const i=tables.findIndex(t=>t.id===id);if(i<0)return;
+  tables[i].name=name;
+  await saveParamTables(tables);
+  closeModal('m-pt-rename');renderPtChips();showToast('Nombre actualizado ✓');
+}
+async function confirmDeletePt(id){
+  if(!confirm('¿Eliminar esta tabla de seguimiento?'))return;
+  await deleteParamTable(id);
+  renderPtChips();showToast('Tabla eliminada');
+}
+
+// ── Abrir / crear ──
+function openNewParamTable(){
+  _ptEditId=null;
+  _ptEmpty();
+  document.getElementById('pt-screen-title').textContent='Nueva tabla';
+  const p=getPets().find(p=>p.id===S.petId);
+  document.getElementById('pt-screen-sub').textContent=p?p.name:'';
+  document.getElementById('pt-tray').classList.remove('open');
+  renderPtTable();
+  go('s-param-table');
+}
+function openExistingPt(id){
+  const t=getParamTables().find(x=>x.id===id);if(!t)return;
+  _ptEditId=id;
+  _ptCols=t.cols?JSON.parse(JSON.stringify(t.cols)):[];
+  _ptRows=t.rows?JSON.parse(JSON.stringify(t.rows)):[];
+  if(!_ptCols.length)_ptEmpty();
+  document.getElementById('pt-screen-title').textContent=escHtml(t.name);
+  const p=getPets().find(p=>p.id===S.petId);
+  document.getElementById('pt-screen-sub').textContent=p?p.name:'';
+  document.getElementById('pt-tray').classList.remove('open');
+  renderPtTable();
+  go('s-param-table');
+}
+function closePtScreen(){
+  go('s-pet');
+  document.getElementById('pt-tray').classList.remove('open');
+}
+
+// ── Render tabla editable ──
+function renderPtTable(){
+  const tbl=document.getElementById('pt-table');if(!tbl)return;
+  // THEAD
+  let thead='<thead><tr><th><input value="Parámetro" readonly style="color:var(--text3);font-weight:700;cursor:default;"></th>';
+  _ptCols.forEach(col=>{
+    thead+=`<th><input data-colid="${col.id}" class="pt-col-hdr" value="${escHtml(col.label)}" placeholder="Fecha"></th>`;
+  });
+  thead+='</tr></thead>';
+  // TBODY
+  let tbody='<tbody>';
+  _ptRows.forEach(row=>{
+    tbody+=`<tr><td><input data-rowid="${row.id}" data-colid="__param__" class="pt-cell" value="${escHtml(row.param||'')}" placeholder="Parámetro..."></td>`;
+    _ptCols.forEach(col=>{
+      const val=row.cells&&row.cells[col.id]!=null?row.cells[col.id]:'';
+      tbody+=`<td><input data-rowid="${row.id}" data-colid="${col.id}" class="pt-cell" value="${escHtml(val)}" placeholder="—"></td>`;
+    });
+    tbody+='</tr>';
+  });
+  tbody+='</tbody>';
+  tbl.innerHTML=thead+tbody;
+  // Live bind
+  tbl.querySelectorAll('.pt-col-hdr').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const col=_ptCols.find(c=>c.id===inp.dataset.colid);
+      if(col)col.label=inp.value;
+    });
+  });
+  tbl.querySelectorAll('.pt-cell').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const rowId=inp.dataset.rowid;const colId=inp.dataset.colid;
+      const row=_ptRows.find(r=>r.id===rowId);if(!row)return;
+      if(colId==='__param__'){row.param=inp.value;}
+      else{if(!row.cells)row.cells={};row.cells[colId]=inp.value;}
+    });
+  });
+}
+
+// ── Agregar fila / columna ──
+function ptAddRow(){
+  _ptRows.push({id:crypto.randomUUID(),param:'',cells:{}});
+  renderPtTable();
+  // focus última fila primera celda
+  setTimeout(()=>{
+    const rows=document.querySelectorAll('#pt-table tbody tr');
+    if(rows.length)rows[rows.length-1].querySelector('input')?.focus();
+  },50);
+}
+function ptAddCol(){
+  _ptCols.push({id:crypto.randomUUID(),label:_todayStr()});
+  renderPtTable();
+}
+
+// ── Guardar ──
+async function savePtScreen(){
+  const tables=getParamTables();
+  let name='Comparación parámetros';
+  if(_ptEditId){
+    const existing=tables.find(t=>t.id===_ptEditId);
+    if(existing)name=existing.name;
+  }
+  if(_ptEditId){
+    const i=tables.findIndex(t=>t.id===_ptEditId);
+    if(i>-1){tables[i].cols=_ptCols;tables[i].rows=_ptRows;}
+  } else {
+    const newId=crypto.randomUUID();
+    _ptEditId=newId;
+    tables.push({id:newId,petId:S.petId,name,cols:_ptCols,rows:_ptRows});
+    document.getElementById('pt-screen-title').textContent=name;
+  }
+  await saveParamTables(tables);
+  showToast('Tabla guardada ✓');
+  renderPtChips();
+}
+
+// ── Descargar Excel ──
+function ptDownloadExcel(){
+  const p=getPets().find(p=>p.id===S.petId);
+  const t=getTutors().find(t=>t.id===(p?p.tutorId:null));
+  const s=getSettings();
+  const activeVet=getActiveVet();
+  const tableName=_ptEditId?(getParamTables().find(x=>x.id===_ptEditId)?.name||'Tabla'):'Tabla';
+  // Build CSV content (will open as xlsx-compatible)
+  const esc=v=>'"'+(String(v||'').replace(/"/g,'""'))+'"';
+  const rows=[];
+  // Header info
+  rows.push([esc('VetNode — Tabla de Seguimiento de Parámetros')]);
+  rows.push([esc('Clínica: '+(s.clinic||'—'))]);
+  if(activeVet)rows.push([esc('Veterinario/a: '+activeVet.name+(activeVet.license?' — Mat. '+activeVet.license:''))]);
+  rows.push([esc('Tutor: '+(t?t.name:'—')+(t&&t.phone?' — '+t.phone:''))]);
+  rows.push([esc('Paciente: '+(p?p.name:'—')+(p&&p.species?' — '+p.species:'')+(p&&p.dob?' — '+calcAgeStr(p.dob):''))]);
+  rows.push([esc('Tabla: '+tableName)]);
+  rows.push(['']);
+  // Table header
+  const hdr=['Parámetro',..._ptCols.map(c=>c.label)];
+  rows.push(hdr.map(esc));
+  // Table rows
+  _ptRows.forEach(row=>{
+    const cells=[row.param||'',..._ptCols.map(c=>(row.cells&&row.cells[c.id]!=null)?row.cells[c.id]:'')];
+    rows.push(cells.map(esc));
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const bom='\uFEFF';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const petName=p?p.name.replace(/\s+/g,'_'):'paciente';
+  a.href=url;a.download=`VetNode_${petName}_${tableName.replace(/\s+/g,'_')}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('Descargando ✓');
 }
 
 // ══════════════════════════════════════════════════
