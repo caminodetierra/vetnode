@@ -778,6 +778,10 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .pie-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .pie-legend-label{font-size:12px;color:var(--text2);flex:1;font-weight:600;}
 .pie-legend-pct{font-size:12px;color:var(--text3);font-weight:700;}
+.pie-leg-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:9px;}
+.pie-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.pie-leg-lbl{font-size:12px;color:var(--text2);flex:1;font-weight:600;}
+.pie-leg-pct{font-size:12px;color:var(--text3);font-weight:700;}
 .stats-bar-wrap{height:8px;background:var(--surface2);border-radius:4px;margin-bottom:9px;}
 .stats-bar{height:8px;border-radius:4px;}
 
@@ -3562,9 +3566,9 @@ function renderStatsOrgans(visits,el){
   // Second pie: diagnosis type breakdown
   if(presuntivos+confirmados>0){
     const diagTypeItems=[
-      ['❓ Presuntivos',presuntivos],
-      ['✅ Confirmados (Clínica)',byClin],
-      ['✅ Confirmados (Lab/Imagen)',byLab],
+      ['Presuntivos',presuntivos],
+      ['Confirmados (Clínica)',byClin],
+      ['Confirmados (Lab/Imagen)',byLab],
     ].filter(x=>x[1]>0);
     const diagTypeColors=['#f5c842','#52c97a','#4a90e2'];
     setTimeout(()=>{
@@ -3585,7 +3589,7 @@ function renderStatsOrgans(visits,el){
       ctx.font='bold 18px Nunito,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText(diagTotal,cx,cy);
       const legendEl=document.getElementById('legend-diag-type');if(!legendEl)return;
-      legendEl.innerHTML=diagTypeItems.map(([lbl,count],i)=>`<div class="pie-leg-item"><div class="pie-leg-dot" style="background:${diagTypeColors[i]}"></div>${lbl} (${count} · ${Math.round(count/diagTotal*100)}%)</div>`).join('');
+      legendEl.innerHTML=diagTypeItems.map(([lbl,count],i)=>`<div class="pie-leg-item"><div class="pie-leg-dot" style="background:${diagTypeColors[i]}"></div><span class="pie-leg-lbl">${lbl}</span><span class="pie-leg-pct">${count} · ${Math.round(count/diagTotal*100)}%</span></div>`).join('');
     },50);
   }
 }
@@ -3609,9 +3613,9 @@ function renderStatsDiags(visits,el){
     return`<div class="diag-row" onclick="statsView={...statsView,level:'symptoms',diag:'${d.replace(/'/g,"\\'")}',organ:'${organ.replace(/'/g,"\\'")}' };renderStats()" style="cursor:pointer"><span class="diag-badge">${badge}</span><span class="diag-name">${d}</span><span class="diag-count">${c} caso${c>1?'s':''} · ${Math.round(c/total*100)}%</span></div>`;
   }).join('');
   const diagTypeItems=[
-    ['❓ Presuntivos',presuntivos],
-    ['✅ Confirmados (Clínica)',byClin],
-    ['✅ Confirmados (Lab/Imagen)',byLab],
+    ['Presuntivos',presuntivos],
+    ['Confirmados (Clínica)',byClin],
+    ['Confirmados (Lab/Imagen)',byLab],
   ].filter(x=>x[1]>0);
   const diagTypeColors=['#f5c842','#52c97a','#4a90e2'];
   const diagTypeTotal=diagTypeItems.reduce((a,x)=>a+x[1],0);
@@ -3629,7 +3633,7 @@ function renderStatsDiags(visits,el){
     </div>`:''}
     <div class="stats-card">
       <div class="stats-title">Listado de diagnósticos</div>
-      <div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-weight:600">✅ Confirmado · ❓ Presuntivo · 🔍 Sin diagnóstico · Tocá para ver síntomas</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-weight:600">Tocá para ver síntomas asociados</div>
       <div class="diag-list">${diagList}</div>
     </div>`;
   drawPie('pie-canvas','pie-legend',items,total,label=>{statsView={...statsView,level:'symptoms',diag:label==='Sin diagnóstico'?null:label};renderStats();});
@@ -3651,7 +3655,7 @@ function renderStatsDiags(visits,el){
       ctx.font='bold 18px Nunito,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText(diagTypeTotal,cx,cy);
       const legendEl=document.getElementById('legend-diag-type2');if(!legendEl)return;
-      legendEl.innerHTML=diagTypeItems.map(([lbl,count],i)=>`<div class="pie-leg-item"><div class="pie-leg-dot" style="background:${diagTypeColors[i]}"></div>${lbl} (${count} · ${Math.round(count/diagTypeTotal*100)}%)</div>`).join('');
+      legendEl.innerHTML=diagTypeItems.map(([lbl,count],i)=>`<div class="pie-leg-item"><div class="pie-leg-dot" style="background:${diagTypeColors[i]}"></div><span class="pie-leg-lbl">${lbl}</span><span class="pie-leg-pct">${count} · ${Math.round(count/diagTypeTotal*100)}%</span></div>`).join('');
     },50);
   }
 }
@@ -3713,6 +3717,7 @@ async function renderStatsGlobal(el){
             <div class="stats-meta-item"><div class="stats-meta-val">${dm.byLab}</div><div class="stats-meta-lbl">Lab / Imagen</div></div>
             <div class="stats-meta-item"><div class="stats-meta-val">${dm.byClin}</div><div class="stats-meta-lbl">Clínica</div></div>
           </div>
+          ${(dm.presuntivos+dm.byClin+dm.byLab)>0?`<canvas id="pie-diag-type-g" width="200" height="200" style="display:block;margin:12px auto 8px"></canvas><div class="pie-legend" id="legend-diag-type-g"></div>`:''}
         </div>
         <div class="stats-card">
           <div class="stats-title">Por especie</div>
@@ -3727,6 +3732,31 @@ async function renderStatsGlobal(el){
           <div class="diag-list">${topCountries.map(([c,n])=>`<div class="diag-row"><span class="diag-badge">🌎</span><span class="diag-name">${c}</span><span class="diag-count">${n} clínica${n>1?'s':''}</span></div>`).join('')}</div>
         </div>`:''}`;
       if(topOrgans.length)drawPie('pie-canvas','pie-legend',topOrgans,orgTotal,label=>{window._gStatsView={level:'diags',organ:label};renderStatsGlobal(el);});
+      // Diag type pie global
+      const gDiagItems=[['Presuntivos',dm.presuntivos],['Confirmados (Clínica)',dm.byClin],['Confirmados (Lab/Imagen)',dm.byLab]].filter(x=>x[1]>0);
+      if(gDiagItems.length){
+        const gDiagColors=['#f5c842','#52c97a','#4a90e2'];
+        setTimeout(()=>{
+          const canvas=document.getElementById('pie-diag-type-g');if(!canvas)return;
+          const ctx=canvas.getContext('2d');const W=200,H=200,cx=100,cy=100,r=80;
+          ctx.clearRect(0,0,W,H);
+          const gDiagTotal=gDiagItems.reduce((a,x)=>a+x[1],0);
+          let angle=-Math.PI/2;
+          gDiagItems.forEach(([lbl,count],i)=>{
+            const slice=(count/gDiagTotal)*2*Math.PI;
+            ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,angle,angle+slice);ctx.closePath();
+            ctx.fillStyle=gDiagColors[i];ctx.fill();
+            angle+=slice;
+          });
+          ctx.beginPath();ctx.arc(cx,cy,r*0.5,0,2*Math.PI);
+          ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()||'#132233';ctx.fill();
+          ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text').trim()||'#e8f0fa';
+          ctx.font='bold 18px Nunito,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText(gDiagTotal,cx,cy);
+          const legendEl=document.getElementById('legend-diag-type-g');if(!legendEl)return;
+          legendEl.innerHTML=gDiagItems.map(([lbl,count],i)=>`<div class="pie-leg-item"><div class="pie-leg-dot" style="background:${gDiagColors[i]}"></div><span class="pie-leg-lbl">${lbl}</span><span class="pie-leg-pct">${count} · ${Math.round(count/gDiagTotal*100)}%</span></div>`).join('');
+        },50);
+      }
     } else if(gv.level==='diags'){
       const diagAgg={};
       rows.forEach(r=>{const ob=(r.organs_by_diag||[]).find(x=>x.organ===gv.organ);if(ob)(ob.diags||[]).forEach(d=>{if(!diagAgg[d.name])diagAgg[d.name]={count:0,isDefinitive:false};diagAgg[d.name].count+=d.count;if(d.isDefinitive)diagAgg[d.name].isDefinitive=true;});});
