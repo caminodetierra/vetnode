@@ -6,6 +6,7 @@
 <title>VetNode</title>
 <link rel="icon" type="image/jpeg" href="/favicon.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* ── TOKENS ── */
 :root{
@@ -4533,39 +4534,58 @@ async function savePtScreen(){
 
 // ── Descargar Excel ──
 function ptDownloadExcel(){
+  if(typeof XLSX==='undefined'){showToast('Librería Excel no cargada, reintentá');return;}
   const p=getPets().find(p=>p.id===S.petId);
   const t=getTutors().find(t=>t.id===(p?p.tutorId:null));
   const s=getSettings();
   const activeVet=getActiveVet();
   const tableName=_ptEditId?(getParamTables().find(x=>x.id===_ptEditId)?.name||'Tabla'):'Tabla';
-  // Build CSV content (will open as xlsx-compatible)
-  const esc=v=>'"'+(String(v||'').replace(/"/g,'""'))+'"';
-  const rows=[];
-  // Header info
-  rows.push([esc('VetNode — Tabla de Seguimiento de Parámetros')]);
-  rows.push([esc('Clínica: '+(s.clinic||'—'))]);
-  if(activeVet)rows.push([esc('Veterinario/a: '+activeVet.name+(activeVet.license?' — Mat. '+activeVet.license:''))]);
-  rows.push([esc('Tutor: '+(t?t.name:'—')+(t&&t.phone?' — '+t.phone:''))]);
-  rows.push([esc('Paciente: '+(p?p.name:'—')+(p&&p.species?' — '+p.species:'')+(p&&p.dob?' — '+calcAgeStr(p.dob):''))]);
-  rows.push([esc('Tabla: '+tableName)]);
-  rows.push(['']);
-  // Table header
-  const hdr=['Parámetro',..._ptCols.map(c=>c.label)];
-  rows.push(hdr.map(esc));
-  // Table rows
+
+  const wb=XLSX.utils.book_new();
+
+  // ── Armar array de arrays ──
+  const data=[];
+
+  // Encabezado institucional
+  data.push(['VetNode — Tabla de Seguimiento de Parámetros']);
+  data.push(['Clínica: '+(s.clinic||'—')]);
+  if(activeVet)data.push(['Veterinario/a: '+activeVet.name+(activeVet.license?' — Mat. '+activeVet.license:'')]);
+  data.push(['Tutor: '+(t?t.name:'—')+(t&&t.phone?'   Tel: '+t.phone:'')]);
+  data.push(['Paciente: '+(p?p.name:'—')+(p&&p.species?'   Especie: '+p.species:'')+(p&&p.dob?'   Edad: '+calcAgeStr(p.dob):'')]);
+  data.push(['Tabla: '+tableName]);
+  data.push([]); // fila vacía separador
+
+  // Encabezado de tabla
+  data.push(['Parámetro',..._ptCols.map(c=>c.label)]);
+
+  // Filas de datos
   _ptRows.forEach(row=>{
-    const cells=[row.param||'',..._ptCols.map(c=>(row.cells&&row.cells[c.id]!=null)?row.cells[c.id]:'')];
-    rows.push(cells.map(esc));
+    data.push([
+      row.param||'',
+      ..._ptCols.map(c=>(row.cells&&row.cells[c.id]!=null&&row.cells[c.id]!=='')?row.cells[c.id]:'')
+    ]);
   });
-  const csv=rows.map(r=>r.join(',')).join('\n');
-  const bom='\uFEFF';
-  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
+
+  const ws=XLSX.utils.aoa_to_sheet(data);
+
+  // Ancho de columnas: primera más ancha, resto igual
+  const colWidths=[{wch:28},..._ptCols.map(()=>({wch:16}))];
+  ws['!cols']=colWidths;
+
+  // Estilo negrita fila encabezado tabla (fila índice 7)
+  const headerRowIdx=7;
+  for(let c=0;c<=_ptCols.length;c++){
+    const cell=XLSX.utils.encode_cell({r:headerRowIdx,c});
+    if(ws[cell]){
+      ws[cell].s={font:{bold:true}};
+    }
+  }
+
+  XLSX.utils.book_append_sheet(wb,ws,'Seguimiento');
+
   const petName=p?p.name.replace(/\s+/g,'_'):'paciente';
-  a.href=url;a.download=`VetNode_${petName}_${tableName.replace(/\s+/g,'_')}.csv`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-  showToast('Descargando ✓');
+  XLSX.writeFile(wb,`VetNode_${petName}_${tableName.replace(/\s+/g,'_')}.xlsx`);
+  showToast('Descargando Excel ✓');
 }
 
 // ══════════════════════════════════════════════════
