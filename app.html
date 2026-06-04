@@ -4547,7 +4547,7 @@ function ptDownloadExcel(){
   const data=[];
 
   // Encabezado institucional
-  data.push(['VetNode — Tabla de Seguimiento de Parámetros']);
+  data.push(['VetNode']);
   data.push(['Clínica: '+(s.clinic||'—')]);
   if(activeVet)data.push(['Veterinario/a: '+activeVet.name+(activeVet.license?' — Mat. '+activeVet.license:'')]);
   data.push(['Tutor: '+(t?t.name:'—')+(t&&t.phone?'   Tel: '+t.phone:'')]);
@@ -4567,6 +4567,11 @@ function ptDownloadExcel(){
   });
 
   const ws=XLSX.utils.aoa_to_sheet(data);
+
+  // Estilo VetNode (A1): negrita, tamaño grande, azul
+  if(ws['A1']){
+    ws['A1'].s={font:{bold:true,sz:20,color:{rgb:'4A90E2'}}};
+  }
 
   // Ancho de columnas: primera más ancha, resto igual
   const colWidths=[{wch:28},..._ptCols.map(()=>({wch:16}))];
