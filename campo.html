@@ -5118,18 +5118,26 @@ function _showCarDropdown(input,cars,onSelect){
   const dd=document.createElement('div');
   dd.id='campo-car-dropdown';
   dd.style.cssText=`position:fixed;left:${Math.round(rect.left)}px;top:${Math.round(rect.bottom+4)}px;width:${Math.round(rect.width)}px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.8);z-index:9999;overflow:hidden;`;
+  let selected=false;
   cars.forEach(c=>{
     const div=document.createElement('div');
     div.textContent=c;
     div.style.cssText='padding:13px 14px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:1px solid var(--border);-webkit-tap-highlight-color:rgba(0,0,0,0)';
-    const handler=e=>{e.preventDefault();e.stopPropagation();onSelect(c);dd.remove();};
+    const handler=e=>{
+      e.preventDefault();e.stopPropagation();
+      selected=true;
+      dd.remove();
+      onSelect(c);
+    };
     div.addEventListener('touchend',handler,{passive:false});
     div.addEventListener('mousedown',handler);
     dd.appendChild(div);
   });
   document.body.appendChild(dd);
-  const blurHandler=()=>setTimeout(()=>{const d=document.getElementById('campo-car-dropdown');if(d)d.remove();},300);
-  input.addEventListener('blur',blurHandler,{once:true});
+  input.addEventListener('blur',function blurHandler(){
+    setTimeout(()=>{if(!selected){const d=document.getElementById('campo-car-dropdown');if(d)d.remove();}},300);
+    input.removeEventListener('blur',blurHandler);
+  });
 }
 
 function selectCar(car,suggId,prefix){
