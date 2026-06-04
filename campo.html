@@ -437,6 +437,58 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .visit-attachments{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
 .attach-thumb{width:54px;height:54px;border-radius:9px;object-fit:cover;border:1px solid var(--border);cursor:pointer;}
 .attach-audio{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 9px;font-size:10px;color:var(--text3);}
+/* ── CARAVANA HISTORIAL ── */
+.car-suggestion-item{padding:10px 14px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;border-bottom:1px solid var(--border);}
+.car-suggestion-item:last-child{border-bottom:none;}
+.car-suggestion-item:hover{background:var(--surface2);color:var(--text);}
+.car-evento-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+.car-evento-tipo{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+.car-evento-fecha{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:8px;}
+.car-evento-dato{font-size:13px;color:var(--text2);font-weight:600;margin-bottom:3px;}
+.car-evento-resultado{display:inline-block;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:800;margin-top:4px;}
+.car-evento-resultado.prenada{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);}
+.car-evento-resultado.vacia{background:rgba(240,106,106,.15);color:#f06a6a;border:1px solid rgba(240,106,106,.3);}
+.car-evento-resultado.otro{background:var(--surface);color:var(--text3);border:1px solid var(--border);}
+/* ── MIC POPUP CAMPO ── */
+.campo-notes-wrap{position:relative;margin-bottom:8px;}
+.campo-notes-wrap .fi{padding-right:46px;}
+.campo-mic-wrap{position:absolute;bottom:10px;right:10px;}
+.campo-mic-fab{
+  width:30px;height:30px;
+  background:rgba(155,114,232,0.15);border:1px solid rgba(155,114,232,0.35);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:15px;cursor:pointer;position:relative;z-index:2;
+}
+.campo-mic-fab.recording{background:rgba(240,106,106,0.2);border-color:rgba(240,106,106,0.5);animation:cRecPulse 1s ease-in-out infinite;}
+.campo-mic-fab.dictating{background:rgba(74,144,226,0.2);border-color:rgba(74,144,226,0.5);animation:cRecPulse 1s ease-in-out infinite;}
+@keyframes cRecPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.campo-mic-popup{
+  position:absolute;bottom:38px;right:0;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:14px;padding:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.45);
+  display:none;z-index:10;min-width:160px;
+}
+.campo-mic-popup.open{display:block;}
+.campo-mic-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;cursor:pointer;
+  font-size:13px;font-weight:700;color:var(--text2);font-family:var(--font);
+  white-space:nowrap;
+}
+.campo-mic-item:hover{background:var(--surface2);color:var(--text);}
+.campo-mic-item.active{color:#f06a6a;background:rgba(240,106,106,0.1);}
+.campo-mic-item-ico{font-size:16px;width:22px;text-align:center;}
+.campo-rec-audios{display:flex;flex-direction:column;gap:7px;margin-bottom:8px;}
+.campo-rec-audio-item{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:9px 12px;
+  display:flex;align-items:center;gap:10px;
+}
+.campo-rec-audio-name{font-size:11px;color:var(--text3);font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.campo-rec-audio-play{font-size:16px;cursor:pointer;flex-shrink:0;}
+.campo-rec-audio-del{font-size:14px;cursor:pointer;color:#f06a6a;flex-shrink:0;padding:2px 4px;}
+.campo-rec-timer{font-size:11px;color:#f06a6a;font-weight:700;font-variant-numeric:tabular-nums;margin-left:4px;}
 
 /* ── NEW VISIT ── */
 .visit-form{flex:1;overflow-y:auto;padding:12px 18px 20px;}
@@ -1022,7 +1074,24 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           <button class="save-sm" style="background:var(--blue-dim);border-color:var(--blue-border);color:var(--blue)" onclick="openNewVisita()">+ Visita</button>
         </div>
       </div>
+      <div style="padding:10px 16px 0;position:relative">
+        <input class="fi" id="search-caravana" placeholder="🔍  Buscar caravana..." oninput="onCaravanaSearch(this.value)" autocomplete="off" style="width:100%">
+        <div id="caravana-suggestions" style="display:none;position:absolute;left:16px;right:16px;top:54px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:20;max-height:200px;overflow-y:auto;"></div>
+      </div>
       <div class="scroll" id="estab-detail-body"></div>
+    </div>
+
+    <!-- HISTORIAL CARAVANA -->
+    <div class="screen" id="s-caravana">
+      <div class="screen-header">
+        <button class="back-btn" onclick="go('s-estab')">←</button>
+        <div class="hdr-info">
+          <div class="hdr-title" id="caravana-hdr-title">Caravana</div>
+          <div class="hdr-sub" id="caravana-hdr-sub"></div>
+        </div>
+        <div class="hdr-actions"></div>
+      </div>
+      <div class="scroll" id="caravana-detail-body"></div>
     </div>
 
     <!-- VISITA -->
@@ -1035,15 +1104,24 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
       <div class="scroll">
         <div class="list-pad" style="padding-top:12px">
           <div class="fg"><label>Fecha</label><input type="date" class="fi" id="v-date"></div>
-          <div class="fg"><label>Notas de la visita</label><textarea class="fi" id="v-notes" placeholder="Descripción, observaciones..." rows="4"></textarea></div>
           <div class="fg">
-            <label>Audio</label>
-            <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;margin-bottom:8px">
-              <button id="rec-btn" onclick="toggleRecording()" style="width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;background:var(--red-dim);color:var(--red);font-size:18px;display:flex;align-items:center;justify-content:center">🎙️</button>
-              <span id="rec-status" style="font-size:12px;font-weight:600;color:var(--text3);flex:1">Presioná para grabar</span>
-              <button id="rec-play" onclick="playRecording()" style="display:none;width:34px;height:34px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green-border);color:var(--green);cursor:pointer;font-size:14px">▶</button>
+            <label>Notas de la visita</label>
+            <div class="campo-notes-wrap">
+              <textarea class="fi" id="v-notes" placeholder="Descripción, observaciones..." rows="4"></textarea>
+              <div class="campo-mic-wrap">
+                <div class="campo-mic-fab" id="campo-mic-fab" onclick="toggleCampoMicPopup(event)">🎙️</div>
+                <div class="campo-mic-popup" id="campo-mic-popup">
+                  <div class="campo-mic-item" id="campo-mic-item-rec" onclick="toggleCampoRecording()">
+                    <span class="campo-mic-item-ico">⏺</span>Grabar audio
+                  </div>
+                  <div class="campo-mic-item" id="campo-mic-item-dict" onclick="toggleCampoDictation()">
+                    <span class="campo-mic-item-ico">🎤</span>Dictado
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+          <div class="campo-rec-audios" id="campo-rec-audios-list"></div>
           <div class="fg">
             <label>Archivos adjuntos</label>
             <div id="v-attach-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>
@@ -1093,9 +1171,10 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           <label>Caravanas</label>
           <div id="id-caravanas-wrap" style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px"></div>
           <div style="display:flex;gap:8px">
-            <input class="fi" id="id-car-input" placeholder="Número de caravana" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCaravanaEvento('id');}">
+            <input class="fi" id="id-car-input" placeholder="Número o buscar..." style="flex:1" oninput="searchCaravanaSuggestions(this.value,'id-car-suggestions','id')" onkeydown="if(event.key==='Enter'){event.preventDefault();addCaravanaEvento('id');}">
             <button onclick="addCaravanaEvento('id')" style="background:var(--green-dim);border:1px solid var(--green-border);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--green);cursor:pointer">+ Agregar</button>
           </div>
+          <div id="id-car-suggestions" style="margin-top:4px"></div>
         </div>
         <div class="fg"><label>Dentición</label><input class="fi" id="id-denticion" placeholder="Ej: 2 dientes, boca llena..."></div>
         <div class="fg"><label>Score corporal</label><input class="fi" id="id-score" type="number" min="1" max="9" step="0.5" placeholder="1 - 9"></div>
@@ -1175,9 +1254,10 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           <label>Caravanas (opcional)</label>
           <div id="diagc-caravanas-wrap" style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px"></div>
           <div style="display:flex;gap:8px">
-            <input class="fi" id="diagc-car-input" placeholder="Número de caravana" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCaravanaEvento('diagc');}">
+            <input class="fi" id="diagc-car-input" placeholder="Número o buscar..." style="flex:1" oninput="searchCaravanaSuggestions(this.value,'diagc-car-suggestions','diagc')" onkeydown="if(event.key==='Enter'){event.preventDefault();addCaravanaEvento('diagc');}">
             <button onclick="addCaravanaEvento('diagc')" style="background:var(--green-dim);border:1px solid var(--green-border);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--green);cursor:pointer">+ Agregar</button>
           </div>
+          <div id="diagc-car-suggestions" style="margin-top:4px"></div>
         </div>
         <div class="fg"><label>Diagnóstico presuntivo</label><input class="fi" id="diagc-presuntivo" placeholder="Ej: Queratoconjuntivitis..."></div>
         <div class="fg"><label>Diagnóstico definitivo</label><input class="fi" id="diagc-definitivo" placeholder="Confirmado..."></div>
@@ -4687,32 +4767,37 @@ function todayISO(){const d=new Date();return`${d.getFullYear()}-${String(d.getM
 
 function openNewVisita(){
   editingVisitaCampoId=null;visitaCampoAttachments=[];visitaCampoAudio=null;campoRecordedBlob=null;
+  campoVisitAudios=[];
   document.getElementById('visita-title').textContent='Nueva visita';
   document.getElementById('v-date').value=todayISO();
   document.getElementById('v-notes').value='';
   document.getElementById('v-attach-preview').innerHTML='';
-  document.getElementById('rec-status').textContent='Presioná para grabar';
-  document.getElementById('rec-btn').style.background='var(--red-dim)';
-  document.getElementById('rec-play').style.display='none';
+  renderCampoRecAudios();
+  if(_campoIsRecording)stopCampoRecording();
+  stopCampoDictation();
   go('s-visita');
 }
 
 function openEditVisita(id){
   const v=getVisitasCampo().find(x=>x.id===id);if(!v)return;
   editingVisitaCampoId=id;visitaCampoAttachments=v.attachments||[];visitaCampoAudio=v.audio||null;campoRecordedBlob=null;
+  campoVisitAudios=[];
   document.getElementById('visita-title').textContent='Editar visita';
   document.getElementById('v-date').value=v.fecha;
   document.getElementById('v-notes').value=v.notas||'';
   renderCampoAttachPreviews();
-  if(visitaCampoAudio){document.getElementById('rec-status').textContent='Audio grabado ✓';document.getElementById('rec-play').style.display='flex';}
+  renderCampoRecAudios();
   go('s-visita');
 }
 
 function saveVisita(){
   const fecha=document.getElementById('v-date').value||todayISO();
   const notas=document.getElementById('v-notes').value.trim();
-  if(campoRecordedBlob){const reader=new FileReader();reader.onload=()=>{visitaCampoAudio=reader.result;_doSaveVisitaCampo(fecha,notas);};reader.readAsDataURL(campoRecordedBlob);}
-  else _doSaveVisitaCampo(fecha,notas);
+  const audioAttachments=campoVisitAudios.filter(a=>a.storageUrl).map(a=>({name:a.name,type:'audio/webm',data:a.storageUrl,isAudio:true}));
+  visitaCampoAttachments=[...visitaCampoAttachments,...audioAttachments];
+  if(_campoIsRecording)stopCampoRecording();
+  stopCampoDictation();
+  _doSaveVisitaCampo(fecha,notas);
 }
 
 function _doSaveVisitaCampo(fecha,notas){
@@ -4722,37 +4807,248 @@ function _doSaveVisitaCampo(fecha,notas){
   saveVisitasCampo(visitas);go('s-estab');showToast('Visita guardada ✓');
 }
 
-async function toggleRecording(){
-  if(campoIsRecording){campoMediaRecorder?.stop();}
-  else{
-    try{
-      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-      campoAudioChunks=[];
-      campoMediaRecorder=new MediaRecorder(stream);
-      campoMediaRecorder.ondataavailable=e=>{if(e.data.size>0)campoAudioChunks.push(e.data);};
-      campoMediaRecorder.onstop=()=>{
-        campoRecordedBlob=new Blob(campoAudioChunks,{type:'audio/webm'});
-        stream.getTracks().forEach(t=>t.stop());
-        document.getElementById('rec-status').textContent='Audio grabado ✓';
-        document.getElementById('rec-btn').style.background='var(--red-dim)';
-        document.getElementById('rec-play').style.display='flex';
-        campoIsRecording=false;
-      };
-      campoMediaRecorder.start();campoIsRecording=true;
-      document.getElementById('rec-btn').style.background='var(--red)';
-      document.getElementById('rec-status').textContent='Grabando...';
-    }catch(e){showToast('No se pudo acceder al micrófono');}
-  }
+// ── Audio campo — nuevo sistema ──
+let campoVisitAudios=[];
+let _campoMediaRecorder=null;
+let _campoRecChunks=[];
+let _campoRecInterval=null;
+let _campoRecSec=0;
+let _campoIsRecording=false;
+let _campoRecognition=null;
+let _campoDictating=false;
+
+function toggleCampoMicPopup(e){
+  e.stopPropagation();
+  document.getElementById('campo-mic-popup').classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  const popup=document.getElementById('campo-mic-popup');
+  if(popup&&!e.target.closest('.campo-mic-wrap'))popup.classList.remove('open');
+});
+
+function toggleCampoRecording(){
+  if(_campoIsRecording){stopCampoRecording();}else{startCampoRecording();}
+}
+function startCampoRecording(){
+  if(!navigator.mediaDevices?.getUserMedia){showToast('Grabación no soportada');return;}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    _campoRecChunks=[];_campoRecSec=0;_campoIsRecording=true;
+    _campoMediaRecorder=new MediaRecorder(stream);
+    _campoMediaRecorder.ondataavailable=e=>{if(e.data.size>0)_campoRecChunks.push(e.data);};
+    _campoMediaRecorder.onstop=()=>{
+      const blob=new Blob(_campoRecChunks,{type:'audio/webm'});
+      const url=URL.createObjectURL(blob);
+      const id=crypto.randomUUID();
+      const name=`Audio ${campoVisitAudios.length+1} (${campoFmtTime(_campoRecSec)})`;
+      campoVisitAudios.push({id,name,blob,url});
+      renderCampoRecAudios();
+      uploadCampoAudio(id,blob);
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    _campoMediaRecorder.start(100);
+    const fab=document.getElementById('campo-mic-fab');
+    const item=document.getElementById('campo-mic-item-rec');
+    if(fab)fab.classList.add('recording');
+    if(item){item.classList.add('active');item.innerHTML=`<span class="campo-mic-item-ico">⏹</span>Detener <span class="campo-rec-timer" id="campo-rec-timer-inline">0:00</span>`;}
+    document.getElementById('campo-mic-popup').classList.remove('open');
+    _campoRecInterval=setInterval(()=>{
+      _campoRecSec++;
+      const t=document.getElementById('campo-rec-timer-inline');
+      if(t)t.textContent=campoFmtTime(_campoRecSec);
+    },1000);
+  }).catch(()=>showToast('No se pudo acceder al micrófono'));
+}
+function stopCampoRecording(){
+  _campoIsRecording=false;
+  if(_campoMediaRecorder&&_campoMediaRecorder.state!=='inactive')_campoMediaRecorder.stop();
+  if(_campoRecInterval){clearInterval(_campoRecInterval);_campoRecInterval=null;}
+  const fab=document.getElementById('campo-mic-fab');
+  const item=document.getElementById('campo-mic-item-rec');
+  if(fab)fab.classList.remove('recording');
+  if(item){item.classList.remove('active');item.innerHTML='<span class="campo-mic-item-ico">⏺</span>Grabar audio';}
+  showToast('Audio guardado ✓');
+}
+function campoFmtTime(s){return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
+
+function renderCampoRecAudios(){
+  const el=document.getElementById('campo-rec-audios-list');if(!el)return;
+  if(!campoVisitAudios.length){el.innerHTML='';return;}
+  el.innerHTML=campoVisitAudios.map(a=>`
+    <div class="campo-rec-audio-item" id="craudio-${a.id}">
+      <span class="campo-rec-audio-play" id="cplay-btn-${a.id}" onclick="toggleCampoAudioPlay('${a.id}')">▶</span>
+      <span class="campo-rec-audio-name">${escHtml(a.name)}</span>
+      <span class="campo-rec-audio-del" onclick="removeCampoAudio('${a.id}')">✕</span>
+    </div>
+    <audio id="caplayer-${a.id}" src="${a.url}" style="display:none"></audio>`).join('');
+  campoVisitAudios.forEach(a=>{
+    const p=document.getElementById('caplayer-'+a.id);
+    if(p)p.onended=()=>{const b=document.getElementById('cplay-btn-'+a.id);if(b)b.textContent='▶';};
+  });
+}
+function toggleCampoAudioPlay(id){
+  campoVisitAudios.forEach(a=>{
+    if(a.id!==id){const p=document.getElementById('caplayer-'+a.id);if(p&&!p.paused){p.pause();const b=document.getElementById('cplay-btn-'+a.id);if(b)b.textContent='▶';}}
+  });
+  const player=document.getElementById('caplayer-'+id);
+  const btn=document.getElementById('cplay-btn-'+id);
+  if(!player)return;
+  if(player.paused){player.play();if(btn)btn.textContent='⏸';}
+  else{player.pause();if(btn)btn.textContent='▶';}
+}
+function removeCampoAudio(id){
+  const p=document.getElementById('caplayer-'+id);if(p)p.pause();
+  campoVisitAudios=campoVisitAudios.filter(a=>a.id!==id);
+  renderCampoRecAudios();
+}
+async function uploadCampoAudio(id,blob){
+  try{
+    const s=getSession();if(!s?.access_token)return;
+    const uid=getUserId();if(!uid)return;
+    const path=`${uid}/${id}.webm`;
+    const r=await fetch(`${SUPABASE_URL}/storage/v1/object/visit-audios/${path}`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+s.access_token,'Content-Type':'audio/webm','x-upsert':'true'},
+      body:blob
+    });
+    if(r.ok){
+      const publicUrl=`${SUPABASE_URL}/storage/v1/object/public/visit-audios/${path}`;
+      const idx=campoVisitAudios.findIndex(a=>a.id===id);
+      if(idx>-1)campoVisitAudios[idx].storageUrl=publicUrl;
+    }
+  }catch(e){console.warn('Campo audio upload error',e);}
 }
 
-function playRecording(){if(campoRecordedBlob)new Audio(URL.createObjectURL(campoRecordedBlob)).play();else if(visitaCampoAudio)new Audio(visitaCampoAudio).play();}
+function toggleCampoDictation(){
+  if(_campoDictating){stopCampoDictation();}else{startCampoDictation();}
+}
+function startCampoDictation(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('Dictado no soportado en este navegador');return;}
+  _campoRecognition=new SR();
+  _campoRecognition.lang='es-AR';_campoRecognition.continuous=true;_campoRecognition.interimResults=false;
+  _campoRecognition.onresult=e=>{
+    let final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';}
+    if(final){const ta=document.getElementById('v-notes');if(ta)ta.value=(ta.value+final).trimStart();}
+  };
+  _campoRecognition.onerror=()=>stopCampoDictation();
+  _campoRecognition.onend=()=>{if(_campoDictating)_campoRecognition.start();};
+  _campoRecognition.start();
+  _campoDictating=true;
+  const fab=document.getElementById('campo-mic-fab');
+  const item=document.getElementById('campo-mic-item-dict');
+  if(fab)fab.classList.add('dictating');
+  if(item){item.classList.add('active');item.innerHTML='<span class="campo-mic-item-ico">⏹</span>Detener dictado';}
+  document.getElementById('campo-mic-popup').classList.remove('open');
+  showToast('Dictado activo 🎤');
+}
+function stopCampoDictation(){
+  _campoDictating=false;
+  if(_campoRecognition){try{_campoRecognition.stop();}catch(e){}_campoRecognition=null;}
+  const fab=document.getElementById('campo-mic-fab');
+  const item=document.getElementById('campo-mic-item-dict');
+  if(fab)fab.classList.remove('dictating');
+  if(item){item.classList.remove('active');item.innerHTML='<span class="campo-mic-item-ico">🎤</span>Dictado';}
+  showToast('Dictado finalizado');
+}
+
 function playAudioData(d){new Audio(d).play();}
 function triggerAttach(type){document.getElementById(type==='image'?'attach-input-img':'attach-input-any').click();}
 function handleAttach(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{visitaCampoAttachments.push({name:file.name,type:file.type,data:e.target.result});renderCampoAttachPreviews();};reader.readAsDataURL(file);input.value='';}
 function renderCampoAttachPreviews(){const el=document.getElementById('v-attach-preview');if(!el)return;el.innerHTML=visitaCampoAttachments.map((a,i)=>{const inner=a.type?.startsWith('image')?`<img src="${a.data}" style="width:54px;height:54px;border-radius:9px;object-fit:cover;border:1px solid var(--border)">`:`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:10px;color:var(--text2)">📎 ${(a.name||'').substring(0,16)}</div>`;return`<div style="position:relative;display:inline-block">${inner}<div onclick="removeAttachCampo(${i})" style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:var(--red);border-radius:50%;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer">✕</div></div>`;}).join('');}
 function removeAttachCampo(i){visitaCampoAttachments.splice(i,1);renderCampoAttachPreviews();}
 
-// ── Rodeos ──
+// ── Buscador de caravana ──
+function onCaravanaSearch(val){
+  const sugg=document.getElementById('caravana-suggestions');
+  if(!sugg)return;
+  if(!val.trim()){sugg.style.display='none';return;}
+  const cars=getAllCaravanasDe(SC.estabId).filter(c=>c.toLowerCase().includes(val.toLowerCase())).slice(0,8);
+  if(!cars.length){sugg.style.display='none';return;}
+  sugg.style.display='block';
+  sugg.innerHTML=cars.map(c=>`<div class="car-suggestion-item" data-car="${escHtml(c)}" onclick="openCaravanaHistorial('${c.replace(/'/g,"\\'")}')">${escHtml(c)}</div>`).join('');
+}
+
+function openCaravanaHistorial(caravana){
+  // Cerrar suggestions y limpiar buscador
+  const sugg=document.getElementById('caravana-suggestions');if(sugg)sugg.style.display='none';
+  const inp=document.getElementById('search-caravana');if(inp)inp.value='';
+
+  document.getElementById('caravana-hdr-title').textContent='Caravana '+caravana;
+
+  const eventos=getEventosCampo().filter(e=>e.estabId===SC.estabId);
+  const rodeos=getRodeos().filter(r=>r.estabId===SC.estabId);
+
+  // Recolectar entradas del historial
+  const entries=[];
+
+  // Rodeos
+  rodeos.forEach(r=>{
+    if((r.caravanas||[]).includes(caravana)){
+      entries.push({tipo:'rodeo',fecha:null,rodeo:r});
+    }
+  });
+
+  // Eventos (identificacion, aplicacion, diagnostico)
+  eventos.filter(e=>e.tipo!=='tacto'&&(e.caravanas||[]).includes(caravana)).forEach(e=>{
+    entries.push({tipo:e.tipo,fecha:e.fecha,datos:e.datos,eventoId:e.id});
+  });
+
+  // Tacto — buscar en resultados individuales
+  eventos.filter(e=>e.tipo==='tacto').forEach(e=>{
+    const res=(e.datos?.resultados||[]).find(r=>r.caravana===caravana);
+    if(res)entries.push({tipo:'tacto',fecha:e.fecha,resultado:res,eventoId:e.id});
+  });
+
+  // Ordenar por fecha desc (rodeos sin fecha van al final)
+  entries.sort((a,b)=>{
+    if(!a.fecha)return 1;if(!b.fecha)return-1;
+    return new Date(b.fecha)-new Date(a.fecha);
+  });
+
+  const TIPO_LABEL={tacto:'Tacto rectal',identificacion:'Identificación',aplicacion:'Aplicación',diagnostico:'Diagnóstico',rodeo:'Rodeo / Lote'};
+  const TIPO_COLOR={tacto:'#9b72e8',identificacion:'#4a90e2',aplicacion:'#52c97a',diagnostico:'#f5c842',rodeo:'var(--text3)'};
+
+  const el=document.getElementById('caravana-detail-body');
+  if(!entries.length){
+    el.innerHTML=`<div class="list-pad" style="padding-top:20px;text-align:center"><div style="font-size:32px;margin-bottom:10px">🏷️</div><div style="font-size:14px;font-weight:700;color:var(--text2)">Sin historial</div><div style="font-size:12px;color:var(--text3);margin-top:4px">No se encontraron eventos para esta caravana.</div></div>`;
+    go('s-caravana');return;
+  }
+
+  const sub=entries.length+' evento'+(entries.length>1?'s':'');
+  document.getElementById('caravana-hdr-sub').textContent=sub;
+
+  el.innerHTML=`<div class="list-pad" style="padding-top:14px">${entries.map(entry=>{
+    const color=TIPO_COLOR[entry.tipo]||'var(--text3)';
+    const label=TIPO_LABEL[entry.tipo]||entry.tipo;
+    let contenido='';
+    if(entry.tipo==='tacto'){
+      const r=entry.resultado;
+      const cls=r.resultado==='Preñada'?'prenada':r.resultado==='Vacía'?'vacia':'otro';
+      contenido=`<span class="car-evento-resultado ${cls}">${r.resultado}</span>${r.desc?`<div class="car-evento-dato" style="margin-top:6px">📝 ${escHtml(r.desc)}</div>`:''}`;
+    } else if(entry.tipo==='identificacion'){
+      const d=entry.datos||{};
+      contenido=[d.denticion?`🦷 Dentición: ${escHtml(d.denticion)}`:'',d.score?`📊 Score: ${escHtml(d.score)}`:'',d.desc?`📝 ${escHtml(d.desc)}`:''].filter(Boolean).map(t=>`<div class="car-evento-dato">${t}</div>`).join('');
+    } else if(entry.tipo==='aplicacion'){
+      const d=entry.datos||{};
+      const prods=(d.productos||[]).map(p=>`${escHtml(p.nombre||p)}`).join(', ');
+      contenido=[prods?`💉 ${prods}`:'',d.desc?`📝 ${escHtml(d.desc)}`:''].filter(Boolean).map(t=>`<div class="car-evento-dato">${t}</div>`).join('');
+    } else if(entry.tipo==='diagnostico'){
+      const d=entry.datos||{};
+      contenido=[d.presuntivo?`❓ Presuntivo: ${escHtml(d.presuntivo)}`:'',d.definitivo?`✅ Definitivo: ${escHtml(d.definitivo)}`:'',d.desc?`📝 ${escHtml(d.desc)}`:''].filter(Boolean).map(t=>`<div class="car-evento-dato">${t}</div>`).join('');
+    } else if(entry.tipo==='rodeo'){
+      const r=entry.rodeo;
+      contenido=`<div class="car-evento-dato">📋 ${escHtml(r.nombre)}${r.categoria?' · '+escHtml(r.categoria):''}</div>`;
+    }
+    return`<div class="car-evento-card">
+      <div class="car-evento-tipo" style="color:${color}">${label}</div>
+      ${entry.fecha?`<div class="car-evento-fecha">${entry.fecha}</div>`:''}
+      ${contenido||'<div class="car-evento-dato" style="color:var(--text3)">Sin datos adicionales</div>'}
+    </div>`;
+  }).join('')}</div>`;
+
+  go('s-caravana');
+}
 let rodeoCaravanas=[];let editingRodeoId=null;
 function openRodeoNew(){editingRodeoId=null;rodeoCaravanas=[];document.getElementById('rodeo-title').textContent='Nuevo rodeo / Lote';['rod-nombre','rod-categoria','rod-desc'].forEach(id=>document.getElementById(id).value='');renderCaravanasWrap('rod-caravanas-wrap',rodeoCaravanas,'rodeoCaravanas');}
 function addCaravanaToRodeo(){const i=document.getElementById('rod-car-input');const v=i.value.trim();if(!v)return;if(!rodeoCaravanas.includes(v)){rodeoCaravanas.push(v);renderCaravanasWrap('rod-caravanas-wrap',rodeoCaravanas,'rodeoCaravanas');}i.value='';}
@@ -4766,13 +5062,52 @@ function deleteRodeo(id){if(!confirm('¿Eliminar este rodeo?'))return;saveRodeos
 let eventoCaravanas={id:[],ap:[],diagc:[]};
 let apProductos=[];let tactoResultados=[];let tactoCurrentResult='';
 
-function addCaravanaEvento(prefix){const i=document.getElementById(`${prefix}-car-input`);const v=i.value.trim();if(!v)return;if(!eventoCaravanas[prefix])eventoCaravanas[prefix]=[];if(!eventoCaravanas[prefix].includes(v)){eventoCaravanas[prefix].push(v);renderCaravanasWrap(`${prefix}-caravanas-wrap`,eventoCaravanas[prefix],`eventoCaravanas.${prefix}`);}i.value='';}
+function addCaravanaEvento(prefix){
+  const i=document.getElementById(`${prefix}-car-input`);
+  const v=i.value.trim();if(!v)return;
+  if(!eventoCaravanas[prefix])eventoCaravanas[prefix]=[];
+  if(!eventoCaravanas[prefix].includes(v)){
+    eventoCaravanas[prefix].push(v);
+    renderCaravanasWrap(`${prefix}-caravanas-wrap`,eventoCaravanas[prefix],`eventoCaravanas.${prefix}`);
+  }
+  i.value='';
+  const sugg=document.getElementById(`${prefix}-car-suggestions`);if(sugg)sugg.innerHTML='';
+}
 
-function getAllCaravanasDe(estabId){const cars=new Set();getRodeos().filter(r=>r.estabId===estabId).forEach(r=>(r.caravanas||[]).forEach(c=>cars.add(c)));getEventosCampo().filter(e=>e.estabId===estabId).forEach(e=>(e.caravanas||[]).forEach(c=>cars.add(c)));return[...cars].sort();}
+function getAllCaravanasDe(estabId){
+  const cars=new Set();
+  getRodeos().filter(r=>r.estabId===estabId).forEach(r=>(r.caravanas||[]).forEach(c=>cars.add(c)));
+  getEventosCampo().filter(e=>e.estabId===estabId).forEach(e=>{
+    (e.caravanas||[]).forEach(c=>cars.add(c));
+    // tacto guarda caravanas en datos.resultados
+    (e.datos?.resultados||[]).forEach(r=>{if(r.caravana)cars.add(r.caravana);});
+  });
+  return[...cars].sort();
+}
 
-function searchCaravanaSuggestions(val,suggId,prefix){const el=document.getElementById(suggId);if(!el)return;if(!val){el.innerHTML='';return;}const cars=getAllCaravanasDe(SC.estabId).filter(c=>c.includes(val)).slice(0,5);el.innerHTML=cars.map(c=>`<div onclick="selectCar('${c}','${suggId}',${prefix?`'${prefix}'`:'null'})" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;margin-bottom:4px">${c}</div>`).join('');}
+function searchCaravanaSuggestions(val,suggId,prefix){
+  const el=document.getElementById(suggId);if(!el)return;
+  if(!val){el.innerHTML='';return;}
+  const cars=getAllCaravanasDe(SC.estabId).filter(c=>c.toLowerCase().includes(val.toLowerCase())).slice(0,5);
+  if(!cars.length){el.innerHTML='';return;}
+  el.innerHTML=cars.map(c=>`<div onclick="selectCar('${c.replace(/'/g,"\\'")}','${suggId}','${prefix||''}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;margin-bottom:4px">${escHtml(c)}</div>`).join('');
+}
 
-function selectCar(car,suggId,prefix){if(prefix){const i=document.getElementById(`${prefix}-car-input`);if(i)i.value=car;}else{const i=document.getElementById('tacto-car-input');if(i)i.value=car;}document.getElementById(suggId).innerHTML='';}
+function selectCar(car,suggId,prefix){
+  if(prefix&&prefix!=='null'){
+    const i=document.getElementById(`${prefix}-car-input`);if(i)i.value=car;
+    // auto-agregar al presionar sugerencia
+    if(!eventoCaravanas[prefix])eventoCaravanas[prefix]=[];
+    if(!eventoCaravanas[prefix].includes(car)){
+      eventoCaravanas[prefix].push(car);
+      renderCaravanasWrap(`${prefix}-caravanas-wrap`,eventoCaravanas[prefix],`eventoCaravanas.${prefix}`);
+    }
+    const inp=document.getElementById(`${prefix}-car-input`);if(inp)inp.value='';
+  } else {
+    const i=document.getElementById('tacto-car-input');if(i)i.value=car;
+  }
+  const el=document.getElementById(suggId);if(el)el.innerHTML='';
+}
 
 function openEvento(tipo){
   eventoCaravanas={id:[],ap:[],diagc:[]};apProductos=[];
