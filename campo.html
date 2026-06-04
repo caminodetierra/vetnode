@@ -4968,13 +4968,33 @@ function removeAttachCampo(i){visitaCampoAttachments.splice(i,1);renderCampoAtta
 
 // ── Buscador de caravana ──
 function onCaravanaSearch(val){
-  const sugg=document.getElementById('caravana-suggestions');
-  if(!sugg)return;
-  if(!val.trim()){sugg.style.display='none';return;}
+  const prev=document.getElementById('campo-car-dropdown');if(prev)prev.remove();
+  const sugg=document.getElementById('caravana-suggestions');if(sugg)sugg.style.display='none';
+  if(!val||!val.trim())return;
   const cars=getAllCaravanasDe(SC.estabId).filter(c=>c.toLowerCase().includes(val.toLowerCase())).slice(0,8);
-  if(!cars.length){sugg.style.display='none';return;}
-  sugg.style.display='block';
-  sugg.innerHTML=cars.map(c=>`<div class="car-suggestion-item" data-car="${escHtml(c)}" onclick="openCaravanaHistorial('${c.replace(/'/g,"\\'")}')">${escHtml(c)}</div>`).join('');
+  if(!cars.length)return;
+  const input=document.getElementById('search-caravana');if(!input)return;
+  const rect=input.getBoundingClientRect();
+  const dropdown=document.createElement('div');
+  dropdown.id='campo-car-dropdown';
+  dropdown.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.bottom+2}px;width:${rect.width}px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.6);z-index:9999;overflow:hidden;max-height:200px;overflow-y:auto;`;
+  dropdown.innerHTML=cars.map(c=>`<div data-car="${c.replace(/"/g,'&quot;')}" style="padding:11px 14px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;border-bottom:1px solid var(--border)">${escHtml(c)}</div>`).join('');
+  dropdown.querySelectorAll('div').forEach(item=>{
+    item.addEventListener('mousedown',function(e){
+      e.preventDefault();
+      const car=this.dataset.car;
+      openCaravanaHistorial(car);
+      dropdown.remove();
+      const inp=document.getElementById('search-caravana');if(inp)inp.value='';
+    });
+  });
+  document.body.appendChild(dropdown);
+  setTimeout(()=>{
+    document.addEventListener('click',function closeDrop(){
+      const d=document.getElementById('campo-car-dropdown');if(d)d.remove();
+      document.removeEventListener('click',closeDrop);
+    });
+  },10);
 }
 
 function openCaravanaHistorial(caravana){
@@ -5094,17 +5114,40 @@ function getAllCaravanasDe(estabId){
 }
 
 function searchCaravanaSuggestions(val,suggId,prefix){
-  const el=document.getElementById(suggId);if(!el)return;
-  if(!val){el.style.display='none';el.innerHTML='';return;}
-  const cars=getAllCaravanasDe(SC.estabId).filter(c=>c.toLowerCase().includes(val.toLowerCase())).slice(0,5);
-  if(!cars.length){el.style.display='none';el.innerHTML='';return;}
-  el.style.display='block';
-  el.innerHTML=cars.map(c=>`<div onclick="selectCar('${c.replace(/'/g,"\\'")}','${suggId}','${prefix||''}')" style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:1px solid var(--border)">${escHtml(c)}</div>`).join('');
+  // Eliminar dropdown previo del body
+  const prev=document.getElementById('campo-car-dropdown');if(prev)prev.remove();
+  if(!val||!val.trim())return;
+  const cars=getAllCaravanasDe(SC.estabId).filter(c=>c.toLowerCase().includes(val.toLowerCase())).slice(0,6);
+  if(!cars.length)return;
+  // Buscar el input asociado
+  const inputId=prefix&&prefix!=='null'?`${prefix}-car-input`:'tacto-car-input';
+  const input=document.getElementById(inputId);if(!input)return;
+  const rect=input.getBoundingClientRect();
+  const dropdown=document.createElement('div');
+  dropdown.id='campo-car-dropdown';
+  dropdown.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.bottom+2}px;width:${rect.width}px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.6);z-index:9999;overflow:hidden;`;
+  dropdown.innerHTML=cars.map(c=>`<div data-car="${c.replace(/"/g,'&quot;')}" data-suggid="${suggId}" data-prefix="${prefix||''}" style="padding:11px 14px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:1px solid var(--border)">${escHtml(c)}</div>`).join('');
+  dropdown.querySelectorAll('div').forEach(item=>{
+    item.addEventListener('mousedown',function(e){
+      e.preventDefault();
+      const car=this.dataset.car;
+      const px=this.dataset.prefix;
+      selectCar(car,this.dataset.suggid,px);
+    });
+  });
+  document.body.appendChild(dropdown);
+  // Cerrar si se toca fuera
+  setTimeout(()=>{
+    document.addEventListener('click',function closeDrop(){
+      const d=document.getElementById('campo-car-dropdown');if(d)d.remove();
+      document.removeEventListener('click',closeDrop);
+    });
+  },10);
 }
 
 function selectCar(car,suggId,prefix){
+  const dropdown=document.getElementById('campo-car-dropdown');if(dropdown)dropdown.remove();
   if(prefix&&prefix!=='null'){
-    const i=document.getElementById(`${prefix}-car-input`);if(i)i.value=car;
     if(!eventoCaravanas[prefix])eventoCaravanas[prefix]=[];
     if(!eventoCaravanas[prefix].includes(car)){
       eventoCaravanas[prefix].push(car);
@@ -5114,7 +5157,6 @@ function selectCar(car,suggId,prefix){
   } else {
     const i=document.getElementById('tacto-car-input');if(i)i.value=car;
   }
-  const el=document.getElementById(suggId);if(el){el.style.display='none';el.innerHTML='';}
 }
 
 function openEvento(tipo){
