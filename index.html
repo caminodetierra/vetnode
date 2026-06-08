@@ -405,7 +405,7 @@ footer span{color:var(--orange);font-weight:700;}
   font-size:15px;font-weight:800;color:var(--text);
   display:flex;align-items:center;gap:6px;
 }
-.review-flag{font-size:17px;line-height:1;}
+.review-flag{font-size:17px;line-height:1;font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;}
 .review-stars{color:var(--orange);font-size:13px;letter-spacing:1px;margin-top:3px;}
 .review-text{
   font-size:14px;line-height:1.7;color:var(--text2);
@@ -981,6 +981,7 @@ document.addEventListener('keydown', e => {
   function resetTimer(){clearInterval(timer);timer=setInterval(()=>goTo(cur+1),4000);}
   window.carouselMove=n=>goTo(cur+n);
   resetTimer();
+})();
 // ── REVIEWS CAROUSEL ──
 (function initReviews(){
   const total=3;let cur=0;let timer;
