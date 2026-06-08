@@ -55,14 +55,18 @@
   <a href="/" class="back-link">← Volver al inicio</a>
 
   <h1>Términos y Condiciones de Uso</h1>
-  <div class="updated">Última actualización: mayo de 2026</div>
+  <div class="updated">Última actualización: junio de 2026</div>
 
   <div class="highlight">
     <p>Al crear una cuenta y usar VetNode, aceptás estos Términos y Condiciones en su totalidad. Si no estás de acuerdo con alguno de los puntos, no uses la aplicación.</p>
   </div>
 
   <h2>1. Descripción del servicio</h2>
-  <p>VetNode es una aplicación web de historia clínica veterinaria que permite a profesionales veterinarios registrar y gestionar información de sus pacientes, visitas, diagnósticos, recordatorios y estadísticas clínicas.</p>
+  <p>VetNode es una aplicación web de historia clínica veterinaria que permite a profesionales veterinarios registrar y gestionar información de sus pacientes, visitas, diagnósticos, recordatorios y estadísticas clínicas. VetNode cuenta con dos módulos principales:</p>
+  <ul>
+    <li><strong>Módulo Clínica:</strong> gestión de pacientes de pequeños animales, tutores, visitas, recordatorios, turnos y encuestas post-visita.</li>
+    <li><strong>Módulo Campo:</strong> gestión de establecimientos, rodeos, eventos sanitarios (tacto, vacunación/aplicación, identificación, diagnóstico) y visitas a campo para medicina de grandes animales y producción.</li>
+  </ul>
   <p>VetNode es desarrollada y mantenida por Francisco Picardo, con domicilio en Argentina, y puede ser contactado en <a href="mailto:soporte@vetnode.app">soporte@vetnode.app</a>.</p>
 
   <h2>2. Elegibilidad y registro</h2>
@@ -83,10 +87,18 @@
     <li>No intentar acceder a datos de otros usuarios</li>
     <li>No realizar ingeniería inversa, descompilar o modificar el código de la aplicación</li>
     <li>No usar la app para actividades ilegales o que violen derechos de terceros</li>
-    <li>No sobrecargar los servidores con solicitudes automatizadas o scripts</li>
+    <li>No sobrecargar los servidores con solicitudes automatizadas, scripts o bots</li>
+    <li>No intentar vulnerar los sistemas de seguridad o autenticación de la aplicación</li>
   </ul>
 
-  <h2>4. Responsabilidad sobre los datos clínicos</h2>
+  <h2>4. Datos de encuestas y acuerdos con terceros</h2>
+  <p>VetNode recopila las respuestas a las encuestas post-visita completadas por el usuario. Estas respuestas son anonimizadas y agregadas antes de cualquier uso o transmisión, de forma que no permiten identificar a ninguna persona, animal o establecimiento en particular.</p>
+  <p>Los datos anonimizados y agregados de encuestas pueden ser compartidos con laboratorios veterinarios, instituciones académicas y organismos del sector en el marco de acuerdos comerciales o de investigación orientados a generar inteligencia clínica veterinaria (prevalencia de enfermedades, tendencias epidemiológicas, eficacia de tratamientos).</p>
+  <div class="highlight">
+    <p><strong>Este uso constituye una condición del servicio.</strong> Al registrarte y usar VetNode, aceptás expresamente que los datos anonimizados de tus encuestas puedan ser utilizados con estos fines. No existe opción de exclusión (opt-out) para este uso, dado que forma parte integral de la propuesta de valor de la plataforma. Para más detalle sobre el tratamiento de estos datos, consultá nuestra <a href="/privacidad.html">Política de Privacidad</a>.</p>
+  </div>
+
+  <h2>5. Responsabilidad sobre los datos clínicos</h2>
   <div class="warning">
     <p>⚠️ VetNode es una herramienta de gestión y registro. <strong>No reemplaza el criterio clínico profesional.</strong> El veterinario es el único responsable de los diagnósticos, tratamientos y decisiones médicas que tome respecto a sus pacientes.</p>
   </div>
@@ -97,10 +109,19 @@
     <li>El cumplimiento de las normativas veterinarias y de protección de datos aplicables en su país</li>
     <li>La obtención del consentimiento de sus clientes cuando sea requerido por la ley local</li>
     <li>La confidencialidad de la información de sus clientes y pacientes</li>
+    <li>El cumplimiento de las normativas sanitarias oficiales (SENASA en Argentina y Perú, SADER en México, SAG en Chile, ICA en Colombia, u organismos equivalentes) en lo que respecta a registros de rodeos, eventos sanitarios y trazabilidad animal al usar el Módulo Campo</li>
   </ul>
 
-  <h2>5. Disponibilidad del servicio</h2>
-  <p>VetNode se ofrece "tal como está" y hacemos nuestro mejor esfuerzo para mantenerla disponible de forma continua. Sin embargo, no garantizamos disponibilidad ininterrumpida. Pueden producirse interrupciones por:</p>
+  <h2>6. Naturaleza del servicio y ausencia de garantías</h2>
+  <p>VetNode se ofrece "tal como está" (as-is), sin garantías de ningún tipo, expresas ni implícitas, incluyendo pero no limitado a garantías de comerciabilidad, aptitud para un propósito particular o no infracción. En particular, no garantizamos que:</p>
+  <ul>
+    <li>El servicio esté libre de errores o interrupciones</li>
+    <li>Los datos almacenados estén completamente protegidos contra pérdidas imprevisibles</li>
+    <li>La aplicación sea adecuada para cumplir con los requisitos legales específicos de cada jurisdicción</li>
+  </ul>
+
+  <h2>7. Disponibilidad del servicio</h2>
+  <p>Hacemos nuestro mejor esfuerzo para mantener VetNode disponible de forma continua. Sin embargo, no garantizamos disponibilidad ininterrumpida. Pueden producirse interrupciones por:</p>
   <ul>
     <li>Mantenimiento programado o de emergencia</li>
     <li>Fallas de los proveedores de infraestructura (Supabase, Vercel)</li>
@@ -108,35 +129,40 @@
   </ul>
   <p>La app incluye funcionalidad offline — los datos se almacenan localmente en tu dispositivo y se sincronizan cuando se restaura la conexión.</p>
 
-  <h2>6. Gratuidad y cambios futuros</h2>
-  <p>En su versión actual, VetNode es completamente gratuita. Nos reservamos el derecho de introducir en el futuro planes de pago o funcionalidades premium. En ese caso, notificaremos a los usuarios con al menos 30 días de anticipación y siempre existirá una versión gratuita con funcionalidades básicas.</p>
+  <h2>8. Gratuidad y cambios futuros</h2>
+  <p>En su versión actual, VetNode es completamente gratuita. Nos reservamos el derecho de introducir en el futuro planes de pago o funcionalidades premium. En ese caso, notificaremos a los usuarios con al menos 30 días de anticipación. Siempre existirá una versión gratuita con funcionalidades básicas y los usuarios actuales nunca perderán acceso sin previo aviso.</p>
 
-  <h2>7. Propiedad intelectual</h2>
-  <p>Todo el código, diseño, marca, logotipos y contenido de VetNode son propiedad de Francisco Picardo y están protegidos por las leyes de propiedad intelectual aplicables.</p>
-  <p>Los datos ingresados por el usuario (historia clínica, tutores, mascotas) son de su exclusiva propiedad. VetNode no reclama ningún derecho sobre ellos. El usuario puede exportarlos en cualquier momento a través de la función de Backup.</p>
+  <h2>9. Propiedad intelectual</h2>
+  <p>Todo el código, diseño, marca, logotipos y contenido de VetNode —incluyendo ambos módulos, Clínica y Campo— son propiedad de Francisco Picardo y están protegidos por las leyes de propiedad intelectual aplicables en Argentina y los países donde opera el servicio. Queda prohibida la reproducción, distribución o uso comercial de cualquier elemento de VetNode sin autorización expresa y por escrito de Francisco Picardo.</p>
+  <p>Los datos ingresados por el usuario (historia clínica, tutores, mascotas, establecimientos, eventos de campo) son de su exclusiva propiedad. VetNode no reclama ningún derecho sobre ellos. El usuario puede exportarlos en cualquier momento a través de la función de Backup.</p>
 
-  <h2>8. Limitación de responsabilidad</h2>
+  <h2>10. Limitación de responsabilidad</h2>
   <p>En la máxima medida permitida por la ley aplicable, VetNode y su desarrollador no serán responsables por:</p>
   <ul>
     <li>Pérdida de datos por fallas técnicas, mal uso o eliminación accidental</li>
-    <li>Daños directos, indirectos o consecuentes derivados del uso o imposibilidad de uso de la app</li>
+    <li>Daños directos, indirectos, incidentales, especiales o consecuentes derivados del uso o imposibilidad de uso de la app</li>
     <li>Decisiones clínicas tomadas con base en información registrada en la app</li>
     <li>Accesos no autorizados derivados de credenciales comprometidas por el usuario</li>
+    <li>Incumplimiento de normativas sanitarias o de trazabilidad animal por parte del usuario</li>
+    <li>Interrupción del servicio por causas ajenas a nuestro control</li>
   </ul>
   <p>Recomendamos realizar backups periódicos desde la función de Backup de la app.</p>
 
-  <h2>9. Cancelación y eliminación de cuenta</h2>
-  <p>Podés solicitar la eliminación de tu cuenta y todos tus datos en cualquier momento escribiendo a <a href="mailto:soporte@vetnode.app">soporte@vetnode.app</a>. Procesaremos la solicitud en un plazo máximo de 30 días.</p>
-  <p>Nos reservamos el derecho de suspender o eliminar cuentas que violen estos Términos, previa notificación al usuario salvo en casos de violaciones graves o actividad fraudulenta.</p>
+  <h2>11. Indemnización</h2>
+  <p>El usuario acepta indemnizar y mantener indemne a Francisco Picardo y a VetNode de cualquier reclamo, daño, pérdida o gasto (incluyendo honorarios legales razonables) que surjan del uso indebido de la aplicación, la violación de estos Términos o el incumplimiento de las normativas aplicables en su jurisdicción.</p>
 
-  <h2>10. Modificaciones a los términos</h2>
-  <p>Podemos actualizar estos Términos ocasionalmente. Notificaremos los cambios relevantes a través de la app con al menos 15 días de anticipación. El uso continuado de VetNode tras la entrada en vigencia de los nuevos Términos implica su aceptación.</p>
+  <h2>12. Cancelación y eliminación de cuenta</h2>
+  <p>Podés solicitar la eliminación de tu cuenta y todos tus datos en cualquier momento escribiendo a <a href="mailto:soporte@vetnode.app">soporte@vetnode.app</a>. Procesaremos la solicitud en un plazo máximo de 30 días. Los datos de encuestas ya incorporados a conjuntos agregados y anonimizados no pueden ser eliminados individualmente por su naturaleza estadística.</p>
+  <p>Nos reservamos el derecho de suspender o eliminar cuentas que violen estos Términos, previa notificación al usuario salvo en casos de violaciones graves, actividad fraudulenta o riesgos de seguridad inminentes.</p>
 
-  <h2>11. Ley aplicable y jurisdicción</h2>
+  <h2>13. Modificaciones a los términos</h2>
+  <p>Podemos actualizar estos Términos ocasionalmente. Notificaremos los cambios relevantes a través de la app con al menos 15 días de anticipación. Para cambios sustanciales que afecten derechos del usuario, solicitaremos una nueva aceptación activa. El uso continuado de VetNode tras la entrada en vigencia de los nuevos Términos implica su aceptación.</p>
+
+  <h2>14. Ley aplicable y jurisdicción</h2>
   <p>Estos Términos se rigen por las leyes de la República Argentina. Ante cualquier controversia, las partes se someten a la jurisdicción de los tribunales ordinarios de la Ciudad Autónoma de Buenos Aires, Argentina, renunciando a cualquier otro fuero que pudiera corresponder.</p>
-  <p>Para usuarios de otros países, reconocemos que pueden aplicar normativas locales adicionales. En caso de conflicto, prevalecerá la normativa local imperativa del usuario.</p>
+  <p>Para usuarios de otros países, reconocemos que pueden aplicar normativas locales adicionales de carácter imperativo. En caso de conflicto con dichas normativas, prevalecerá la normativa local imperativa del usuario en todo lo que resulte aplicable.</p>
 
-  <h2>12. Contacto</h2>
+  <h2>15. Contacto</h2>
   <p>Para cualquier consulta sobre estos Términos:</p>
   <div class="highlight">
     <p>📧 <a href="mailto:soporte@vetnode.app">soporte@vetnode.app</a></p>
