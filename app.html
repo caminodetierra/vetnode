@@ -18,7 +18,8 @@
   --red:#f06a6a; --red-dim:rgba(240,106,106,0.12); --red-border:rgba(240,106,106,0.3);
   --purple:#9b72e8; --purple-dim:rgba(155,114,232,0.12);
   --text:#ddeeff; --text2:#7a9ab8; --text3:#3a5a7a;
-  --radius:14px; --radius-sm:9px; --radius-lg:20px; --radius-xs:6px;
+  --orange:#f5a623; --orange-dim:rgba(245,166,35,0.13); --orange-border:rgba(245,166,35,0.35);
+  --icon:var(--orange); --icon-dim:var(--orange-dim); --icon-border:var(--orange-border);
   --shadow:0 2px 12px rgba(0,0,0,0.25);
   --inset-shine:inset 0 1px 0 rgba(255,255,255,0.06);
   --ease:cubic-bezier(0.4,0,0.2,1);
@@ -33,6 +34,7 @@ body.light{
   --red:#b82020; --red-dim:rgba(184,32,32,0.08); --red-border:rgba(184,32,32,0.25);
   --purple:#5a3aaa; --purple-dim:rgba(90,58,170,0.09);
   --text:#0e1e2e; --text2:#2e4a68; --text3:#6a8aaa;
+  --icon:var(--blue); --icon-dim:var(--blue-dim); --icon-border:var(--blue-border);
   --shadow:0 2px 12px rgba(0,0,0,0.1);
   --inset-shine:inset 0 1px 0 rgba(255,255,255,0.7);
 }
@@ -445,6 +447,16 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
   font-size:13px;line-height:1.7;
 }
 .empty-state .emoji{font-size:40px;display:block;margin-bottom:14px;}
+
+/* ── SVG ICONS ── */
+.s-ico svg,.cr-ico svg{width:17px;height:17px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;}
+.s-ico svg.filled,.cr-ico svg.filled,.btn-ico svg.filled{stroke:none;fill:var(--icon);}
+.btn-ico svg{width:24px;height:24px;stroke:var(--icon);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;}
+.tool-btn-ico svg{width:21px;height:21px;stroke:var(--icon);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;}
+.attach-ico svg{width:20px;height:20px;stroke:var(--icon);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;}
+.notif-btn svg{width:18px;height:18px;stroke:var(--icon);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;}
+.sidebar-item:hover .s-ico svg,.sidebar-item.active .s-ico svg{stroke:var(--icon);}
+.sidebar-item:hover .s-ico svg.filled,.sidebar-item.active .s-ico svg.filled{fill:var(--icon);stroke:none;}
 
 /* ── FAB ── */
 .fab{
@@ -1148,20 +1160,20 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
       <img src="/logo-vetnode.jpg" style="width:100%;max-width:160px;height:auto;object-fit:contain;border-radius:var(--radius-sm);">
     </div>
     <div class="sidebar-nav" id="sidebar-nav-main">
-      <div class="sidebar-item" onclick="showConfigPanel()"><span class="s-ico">⚙️</span>Configuración</div>
-      <div class="sidebar-item" onclick="openSupport()"><span class="s-ico">💬</span>Soporte</div>
+      <div class="sidebar-item" onclick="showConfigPanel()"><span class="s-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Configuración</div>
+      <div class="sidebar-item" onclick="openSupport()"><span class="s-ico"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Soporte</div>
     </div>
     <div class="sidebar-nav" id="sidebar-nav-inner" style="display:none">
-      <div class="sidebar-item" onclick="go('s-home')"><span class="s-ico">🏠</span>Inicio</div>
-      <div class="sidebar-item" onclick="openGlobalSearch()"><span class="s-ico">🔍</span>Buscar paciente</div>
+      <div class="sidebar-item" onclick="go('s-home')"><span class="s-ico"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Inicio</div>
+      <div class="sidebar-item" onclick="openGlobalSearch()"><span class="s-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Buscar paciente</div>
       <div class="ctx-divider" style="margin:6px 0"></div>
-      <div class="sidebar-item" onclick="go('s-patients')"><span class="s-ico">🐾</span>Pacientes</div>
-      <div class="sidebar-item" onclick="go('s-reminders')"><span class="s-ico">🔔</span>Recordatorios</div>
-      <div class="sidebar-item" onclick="go('s-calendar')"><span class="s-ico">📅</span>Calendario</div>
-      <div class="sidebar-item" onclick="go('s-stats')"><span class="s-ico">📊</span>Estadísticas</div>
+      <div class="sidebar-item" onclick="go('s-patients')"><span class="s-ico"><svg viewBox="0 0 24 24" class="filled"><ellipse cx="5.5" cy="5.8" rx="1.9" ry="2.6"/><ellipse cx="9.8" cy="3.8" rx="1.7" ry="2.3"/><ellipse cx="14.2" cy="4.1" rx="1.7" ry="2.3"/><ellipse cx="18.3" cy="6.3" rx="1.7" ry="2.3"/><path d="M12 10c-4.2 0-6.5 2.3-6 5.8.3 1.9 1.7 4.2 3.8 5.1.9.4 1.8.6 2.2.6s1.3-.2 2.2-.6c2.1-.9 3.5-3.2 3.8-5.1.5-3.5-1.8-5.8-6-5.8z"/></svg></span>Pacientes</div>
+      <div class="sidebar-item" onclick="go('s-reminders')"><span class="s-ico"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>Recordatorios</div>
+      <div class="sidebar-item" onclick="go('s-calendar')"><span class="s-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Calendario</div>
+      <div class="sidebar-item" onclick="go('s-stats')"><span class="s-ico"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Estadísticas</div>
       <div class="ctx-divider" style="margin:6px 0"></div>
-      <div class="sidebar-item" onclick="showConfigPanel()"><span class="s-ico">⚙️</span>Configuración</div>
-      <div class="sidebar-item" onclick="openSupport()"><span class="s-ico">💬</span>Soporte</div>
+      <div class="sidebar-item" onclick="showConfigPanel()"><span class="s-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Configuración</div>
+      <div class="sidebar-item" onclick="openSupport()"><span class="s-ico"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Soporte</div>
     </div>
     <div class="sidebar-bottom"></div>
   </div>
@@ -1178,17 +1190,17 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
       <div style="flex:1;overflow-y:auto;padding:8px 0;">
         <div class="config-section">
           <div class="config-section-title">Clínica</div>
-          <div class="config-row" onclick="closeConfigPanel();openClinicModal()"><span class="cr-ico">🏥</span>Mi clínica</div>
-          <div class="config-row" onclick="closeConfigPanel();openVetsModal()"><span class="cr-ico">👨‍⚕️</span>Veterinarios</div>
+          <div class="config-row" onclick="closeConfigPanel();openClinicModal()"><span class="cr-ico"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Mi clínica</div>
+          <div class="config-row" onclick="closeConfigPanel();openVetsModal()"><span class="cr-ico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>Veterinarios</div>
         </div>
         <div class="config-section">
           <div class="config-section-title">Apariencia</div>
           <div class="config-row" onclick="toggleTheme()">
-            <span class="cr-ico">🌙</span><span>Tema oscuro</span>
+            <span class="cr-ico"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span>Tema oscuro</span>
             <div class="config-row-ctrl"><div class="toggle" id="theme-toggle-cp" style="pointer-events:none"><div class="toggle-knob"></div></div></div>
           </div>
           <div class="config-row" style="cursor:default">
-            <span class="cr-ico">🔤</span><span>Tamaño de letra</span>
+            <span class="cr-ico"><svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></span><span>Tamaño de letra</span>
             <div class="config-row-ctrl"><div class="fs-pills" id="fs-pills">
               <div class="fs-pill" onclick="setFontSize('sm')">Chico</div>
               <div class="fs-pill" onclick="setFontSize('md')">Mediano</div>
@@ -1198,11 +1210,11 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
         </div>
         <div class="config-section">
           <div class="config-section-title">Datos</div>
-          <div class="config-row" onclick="closeConfigPanel();openBackupModal()"><span class="cr-ico">💾</span>Backup</div>
+          <div class="config-row" onclick="closeConfigPanel();openBackupModal()"><span class="cr-ico"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>Backup</div>
         </div>
         <div class="config-section">
           <div class="config-section-title">Ayuda</div>
-          <div class="config-row" onclick="openSupport()"><span class="cr-ico">💬</span>Soporte</div>
+          <div class="config-row" onclick="openSupport()"><span class="cr-ico"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Soporte</div>
         </div>
       </div>
     </div>
@@ -1217,7 +1229,7 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="notif-btn" id="notif-bell-btn" onclick="toggleNotifDropdown()">
-              📬
+              <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               <div class="notif-badge" id="notif-badge" style="display:none">0</div>
             </div>
             <div class="clinic-logo" id="clinic-logo-el" onclick="triggerClinicPhoto()">+</div>
@@ -1233,11 +1245,11 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
           <div id="home-search-results" class="home-search-results"></div>
         </div>
         <div class="btn-grid">
-          <div class="main-btn" onclick="go('s-patients')"><span class="btn-ico">🐾</span><span class="btn-lbl">Pacientes</span><span class="btn-desc">Historias clínicas</span></div>
-          <div class="main-btn" onclick="go('s-reminders')"><span class="btn-ico">🔔</span><span class="btn-lbl">Recordatorios</span><span class="btn-desc">Vacunas y seguimiento</span></div>
-          <div class="main-btn" onclick="go('s-calendar')"><span class="btn-ico">📅</span><span class="btn-lbl">Calendario</span><span class="btn-desc">Turnos del día</span></div>
-          <div class="main-btn" onclick="go('s-stats')"><span class="btn-ico">📊</span><span class="btn-lbl">Estadísticas</span><span class="btn-desc">Análisis clínico</span></div>
-          <div class="main-btn" onclick="go('s-agenda')"><span class="btn-ico">📒</span><span class="btn-lbl">Agenda</span><span class="btn-desc">Contactos de referencia</span></div>
+          <div class="main-btn" onclick="go('s-patients')"><span class="btn-ico"><svg class="filled" viewBox="0 0 24 24"><ellipse cx="5.5" cy="5.8" rx="1.9" ry="2.6"/><ellipse cx="9.8" cy="3.8" rx="1.7" ry="2.3"/><ellipse cx="14.2" cy="4.1" rx="1.7" ry="2.3"/><ellipse cx="18.3" cy="6.3" rx="1.7" ry="2.3"/><path d="M12 10c-4.2 0-6.5 2.3-6 5.8.3 1.9 1.7 4.2 3.8 5.1.9.4 1.8.6 2.2.6s1.3-.2 2.2-.6c2.1-.9 3.5-3.2 3.8-5.1.5-3.5-1.8-5.8-6-5.8z"/></svg></span><span class="btn-lbl">Pacientes</span><span class="btn-desc">Historias clínicas</span></div>
+          <div class="main-btn" onclick="go('s-reminders')"><span class="btn-ico"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span class="btn-lbl">Recordatorios</span><span class="btn-desc">Vacunas y seguimiento</span></div>
+          <div class="main-btn" onclick="go('s-calendar')"><span class="btn-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span class="btn-lbl">Calendario</span><span class="btn-desc">Turnos del día</span></div>
+          <div class="main-btn" onclick="go('s-stats')"><span class="btn-ico"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span><span class="btn-lbl">Estadísticas</span><span class="btn-desc">Análisis clínico</span></div>
+          <div class="main-btn" onclick="go('s-agenda')"><span class="btn-ico"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><span class="btn-lbl">Agenda</span><span class="btn-desc">Contactos de referencia</span></div>
         </div>
       </div>
     </div>
@@ -1439,11 +1451,11 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
         </div>
         <!-- HERRAMIENTAS -->
         <div class="tools-row">
-          <button class="tool-btn" id="tool-btn-timer" onclick="toggleTool('timer')"><span class="tool-btn-ico">⏱</span><span class="tool-btn-lbl">Crono</span></button>
-          <button class="tool-btn" id="tool-btn-m2" onclick="toggleTool('m2')"><span class="tool-btn-ico">⚖️</span><span class="tool-btn-lbl">kg→m²</span></button>
-          <button class="tool-btn" id="tool-btn-dose" onclick="toggleTool('dose')"><span class="tool-btn-ico">💊</span><span class="tool-btn-lbl">Dosis</span></button>
-          <button class="tool-btn" id="tool-btn-fluid" onclick="toggleTool('fluid')"><span class="tool-btn-ico">💧</span><span class="tool-btn-lbl">Fluidos</span></button>
-          <button class="tool-btn" id="tool-btn-agenda" onclick="toggleTool('agenda')"><span class="tool-btn-ico">📋</span><span class="tool-btn-lbl">Agenda</span></button>
+          <button class="tool-btn" id="tool-btn-timer" onclick="toggleTool('timer')"><span class="tool-btn-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><span class="tool-btn-lbl">Crono</span></button>
+          <button class="tool-btn" id="tool-btn-m2" onclick="toggleTool('m2')"><span class="tool-btn-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/><circle cx="12" cy="12" r="4"/></svg></span><span class="tool-btn-lbl">kg→m²</span></button>
+          <button class="tool-btn" id="tool-btn-dose" onclick="toggleTool('dose')"><span class="tool-btn-ico"><svg viewBox="0 0 24 24"><path d="M9 2h6l1 7H8L9 2z"/><path d="M8 9c0 5 8 5 8 10a4 4 0 0 1-8 0c0-5 8-5 8-10"/></svg></span><span class="tool-btn-lbl">Dosis</span></button>
+          <button class="tool-btn" id="tool-btn-fluid" onclick="toggleTool('fluid')"><span class="tool-btn-ico"><svg viewBox="0 0 24 24"><path d="M12 2C6 2 2 7 2 12s4 10 10 10 10-4.5 10-10S18 2 12 2z"/><path d="M12 8v4l3 3"/></svg></span><span class="tool-btn-lbl">Fluidos</span></button>
+          <button class="tool-btn" id="tool-btn-agenda" onclick="toggleTool('agenda')"><span class="tool-btn-ico"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><span class="tool-btn-lbl">Agenda</span></button>
         </div>
         <!-- Panel Crono -->
         <div class="tool-panel" id="tool-panel-timer">
@@ -1485,15 +1497,15 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
         <!-- NOTAS: 📎 arriba-derecha, 🎙️ abajo-derecha, ambos dentro del textarea -->
         <div class="notes-wrap">
           <textarea class="notes-area" id="v-notes" placeholder="Síntomas, diagnóstico, tratamiento indicado…" rows="6"></textarea>
-          <div class="clip-fab" onclick="toggleAttach()">📎</div>
+          <div class="clip-fab" onclick="toggleAttach()"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text2);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div>
           <div class="mic-popup-wrap">
-            <div class="mic-fab" id="mic-fab" onclick="toggleMicPopup(event)">🎙️</div>
+            <div class="mic-fab" id="mic-fab" onclick="toggleMicPopup(event)"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:white;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
             <div class="mic-popup" id="mic-popup">
               <div class="mic-popup-item" id="mic-item-rec" onclick="toggleRecording()">
                 <span class="mic-popup-item-ico">⏺</span>Grabar audio
               </div>
               <div class="mic-popup-item" id="mic-item-dict" onclick="toggleDictation()">
-                <span class="mic-popup-item-ico">🎤</span>Dictado
+                <span class="mic-popup-item-ico"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></span>Dictado
               </div>
             </div>
           </div>
@@ -1501,8 +1513,8 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
         <!-- Audios grabados -->
         <div class="rec-audios" id="rec-audios-list"></div>
         <div id="attach-menu" style="display:none" class="attach-menu">
-          <div class="attach-opt" onclick="triggerVisitFile('camera')"><div class="attach-ico cam">📷</div><div><div class="attach-text">Cámara</div><div class="attach-sub">Sacar foto ahora</div></div></div>
-          <div class="attach-opt" onclick="triggerVisitFile('image')"><div class="attach-ico file">🖼️</div><div><div class="attach-text">Imagen / Archivo</div><div class="attach-sub">Desde el dispositivo</div></div></div>
+          <div class="attach-opt" onclick="triggerVisitFile('camera')"><div class="attach-ico cam"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div><div class="attach-text">Cámara</div><div class="attach-sub">Sacar foto ahora</div></div></div>
+          <div class="attach-opt" onclick="triggerVisitFile('image')"><div class="attach-ico file"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div><div class="attach-text">Imagen / Archivo</div><div class="attach-sub">Desde el dispositivo</div></div></div>
         </div>
         <div id="visit-attachments-preview" class="visit-attachments"></div>
         <input type="file" id="visit-file-input" style="display:none" onchange="handleVisitFile(this)">
