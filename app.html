@@ -4192,6 +4192,8 @@ function renderMobileWeightChart(){
     </svg>
   </div>`;
 }
+
+function renderRpWeightChart(){
   const el=document.getElementById('rp-weight-chart');if(!el)return;
   const pet=getPets().find(p=>p.id===S.petId);if(!pet){el.innerHTML='';return;}
   const visits=getVisits().filter(v=>v.petId===S.petId&&v.peso&&!isNaN(parseFloat(v.peso))).sort((a,b)=>a.date-b.date);
