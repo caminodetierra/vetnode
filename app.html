@@ -3417,32 +3417,29 @@ function triggerVisitFile(type){
   input.click();
   document.getElementById('attach-menu').style.display='none';
 }
-function handleVisitFile(input){
+async function handleVisitFile(input){
   const file=input.files[0];if(!file)return;
+  input.value='';
   if(file.type.startsWith('image/')){
+    showToast('Subiendo imagen...');
     try{
-      const objectUrl=URL.createObjectURL(file);
-      const img=new Image();
-      img.onload=()=>{
-        try{
-          URL.revokeObjectURL(objectUrl);
-          const MAX=1200;
-          let w=img.width,h=img.height;
-          if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
-          const canvas=document.createElement('canvas');
-          canvas.width=w;canvas.height=h;
-          canvas.getContext('2d').drawImage(img,0,0,w,h);
-          const compressed=canvas.toDataURL('image/jpeg',0.75);
-          visitAttachments.push({name:file.name,type:'image/jpeg',data:compressed});
-          renderAttachPreviews();
-        }catch(err){
-          showToast('Error al comprimir: '+err.message);
-        }
-      };
-      img.onerror=()=>{URL.revokeObjectURL(objectUrl);showToast('Error al leer imagen: formato no soportado');};
-      img.src=objectUrl;
+      const s=getSession();if(!s?.access_token){showToast('Sesión expirada, reingresá');return;}
+      const uid=getUserId();if(!uid)return;
+      const ext=file.name.split('.').pop()||'jpg';
+      const id=crypto.randomUUID();
+      const path=`${uid}/${id}.${ext}`;
+      const r=await fetch(`${SUPABASE_URL}/storage/v1/object/visit-images/${path}`,{
+        method:'POST',
+        headers:{'Authorization':'Bearer '+s.access_token,'Content-Type':file.type,'x-upsert':'true'},
+        body:file
+      });
+      if(!r.ok){showToast('Error al subir imagen');return;}
+      const publicUrl=`${SUPABASE_URL}/storage/v1/object/public/visit-images/${path}`;
+      visitAttachments.push({name:file.name,type:file.type,data:publicUrl,isStorage:true});
+      renderAttachPreviews();
+      showToast('Imagen agregada ✓');
     }catch(err){
-      showToast('Error al procesar: '+err.message);
+      showToast('Error: '+err.message);
     }
   } else {
     const r=new FileReader();
@@ -3450,7 +3447,6 @@ function handleVisitFile(input){
     r.onerror=()=>showToast('Error al leer archivo');
     r.readAsDataURL(file);
   }
-  input.value='';
 }
 function renderAttachPreviews(){
   const el=document.getElementById('visit-attachments-preview');
