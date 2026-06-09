@@ -525,6 +525,29 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
 .pt-table td input:focus,.pt-table th input:focus{background:var(--blue-dim);}
 .pt-table tr:hover td{background:rgba(74,144,226,0.03);}
 
+/* ── MOBILE WEIGHT CHART ── */
+.mobile-weight-chart{
+  margin:14px 18px 8px;
+  display:none;
+}
+.mobile-weight-chart:empty{display:none;}
+.mobile-weight-chart .rp-chart-wrap{
+  display:flex;flex-direction:column;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:14px;padding:12px 14px;
+}
+.mobile-weight-chart .rp-chart-title{
+  font-size:11px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;
+}
+.mobile-weight-chart .rp-chart-svg{width:100%;height:auto;}
+.mobile-weight-chart .rp-chart-empty{
+  font-size:12px;color:var(--text3);text-align:center;padding:10px 0;
+}
+@media(max-width:1099px){
+  .mobile-weight-chart{display:block;}
+}
+
 /* ── TUTOR PROFILE ── */
 .profile-pad{padding:10px 18px;flex:1;overflow-y:auto;}
 .profile-pad::-webkit-scrollbar{width:3px;}
@@ -1353,6 +1376,7 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
           <div class="hdr-sub" id="pet-hdr-sub"></div>
         </div>
         <div class="hdr-actions">
+          <button class="pt-tool-btn" style="font-size:11px;padding:6px 10px;" onclick="showHcExportMenu(event)">⬇ HC</button>
         </div>
       </div>
       <div class="visits-wrap" id="visits-list"></div>
@@ -1473,6 +1497,7 @@ body.fs-sm .btn-lbl, body.fs-md .btn-lbl, body.fs-lg .btn-lbl { font-size:1em; }
         <div class="action-row">
           <button class="vacc-btn" onclick="openModal('m-vaccines')">💉 + Vacuna / Recordatorio</button>
         </div>
+        <div class="mobile-weight-chart" id="mobile-weight-chart"></div>
       </div>
     </div>
 
@@ -2346,7 +2371,7 @@ function go(id){
   if(id==='s-reminders'){renderReminders();setTimeout(renderRpReminders,50);}
   if(id==='s-tutor')renderTutorProfile();
   if(id==='s-pet'){renderPetProfile();setTimeout(()=>{setRpPetMode(true);},50);}
-  if(id==='s-newvisit')setTimeout(()=>{setRpPetMode(true);},50);
+  if(id==='s-newvisit')setTimeout(()=>{setRpPetMode(true);renderMobileWeightChart();},50);
   if(id==='s-survey1'||id==='s-survey2'||id==='s-visitdetail'||id==='s-param-table')setTimeout(()=>{setRpPetMode(true);},50);
   if(id==='s-survey2')renderSymptoms();
   if(id==='s-stats'){statsView={level:'organs',organ:null,diag:null,tab:statsView.tab||'personal',species:statsView.species||''};renderStats();}
@@ -4120,6 +4145,54 @@ function setRpPetMode(petMode){
   }
 }
 
+function renderMobileWeightChart(){
+  const el=document.getElementById('mobile-weight-chart');if(!el)return;
+  const pet=getPets().find(p=>p.id===S.petId);if(!pet){el.innerHTML='';return;}
+  const visits=getVisits().filter(v=>v.petId===S.petId&&v.peso&&!isNaN(parseFloat(v.peso))).sort((a,b)=>a.date-b.date);
+  if(visits.length<1){el.innerHTML='';return;}
+  const pts=visits.map(v=>({w:parseFloat(v.peso),d:v.date}));
+  const minW=Math.min(...pts.map(p=>p.w));
+  const maxW=Math.max(...pts.map(p=>p.w));
+  const minD=pts[0].d;const maxD=pts[pts.length-1].d;
+  const W=300,H=120,pad={t:10,r:10,b:24,l:32};
+  const cx=d=>pts.length===1?pad.l+(W-pad.l-pad.r)/2:pad.l+(W-pad.l-pad.r)*(d-minD)/(maxD-minD||1);
+  const cy=w=>pad.t+(H-pad.t-pad.b)*(1-(maxW===minW?0.5:(w-minW)/(maxW-minW)));
+  const polyline=pts.map(p=>`${cx(p.d).toFixed(1)},${cy(p.w).toFixed(1)}`).join(' ');
+  const areaStart=`${cx(pts[0].d).toFixed(1)},${(H-pad.b).toFixed(1)}`;
+  const areaEnd=`${cx(pts[pts.length-1].d).toFixed(1)},${(H-pad.b).toFixed(1)}`;
+  const area=`${areaStart} ${polyline} ${areaEnd}`;
+  const yLabels=maxW===minW?[minW]:[(minW).toFixed(1),((minW+maxW)/2).toFixed(1),(maxW).toFixed(1)];
+  const yLabelHtml=yLabels.map((lbl,i)=>{
+    const yv=maxW===minW?H/2:pad.t+(H-pad.t-pad.b)*(1-i/(yLabels.length-1));
+    return`<text x="${pad.l-3}" y="${yv.toFixed(1)}" text-anchor="end" font-size="8" fill="var(--text3)">${lbl}</text>`;
+  }).join('');
+  const dots=pts.map(p=>{
+    const tip=`${formatDateShort(p.d)} · ${p.w} kg`;
+    return`<circle cx="${cx(p.d).toFixed(1)}" cy="${cy(p.w).toFixed(1)}" r="3.5" fill="var(--blue)" stroke="var(--surface)" stroke-width="1.5"><title>${tip}</title></circle>`;
+  }).join('');
+  // último peso destacado
+  const last=pts[pts.length-1];
+  const prev=pts.length>1?pts[pts.length-2]:null;
+  const diff=prev?(last.w-prev.w):null;
+  const diffStr=diff!==null?(diff>0?`▲ +${diff.toFixed(1)} kg`:(diff<0?`▼ ${diff.toFixed(1)} kg`:'Sin cambio')):'';
+  const diffColor=diff>0?'var(--orange)':diff<0?'var(--blue)':'var(--text3)';
+  el.innerHTML=`<div class="rp-chart-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <span class="rp-chart-title">⚖️ Evolución de peso</span>
+      ${diffStr?`<span style="font-size:11px;font-weight:700;color:${diffColor}">${diffStr}</span>`:''}
+    </div>
+    <svg class="rp-chart-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="wgm" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--blue)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--blue)" stop-opacity="0"/></linearGradient></defs>
+      <line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${H-pad.b}" stroke="var(--border)" stroke-width="1"/>
+      <line x1="${pad.l}" y1="${H-pad.b}" x2="${W-pad.r}" y2="${H-pad.b}" stroke="var(--border)" stroke-width="1"/>
+      ${yLabelHtml}
+      ${pts.length>1?`<polygon points="${area}" fill="url(#wgm)"/>`:''}
+      ${pts.length>1?`<polyline points="${polyline}" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>`:''}
+      ${dots}
+    </svg>
+  </div>`;
+}
+
 function renderRpWeightChart(){
   const el=document.getElementById('rp-weight-chart');if(!el)return;
   const pet=getPets().find(p=>p.id===S.petId);if(!pet){el.innerHTML='';return;}
@@ -4151,15 +4224,26 @@ function renderRpWeightChart(){
     const tip=`${formatDateShort(p.d)} · ${p.w} kg`;
     return`<circle cx="${cx(p.d).toFixed(1)}" cy="${cy(p.w).toFixed(1)}" r="3.5" fill="var(--blue)" stroke="var(--surface)" stroke-width="1.5"><title>${tip}</title></circle>`;
   }).join('');
-  el.innerHTML=`<svg class="rp-chart-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-    <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--blue)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--blue)" stop-opacity="0"/></linearGradient></defs>
-    <line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${H-pad.b}" stroke="var(--border)" stroke-width="1"/>
-    <line x1="${pad.l}" y1="${H-pad.b}" x2="${W-pad.r}" y2="${H-pad.b}" stroke="var(--border)" stroke-width="1"/>
-    ${yLabelHtml}
-    ${pts.length>1?`<polygon points="${area}" fill="url(#wg)"/>`:''}
-    ${pts.length>1?`<polyline points="${polyline}" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>`:''}
-    ${dots}
-  </svg>`;
+  const last=pts[pts.length-1];
+  const prev=pts.length>1?pts[pts.length-2]:null;
+  const diff=prev?(last.w-prev.w):null;
+  const diffStr=diff!==null?(diff>0?`▲ +${diff.toFixed(1)} kg`:(diff<0?`▼ ${diff.toFixed(1)} kg`:'Sin cambio')):'';
+  const diffColor=diff>0?'var(--orange)':diff<0?'var(--blue)':'var(--text3)';
+  el.innerHTML=`<div class="rp-chart-wrap" style="padding:8px 12px 4px;flex:1;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <span style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">⚖️ Peso</span>
+      ${diffStr?`<span style="font-size:10px;font-weight:700;color:${diffColor}">${diffStr}</span>`:''}
+    </div>
+    <svg class="rp-chart-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--blue)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--blue)" stop-opacity="0"/></linearGradient></defs>
+      <line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${H-pad.b}" stroke="var(--border)" stroke-width="1"/>
+      <line x1="${pad.l}" y1="${H-pad.b}" x2="${W-pad.r}" y2="${H-pad.b}" stroke="var(--border)" stroke-width="1"/>
+      ${yLabelHtml}
+      ${pts.length>1?`<polygon points="${area}" fill="url(#wg)"/>`:''}
+      ${pts.length>1?`<polyline points="${polyline}" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>`:''}
+      ${dots}
+    </svg>
+  </div>`;
 }
 
 function renderRpPetList(){
@@ -4343,6 +4427,218 @@ function skipFollowup(){
   S.pendingFollowupPet=null; S.pendingFollowupTutor=null;
   closeModal('m-followup-date');
   go('s-pet'); showToast('Visita guardada ✓');
+}
+
+// ══════════════════════════════════════════════════
+//  EXPORTAR HISTORIA CLÍNICA
+// ══════════════════════════════════════════════════
+
+function showHcExportMenu(e){
+  e.stopPropagation();
+  document.querySelectorAll('.ctx-menu').forEach(m=>m.remove());
+  const rect=e.currentTarget.getBoundingClientRect();
+  const menu=document.createElement('div');
+  menu.className='ctx-menu';
+  menu.style.cssText=`position:fixed;top:${rect.bottom+4}px;right:${window.innerWidth-rect.right}px;z-index:200;`;
+  menu.innerHTML=`
+    <div class="ctx-item" onclick="exportHcExcel()"><span class="ctx-ico">📊</span>Descargar Excel</div>
+    <div class="ctx-item" onclick="exportHcPdf()"><span class="ctx-ico">📄</span>Descargar PDF</div>`;
+  document.body.appendChild(menu);
+  setTimeout(()=>document.addEventListener('click',function h(){menu.remove();document.removeEventListener('click',h);},{once:true}),10);
+}
+
+function _buildHcData(){
+  const pet=getPets().find(p=>p.id===S.petId);
+  const tutor=getTutors().find(t=>t.id===(pet?pet.tutorId:null));
+  const s=getSettings();
+  const activeVet=getActiveVet();
+  const visits=getVisits().filter(v=>v.petId===S.petId).sort((a,b)=>a.date-b.date);
+  return{pet,tutor,s,activeVet,visits};
+}
+
+function _calcAge(dob){
+  if(!dob)return'—';
+  const d=new Date(dob),now=new Date();
+  let y=now.getFullYear()-d.getFullYear(),m=now.getMonth()-d.getMonth();
+  if(m<0){y--;m+=12;}
+  return y>0?`${y} año${y>1?'s':''}`:`${m} mes${m!==1?'es':''}`;
+}
+
+function exportHcExcel(){
+  if(typeof XLSX==='undefined'){showToast('Librería Excel no cargada');return;}
+  const{pet,tutor,s,activeVet,visits}=_buildHcData();
+  const wb=XLSX.utils.book_new();
+  const data=[];
+  const merges=[];
+  const styles={};
+
+  // Encabezado institucional
+  data.push(['VetNode']);
+  data.push(['Clínica: '+(s.clinic||'—')]);
+  if(activeVet)data.push(['Veterinario/a: '+activeVet.name+(activeVet.license?' — Mat. '+activeVet.license:'')]);
+  data.push([]);
+
+  // Tutor
+  data.push(['DATOS DEL TUTOR']);
+  data.push(['Apellido y Nombre',tutor?tutor.name:'—']);
+  data.push(['Teléfono',tutor?tutor.phone||'—':'—']);
+  data.push(['Dirección',tutor?tutor.address||'—':'—']);
+  data.push([]);
+
+  // Paciente
+  data.push(['DATOS DEL PACIENTE']);
+  data.push(['Nombre',pet?pet.name:'—']);
+  data.push(['Especie / Raza',[pet?.species,pet?.breed].filter(Boolean).join(' / ')||'—']);
+  data.push(['Fecha de nacimiento',pet?.dob||'—']);
+  data.push(['Edad',pet?_calcAge(pet.dob):'—']);
+  data.push(['Sexo',pet?.sex||'—']);
+  data.push(['Castrado/a',pet?(pet.neutered?'Sí':'No'):'—']);
+  data.push(['N° de chip',pet?.chip||'—']);
+  data.push([]);
+
+  // Historia clínica — un bloque por visita
+  data.push(['HISTORIA CLÍNICA']);
+
+  // 7 columnas de parámetros: Peso | Temp | FC | FR | Presión | BCS | Vacuna
+  const NCOLS=7;
+
+  visits.forEach(v=>{
+    // Separador fecha + vet
+    const vetName=activeVet?activeVet.name:'';
+    data.push([formatDate(v.date)+(vetName?' — '+vetName:''),'','','','','','']);
+    const fechaRow=data.length-1;
+    merges.push({s:{r:fechaRow,c:0},e:{r:fechaRow,c:NCOLS-1}});
+
+    // Encabezados parámetros
+    data.push(['Peso (kg)','Temp (°C)','FC (lpm)','FR (rpm)','Presión','BCS','Vacuna']);
+
+    // Valores parámetros
+    data.push([
+      v.peso||'—', v.temp||'—', v.fc||'—', v.fr||'—',
+      v.presion||'—', v.bcs||'—',
+      v.vacc?(v.vacc.name||'')+(v.vacc.lot?' (Lote: '+v.vacc.lot+')':''):'—'
+    ]);
+
+    // Diagnósticos (si tienen)
+    if(v.diagPresuntivo||v.diagDefinitivo){
+      data.push(['Diag. Presuntivo: '+(v.diagPresuntivo||'—'),'','','','','','']);
+      const dpRow=data.length-1;
+      merges.push({s:{r:dpRow,c:0},e:{r:dpRow,c:NCOLS-1}});
+      data.push(['Diag. Definitivo: '+(v.diagDefinitivo||'—'),'','','','','','']);
+      const ddRow=data.length-1;
+      merges.push({s:{r:ddRow,c:0},e:{r:ddRow,c:NCOLS-1}});
+    }
+
+    // Notas — celda mergeada ancho completo
+    if(v.notes){
+      data.push([v.notes,'','','','','','']);
+      const notesRow=data.length-1;
+      merges.push({s:{r:notesRow,c:0},e:{r:notesRow,c:NCOLS-1}});
+    }
+
+    // Fila vacía separadora
+    data.push(['','','','','','','']);
+  });
+
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!merges']=merges;
+  ws['!cols']=[{wch:18},{wch:12},{wch:10},{wch:10},{wch:12},{wch:8},{wch:28}];
+
+  // Estilo VetNode A1
+  if(ws['A1'])ws['A1'].s={font:{bold:true,sz:18,color:{rgb:'4A90E2'}}};
+
+  XLSX.utils.book_append_sheet(wb,ws,'Historia Clínica');
+  const petName=pet?pet.name.replace(/\s+/g,'_'):'paciente';
+  XLSX.writeFile(wb,`VetNode_HC_${petName}.xlsx`);
+  showToast('Descargando Excel ✓');
+}
+
+function exportHcPdf(){
+  const{pet,tutor,s,activeVet,visits}=_buildHcData();
+  const petName=pet?pet.name:'Paciente';
+
+  const visitsHtml=visits.map(v=>{
+    const params=[
+      v.peso?`<div class="param"><span class="param-lbl">Peso</span><span class="param-val">${v.peso} kg</span></div>`:'',
+      v.temp?`<div class="param"><span class="param-lbl">Temp</span><span class="param-val">${v.temp} °C</span></div>`:'',
+      v.fc?`<div class="param"><span class="param-lbl">FC</span><span class="param-val">${v.fc} lpm</span></div>`:'',
+      v.fr?`<div class="param"><span class="param-lbl">FR</span><span class="param-val">${v.fr} rpm</span></div>`:'',
+      v.presion?`<div class="param"><span class="param-lbl">Presión</span><span class="param-val">${v.presion}</span></div>`:'',
+      v.bcs?`<div class="param"><span class="param-lbl">BCS</span><span class="param-val">${v.bcs}</span></div>`:'',
+    ].filter(Boolean).join('');
+
+    const vaccHtml=v.vacc?`<div class="visit-field"><span class="field-lbl">Vacuna:</span> ${v.vacc.name||''}${v.vacc.lot?' — Lote: '+v.vacc.lot:''}</div>`:'';
+    const dpHtml=v.diagPresuntivo?`<div class="visit-field"><span class="field-lbl">Diag. presuntivo:</span> ${v.diagPresuntivo}</div>`:'';
+    const ddHtml=v.diagDefinitivo?`<div class="visit-field"><span class="field-lbl">Diag. definitivo:</span> ${v.diagDefinitivo}</div>`:'';
+    const notesHtml=v.notes?`<div class="visit-notes">${(v.notes).replace(/\n/g,'<br>')}</div>`:'';
+
+    return`<div class="visit-block">
+      <div class="visit-header">
+        <span class="visit-date">${formatDate(v.date)}</span>
+        ${activeVet?`<span class="visit-vet">${activeVet.name}</span>`:''}
+      </div>
+      ${params?`<div class="params-grid">${params}</div>`:''}
+      ${vaccHtml}${dpHtml}${ddHtml}
+      ${notesHtml}
+    </div>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8">
+  <title>HC - ${petName}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:Arial,sans-serif;font-size:12px;color:#1a1a2e;padding:28px 32px;}
+    .brand{font-size:24px;font-weight:900;color:#4A90E2;margin-bottom:2px;}
+    .clinic-line{font-size:12px;color:#555;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #4A90E2;}
+    .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#4A90E2;margin:16px 0 8px;}
+    .info-grid{display:grid;grid-template-columns:160px 1fr;gap:3px 12px;margin-bottom:4px;}
+    .info-label{font-weight:700;color:#555;font-size:11px;}
+    .info-value{color:#1a1a2e;font-size:11px;}
+    /* Visitas */
+    .visit-block{border:1px solid #dde4f0;border-radius:8px;padding:12px 14px;margin-bottom:12px;page-break-inside:avoid;}
+    .visit-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #eef0f8;}
+    .visit-date{font-size:13px;font-weight:700;color:#1a1a2e;}
+    .visit-vet{font-size:11px;color:#555;}
+    .params-grid{display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:8px;}
+    .param{background:#f0f4ff;border-radius:6px;padding:4px 10px;display:flex;flex-direction:column;align-items:center;min-width:60px;}
+    .param-lbl{font-size:9px;font-weight:700;color:#4A90E2;text-transform:uppercase;letter-spacing:.5px;}
+    .param-val{font-size:12px;font-weight:700;color:#1a1a2e;margin-top:1px;}
+    .visit-field{font-size:11px;color:#333;margin-bottom:4px;}
+    .field-lbl{font-weight:700;color:#555;}
+    .visit-notes{font-size:12px;color:#1a1a2e;line-height:1.65;margin-top:8px;padding-top:8px;border-top:1px dashed #dde4f0;width:100%;}
+    @media print{body{padding:16px 20px;}.visit-block{break-inside:avoid;}}
+  </style></head><body>
+  <div class="brand">VetNode</div>
+  <div class="clinic-line">${s.clinic||''}${activeVet?' · '+activeVet.name+(activeVet.license?' — Mat. '+activeVet.license:''):''}</div>
+
+  <div class="section-title">Datos del Tutor</div>
+  <div class="info-grid">
+    <span class="info-label">Apellido y Nombre</span><span class="info-value">${tutor?tutor.name:'—'}</span>
+    <span class="info-label">Teléfono</span><span class="info-value">${tutor?tutor.phone||'—':'—'}</span>
+    <span class="info-label">Dirección</span><span class="info-value">${tutor?tutor.address||'—':'—'}</span>
+  </div>
+
+  <div class="section-title">Datos del Paciente</div>
+  <div class="info-grid">
+    <span class="info-label">Nombre</span><span class="info-value">${pet?pet.name:'—'}</span>
+    <span class="info-label">Especie / Raza</span><span class="info-value">${[pet?.species,pet?.breed].filter(Boolean).join(' / ')||'—'}</span>
+    <span class="info-label">Fecha de nacimiento</span><span class="info-value">${pet?.dob||'—'}</span>
+    <span class="info-label">Edad</span><span class="info-value">${pet?_calcAge(pet.dob):'—'}</span>
+    <span class="info-label">Sexo</span><span class="info-value">${pet?.sex||'—'}</span>
+    <span class="info-label">Castrado/a</span><span class="info-value">${pet?(pet.neutered?'Sí':'No'):'—'}</span>
+    <span class="info-label">N° de chip</span><span class="info-value">${pet?.chip||'—'}</span>
+  </div>
+
+  <div class="section-title">Historia Clínica — ${visits.length} visita${visits.length!==1?'s':''}</div>
+  ${visitsHtml}
+  <script>window.onload=()=>window.print();<\/script>
+  </body></html>`;
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const w=window.open(url,'_blank');
+  if(!w)showToast('Permitir popups para generar PDF');
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
 
 // ══════════════════════════════════════════════════
