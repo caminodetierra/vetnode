@@ -3411,7 +3411,7 @@ function toggleAttach(){const m=document.getElementById('attach-menu');m.style.d
 // ══════════════════════════════════════════════════
 function triggerVisitFile(type){
   const input=document.getElementById('visit-file-input');
-  if(type==='camera'){input.setAttribute('accept','image/*');input.setAttribute('capture','environment');}
+  if(type==='camera'){input.setAttribute('accept','image/*');input.removeAttribute('capture');}
   else if(type==='audio'){input.setAttribute('accept','audio/*');input.removeAttribute('capture');}
   else{input.setAttribute('accept','image/*,application/pdf');input.removeAttribute('capture');}
   input.click();
