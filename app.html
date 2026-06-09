@@ -4469,8 +4469,10 @@ function exportHcExcel(){
   const{pet,tutor,s,activeVet,visits}=_buildHcData();
   const wb=XLSX.utils.book_new();
   const data=[];
+  const merges=[];
+  const styles={};
 
-  // Encabezado
+  // Encabezado institucional
   data.push(['VetNode']);
   data.push(['Clínica: '+(s.clinic||'—')]);
   if(activeVet)data.push(['Veterinario/a: '+activeVet.name+(activeVet.license?' — Mat. '+activeVet.license:'')]);
@@ -4494,24 +4496,57 @@ function exportHcExcel(){
   data.push(['N° de chip',pet?.chip||'—']);
   data.push([]);
 
-  // Visitas
+  // Historia clínica — un bloque por visita
   data.push(['HISTORIA CLÍNICA']);
-  data.push(['Fecha','Peso (kg)','Temp (°C)','FC (lpm)','FR (rpm)','Presión','BCS','Vacuna','Diag. Presuntivo','Diag. Definitivo','Método confirm.','Estado confirm.','Notas']);
+
+  // 7 columnas de parámetros: Peso | Temp | FC | FR | Presión | BCS | Vacuna
+  const NCOLS=7;
+
   visits.forEach(v=>{
+    // Separador fecha + vet
+    const vetName=activeVet?activeVet.name:'';
+    data.push([formatDate(v.date)+(vetName?' — '+vetName:''),'','','','','','']);
+    const fechaRow=data.length-1;
+    merges.push({s:{r:fechaRow,c:0},e:{r:fechaRow,c:NCOLS-1}});
+
+    // Encabezados parámetros
+    data.push(['Peso (kg)','Temp (°C)','FC (lpm)','FR (rpm)','Presión','BCS','Vacuna']);
+
+    // Valores parámetros
     data.push([
-      formatDate(v.date),
-      v.peso||'',v.temp||'',v.fc||'',v.fr||'',v.presion||'',v.bcs||'',
-      v.vacc?`${v.vacc.name||''}${v.vacc.lot?' (Lote: '+v.vacc.lot+')':''}`:'' ,
-      v.diagPresuntivo||'',v.diagDefinitivo||'',v.confMethod||'',v.confStatus||'',
-      v.notes||''
+      v.peso||'—', v.temp||'—', v.fc||'—', v.fr||'—',
+      v.presion||'—', v.bcs||'—',
+      v.vacc?(v.vacc.name||'')+(v.vacc.lot?' (Lote: '+v.vacc.lot+')':''):'—'
     ]);
+
+    // Diagnósticos (si tienen)
+    if(v.diagPresuntivo||v.diagDefinitivo){
+      data.push(['Diag. Presuntivo: '+(v.diagPresuntivo||'—'),'','','','','','']);
+      const dpRow=data.length-1;
+      merges.push({s:{r:dpRow,c:0},e:{r:dpRow,c:NCOLS-1}});
+      data.push(['Diag. Definitivo: '+(v.diagDefinitivo||'—'),'','','','','','']);
+      const ddRow=data.length-1;
+      merges.push({s:{r:ddRow,c:0},e:{r:ddRow,c:NCOLS-1}});
+    }
+
+    // Notas — celda mergeada ancho completo
+    if(v.notes){
+      data.push([v.notes,'','','','','','']);
+      const notesRow=data.length-1;
+      merges.push({s:{r:notesRow,c:0},e:{r:notesRow,c:NCOLS-1}});
+    }
+
+    // Fila vacía separadora
+    data.push(['','','','','','','']);
   });
 
   const ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=[{wch:28},{wch:40},{wch:18},{wch:18},{wch:18},{wch:18},{wch:8},{wch:8},{wch:8},{wch:28},{wch:28},{wch:18},{wch:18},{wch:60}];
+  ws['!merges']=merges;
+  ws['!cols']=[{wch:18},{wch:12},{wch:10},{wch:10},{wch:12},{wch:8},{wch:28}];
+
+  // Estilo VetNode A1
   if(ws['A1'])ws['A1'].s={font:{bold:true,sz:18,color:{rgb:'4A90E2'}}};
-  // Negrita en títulos de sección
-  ['A5','A10','A19'].forEach(ref=>{if(ws[ref])ws[ref].s={font:{bold:true}};});
+
   XLSX.utils.book_append_sheet(wb,ws,'Historia Clínica');
   const petName=pet?pet.name.replace(/\s+/g,'_'):'paciente';
   XLSX.writeFile(wb,`VetNode_HC_${petName}.xlsx`);
@@ -4522,26 +4557,59 @@ function exportHcPdf(){
   const{pet,tutor,s,activeVet,visits}=_buildHcData();
   const petName=pet?pet.name:'Paciente';
 
+  const visitsHtml=visits.map(v=>{
+    const params=[
+      v.peso?`<div class="param"><span class="param-lbl">Peso</span><span class="param-val">${v.peso} kg</span></div>`:'',
+      v.temp?`<div class="param"><span class="param-lbl">Temp</span><span class="param-val">${v.temp} °C</span></div>`:'',
+      v.fc?`<div class="param"><span class="param-lbl">FC</span><span class="param-val">${v.fc} lpm</span></div>`:'',
+      v.fr?`<div class="param"><span class="param-lbl">FR</span><span class="param-val">${v.fr} rpm</span></div>`:'',
+      v.presion?`<div class="param"><span class="param-lbl">Presión</span><span class="param-val">${v.presion}</span></div>`:'',
+      v.bcs?`<div class="param"><span class="param-lbl">BCS</span><span class="param-val">${v.bcs}</span></div>`:'',
+    ].filter(Boolean).join('');
+
+    const vaccHtml=v.vacc?`<div class="visit-field"><span class="field-lbl">Vacuna:</span> ${v.vacc.name||''}${v.vacc.lot?' — Lote: '+v.vacc.lot:''}</div>`:'';
+    const dpHtml=v.diagPresuntivo?`<div class="visit-field"><span class="field-lbl">Diag. presuntivo:</span> ${v.diagPresuntivo}</div>`:'';
+    const ddHtml=v.diagDefinitivo?`<div class="visit-field"><span class="field-lbl">Diag. definitivo:</span> ${v.diagDefinitivo}</div>`:'';
+    const notesHtml=v.notes?`<div class="visit-notes">${(v.notes).replace(/\n/g,'<br>')}</div>`:'';
+
+    return`<div class="visit-block">
+      <div class="visit-header">
+        <span class="visit-date">${formatDate(v.date)}</span>
+        ${activeVet?`<span class="visit-vet">${activeVet.name}</span>`:''}
+      </div>
+      ${params?`<div class="params-grid">${params}</div>`:''}
+      ${vaccHtml}${dpHtml}${ddHtml}
+      ${notesHtml}
+    </div>`;
+  }).join('');
+
   const html=`<!DOCTYPE html><html><head><meta charset="utf-8">
   <title>HC - ${petName}</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:Arial,sans-serif;font-size:12px;color:#1a1a2e;padding:32px;}
+    body{font-family:Arial,sans-serif;font-size:12px;color:#1a1a2e;padding:28px 32px;}
     .brand{font-size:24px;font-weight:900;color:#4A90E2;margin-bottom:2px;}
-    .clinic{font-size:13px;color:#555;margin-bottom:16px;}
-    .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#4A90E2;border-bottom:1.5px solid #4A90E2;margin:18px 0 8px;padding-bottom:3px;}
-    .info-grid{display:grid;grid-template-columns:160px 1fr;gap:4px 12px;margin-bottom:4px;}
-    .info-label{font-weight:700;color:#555;}
-    .info-value{color:#1a1a2e;}
-    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10px;}
-    th{background:#4A90E2;color:white;padding:5px 7px;text-align:left;font-weight:700;}
-    td{padding:5px 7px;border-bottom:1px solid #e0e0f0;vertical-align:top;}
-    tr:nth-child(even) td{background:#f5f7ff;}
-    .notes-cell{max-width:200px;word-wrap:break-word;}
-    @media print{body{padding:16px;}button{display:none;}}
+    .clinic-line{font-size:12px;color:#555;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #4A90E2;}
+    .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#4A90E2;margin:16px 0 8px;}
+    .info-grid{display:grid;grid-template-columns:160px 1fr;gap:3px 12px;margin-bottom:4px;}
+    .info-label{font-weight:700;color:#555;font-size:11px;}
+    .info-value{color:#1a1a2e;font-size:11px;}
+    /* Visitas */
+    .visit-block{border:1px solid #dde4f0;border-radius:8px;padding:12px 14px;margin-bottom:12px;page-break-inside:avoid;}
+    .visit-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #eef0f8;}
+    .visit-date{font-size:13px;font-weight:700;color:#1a1a2e;}
+    .visit-vet{font-size:11px;color:#555;}
+    .params-grid{display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:8px;}
+    .param{background:#f0f4ff;border-radius:6px;padding:4px 10px;display:flex;flex-direction:column;align-items:center;min-width:60px;}
+    .param-lbl{font-size:9px;font-weight:700;color:#4A90E2;text-transform:uppercase;letter-spacing:.5px;}
+    .param-val{font-size:12px;font-weight:700;color:#1a1a2e;margin-top:1px;}
+    .visit-field{font-size:11px;color:#333;margin-bottom:4px;}
+    .field-lbl{font-weight:700;color:#555;}
+    .visit-notes{font-size:12px;color:#1a1a2e;line-height:1.65;margin-top:8px;padding-top:8px;border-top:1px dashed #dde4f0;width:100%;}
+    @media print{body{padding:16px 20px;}.visit-block{break-inside:avoid;}}
   </style></head><body>
   <div class="brand">VetNode</div>
-  <div class="clinic">${s.clinic||''}${activeVet?' · '+activeVet.name+(activeVet.license?' — Mat. '+activeVet.license:''):''}</div>
+  <div class="clinic-line">${s.clinic||''}${activeVet?' · '+activeVet.name+(activeVet.license?' — Mat. '+activeVet.license:''):''}</div>
 
   <div class="section-title">Datos del Tutor</div>
   <div class="info-grid">
@@ -4561,26 +4629,8 @@ function exportHcPdf(){
     <span class="info-label">N° de chip</span><span class="info-value">${pet?.chip||'—'}</span>
   </div>
 
-  <div class="section-title">Historia Clínica (${visits.length} visita${visits.length!==1?'s':''})</div>
-  <table>
-    <thead><tr>
-      <th>Fecha</th><th>Peso</th><th>Temp</th><th>FC</th><th>FR</th><th>Presión</th><th>BCS</th>
-      <th>Vacuna</th><th>Diag. Presuntivo</th><th>Diag. Definitivo</th><th>Notas</th>
-    </tr></thead>
-    <tbody>
-    ${visits.map(v=>`<tr>
-      <td>${formatDate(v.date)}</td>
-      <td>${v.peso?v.peso+' kg':''}</td>
-      <td>${v.temp?v.temp+'°C':''}</td>
-      <td>${v.fc||''}</td><td>${v.fr||''}</td>
-      <td>${v.presion||''}</td><td>${v.bcs||''}</td>
-      <td>${v.vacc?v.vacc.name||'':''}</td>
-      <td>${v.diagPresuntivo||''}</td>
-      <td>${v.diagDefinitivo||''}</td>
-      <td class="notes-cell">${(v.notes||'').replace(/\n/g,'<br>')}</td>
-    </tr>`).join('')}
-    </tbody>
-  </table>
+  <div class="section-title">Historia Clínica — ${visits.length} visita${visits.length!==1?'s':''}</div>
+  ${visitsHtml}
   <script>window.onload=()=>window.print();<\/script>
   </body></html>`;
 
