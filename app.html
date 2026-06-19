@@ -1334,7 +1334,7 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
           <div><label class="v-label">FC</label><input class="v-input" id="q-fc" placeholder="lpm"></div>
           <div><label class="v-label">FR</label><input class="v-input" id="q-fr" placeholder="rpm"></div>
           <div><label class="v-label">PA</label><input class="v-input" id="q-presion" placeholder="120/80"></div>
-          <div><label class="v-label">BCS</label><input class="v-input" id="q-bcs" placeholder="1-5"></div>
+          <div><label class="v-label">BCS</label><input class="v-input" id="q-bcs" placeholder="1-9"></div>
         </div>
         <div class="notes-wrap">
           <textarea class="notes-area" id="q-notes" placeholder="Síntomas, diagnóstico, tratamiento…" rows="5"></textarea>
@@ -1448,7 +1448,7 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
           <div><label class="v-label">FC</label><input class="v-input" id="v-fc" placeholder="lpm"></div>
           <div><label class="v-label">FR</label><input class="v-input" id="v-fr" placeholder="rpm"></div>
           <div><label class="v-label">PA</label><input class="v-input" id="v-presion" placeholder="120/80"></div>
-          <div><label class="v-label">BCS</label><input class="v-input" id="v-bcs" placeholder="1-5"></div>
+          <div><label class="v-label">BCS</label><input class="v-input" id="v-bcs" placeholder="1-9"></div>
         </div>
         <!-- HERRAMIENTAS -->
         <div class="tools-row">
@@ -1471,8 +1471,12 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
         <!-- Panel Dosis -->
         <div class="tool-panel" id="tool-panel-dose">
           <div style="margin-bottom:8px"><label class="v-label">mg/kg a administrar</label><input class="v-input" id="dose-mgkg" placeholder="ej: 5" oninput="calcDose()" style="text-align:left;padding:9px 12px"></div>
-          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Peso: <span id="dose-peso-lbl" style="color:var(--blue);font-weight:700">—</span> kg</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Peso: <span id="dose-peso-lbl" style="color:var(--blue);font-weight:700">—</span> kg</div>
           <div class="dose-result" id="dose-result" style="display:none"></div>
+          <div id="dose-conc-wrap" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);">
+            <div style="margin-bottom:8px"><label class="v-label">Concentración del producto (%)</label><input class="v-input" id="dose-conc" placeholder="ej: 5" oninput="calcDoseMl()" style="text-align:left;padding:9px 12px"></div>
+            <div class="dose-result" id="dose-ml-result" style="display:none"></div>
+          </div>
         </div>
         <!-- Panel Fluidos -->
         <div class="tool-panel" id="tool-panel-fluid">
@@ -1651,7 +1655,7 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
           <div><label class="v-label">FC</label><input class="v-input" id="ve-fc" placeholder="lpm"></div>
           <div><label class="v-label">FR</label><input class="v-input" id="ve-fr" placeholder="rpm"></div>
           <div><label class="v-label">PA</label><input class="v-input" id="ve-presion" placeholder="120/80"></div>
-          <div><label class="v-label">BCS</label><input class="v-input" id="ve-bcs" placeholder="1-5"></div>
+          <div><label class="v-label">BCS</label><input class="v-input" id="ve-bcs" placeholder="1-9"></div>
         </div>
         <div class="notes-wrap">
           <textarea class="notes-area" id="ve-notes" placeholder="Síntomas, diagnóstico, tratamiento indicado…" rows="6"></textarea>
@@ -5170,9 +5174,35 @@ function calcDose(){
   const mgkg=parseFloat(document.getElementById('dose-mgkg')?.value||'0');
   const peso=parseFloat(document.getElementById('v-peso')?.value||'0');
   const res=document.getElementById('dose-result');if(!res)return;
-  if(!mgkg||!peso){res.style.display='none';return;}
+  const concWrap=document.getElementById('dose-conc-wrap');
+  const mlRes=document.getElementById('dose-ml-result');
+  if(!mgkg||!peso){
+    res.style.display='none';
+    if(concWrap)concWrap.style.display='none';
+    return;
+  }
+  const mgTotal=(mgkg*peso);
   res.style.display='block';
-  res.textContent=`Dosis total: ${(mgkg*peso).toFixed(2)} mg`;
+  res.textContent=`Dosis total: ${mgTotal.toFixed(2)} mg`;
+  if(concWrap)concWrap.style.display='block';
+  // recalcular ml si ya hay concentración cargada
+  const conc=parseFloat(document.getElementById('dose-conc')?.value||'0');
+  if(conc&&mlRes){
+    const ml=mgTotal/(conc*10);
+    mlRes.style.display='block';
+    mlRes.textContent=`Volumen a cargar: ${ml.toFixed(2)} ml`;
+  }
+}
+function calcDoseMl(){
+  const mgkg=parseFloat(document.getElementById('dose-mgkg')?.value||'0');
+  const peso=parseFloat(document.getElementById('v-peso')?.value||'0');
+  const conc=parseFloat(document.getElementById('dose-conc')?.value||'0');
+  const res=document.getElementById('dose-ml-result');if(!res)return;
+  if(!mgkg||!peso||!conc){res.style.display='none';return;}
+  const mgTotal=mgkg*peso;
+  const ml=mgTotal/(conc*10);
+  res.style.display='block';
+  res.textContent=`Volumen a cargar: ${ml.toFixed(2)} ml`;
 }
 
 // ── Calculador de fluidos ──
