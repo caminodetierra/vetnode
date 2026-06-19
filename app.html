@@ -2507,9 +2507,41 @@ function renderVetsList(){
   if(!vets.length){el.innerHTML=`<div style="text-align:center;padding:16px;font-size:12px;color:var(--text3)">Sin veterinarios. Agregá el primero.</div>`;return;}
   el.innerHTML=vets.map(vt=>`<div class="vet-item">
     <div class="vet-av">${vt.photo?`<img src="${vt.photo}">`:(vt.name||'?').substring(0,2).toUpperCase()}</div>
-    <div class="vet-info"><div class="vet-name">${vt.name||'Sin nombre'}</div><div class="vet-mat">${vt.license||''}</div></div>
-    <div class="vet-active-chk ${s.activeVetId===vt.id?'on':''}" onclick="setActiveVet(${vt.id})">${s.activeVetId===vt.id?'✓':''}</div>
+    <div class="vet-info" style="flex:1;cursor:pointer;" onclick="setActiveVet('${vt.id}')"><div class="vet-name">${escHtml(vt.name||'Sin nombre')}</div><div class="vet-mat">${escHtml(vt.license||'')}</div></div>
+    <div class="vet-active-chk ${s.activeVetId===vt.id?'on':''}" onclick="setActiveVet('${vt.id}')" style="cursor:pointer;">${s.activeVetId===vt.id?'✓':''}</div>
+    <button class="pt-chip-dots" onclick="showVetMenu(event,'${vt.id}')">⋯</button>
   </div>`).join('');
+}
+function showVetMenu(e,id){
+  e.stopPropagation();
+  document.querySelectorAll('.ctx-menu').forEach(m=>m.remove());
+  const rect=e.target.getBoundingClientRect();
+  const menu=document.createElement('div');
+  menu.className='ctx-menu';
+  menu.style.cssText=`position:fixed;top:${rect.bottom+4}px;right:${window.innerWidth-rect.right}px;z-index:200;`;
+  menu.innerHTML=`
+    <div class="ctx-item" onclick="openEditVet('${id}')"><span class="ctx-ico">✏️</span>Editar</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item red" onclick="confirmDeleteVet('${id}')"><span class="ctx-ico">🗑️</span>Eliminar</div>`;
+  document.body.appendChild(menu);
+  setTimeout(()=>document.addEventListener('click',function h(){menu.remove();document.removeEventListener('click',h);},{once:true}),10);
+}
+function openEditVet(id){
+  const vt=getVets().find(v=>v.id===id);if(!vt)return;
+  editingVetId=id;vetPhotoData=vt.photo||null;
+  document.getElementById('m-addvet-title').textContent='Editar veterinario';
+  document.getElementById('vet-name').value=vt.name||'';
+  document.getElementById('vet-phone').value=vt.phone||'';
+  document.getElementById('vet-license').value=vt.license||'';
+  document.getElementById('vet-photo-preview-wrap').innerHTML=vt.photo?`<img src="${vt.photo}" style="width:100%;height:100%;object-fit:cover;">`:'👤';
+  openModal('m-addvet');
+}
+function confirmDeleteVet(id){
+  if(!confirm('¿Eliminar este veterinario?'))return;
+  const vets=getVets().filter(v=>v.id!==id);
+  const s=getSettings();
+  if(s.activeVetId===id){s.activeVetId=vets.length?vets[0].id:null;CACHE.set('settings',s);}
+  saveVets(vets);renderVetsList();showToast('Veterinario eliminado');
 }
 function setActiveVet(id){
   const s=getSettings();s.activeVetId=id;CACHE.set('settings',s);
