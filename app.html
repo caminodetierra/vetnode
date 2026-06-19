@@ -2212,7 +2212,7 @@ const fromReminder=(r,uid)=>{const o={user_id:uid,pet_id:r.petId||null,tutor_id:
 const toAppt=r=>(({id:r.id,petId:r.pet_id,tutorId:r.tutor_id,date:r.appt_date,time:r.appt_time||'',procedure:r.procedure||''}));
 const fromAppt=(a,uid)=>{const o={user_id:uid,pet_id:a.petId||null,tutor_id:a.tutorId||null,appt_date:a.date,appt_time:a.time||'',procedure:a.procedure||''};if(a.id)o.id=a.id;return o;};
 const toVet=r=>(({id:r.id,name:r.name,phone:r.phone||'',license:r.license||'',photo:r.photo||null,isActive:!!r.is_active}));
-const fromVet=(v,uid)=>{const o={user_id:uid,name:v.name,phone:v.phone||'',license:v.license||'',photo:v.photo||null,is_active:!!v.isActive};if(v.id)o.id=v.id;return o;};
+const fromVet=(v,uid)=>{const o={user_id:uid,name:v.name,phone:v.phone||'',license:v.license||'',photo:v.photo||null,is_active:!!v.isActive};if(v.id&&/^[0-9a-f-]{36}$/i.test(v.id))o.id=v.id;return o;};
 
 // ── Cache (for instant UI reads) ──
 const CACHE={
