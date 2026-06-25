@@ -2295,7 +2295,7 @@ const _sbSave=async(table,rows,mapper)=>{
   }
   if(!navigator.onLine){addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');return;}
   try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(mapped)});
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:'POST',headers:{...getAuthHeaders(),'Content-Type':'application/json','Prefer':'return=minimal,resolution=merge-duplicates'},body:JSON.stringify(mapped)});
     if(!r.ok){addPending(table,mapped);showToast('Error al guardar — se reintentará al sincronizar');}
   }catch{addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');}
 };
