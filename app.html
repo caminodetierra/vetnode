@@ -2286,6 +2286,13 @@ const _sbSave=async(table,rows,mapper)=>{
   const uid=getUserId();if(!uid||!rows.length)return;
   if(isTokenExpired())await refreshSession();
   const mapped=rows.map(r=>mapper(r,uid));
+  // Detectar filas con FKs inválidas y avisar al usuario
+  if(table==='visits'&&mapped.some(r=>!r.pet_id)){
+    showToastLong('⚠️ Algunos datos no pudieron sincronizarse. Contactá a soporte@vetnode.app');
+  }
+  if(table==='pets'&&mapped.some(r=>!r.tutor_id)){
+    showToastLong('⚠️ Algunos datos no pudieron sincronizarse. Contactá a soporte@vetnode.app');
+  }
   if(!navigator.onLine){addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');return;}
   try{
     const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(mapped)});
@@ -4136,6 +4143,7 @@ function timeAgo(ts){const d=Math.floor((Date.now()-ts)/864e5);if(d===0)return'h
 function formatDate(ts){return new Date(ts).toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});}
 function formatDateShort(ts){return new Date(ts).toLocaleDateString('es-AR',{day:'numeric',month:'short',year:'numeric'});}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+function showToastLong(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),6000);}
 
 // ── CONFIG PANEL (desktop) ──
 function showConfigPanel(){
@@ -4991,7 +4999,9 @@ let _notifCache=[];
 
 async function loadNotifications(){
   try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/notifications?order=created_at.desc&limit=30`,{
+    const uid=getUserId();
+    const filter=uid?`or=(user_id.is.null,user_id.eq.${uid})`:`user_id=is.null`;
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/notifications?${filter}&order=created_at.desc&limit=30`,{
       headers:getAuthHeaders()
     });
     if(!r.ok)return;
@@ -5500,7 +5510,30 @@ function maybeShowWelcome(){
     _welcomeIdx=0;
     renderWelcomeSlide();
     openModal('m-welcome');
+    insertWelcomeNotification();
   }
+}
+async function insertWelcomeNotification(){
+  try{
+    const uid=getUserId();if(!uid)return;
+    const s=getSession();if(!s?.access_token)return;
+    // Verificar que no exista ya una notificación de bienvenida
+    const check=await fetch(`${SUPABASE_URL}/rest/v1/notifications?type=eq.welcome&limit=1`,{
+      headers:{...getAuthHeaders(),'Accept':'application/json'}
+    });
+    if(check.ok){const existing=await check.json();if(existing.length)return;}
+    await fetch(`${SUPABASE_URL}/rest/v1/notifications`,{
+      method:'POST',
+      headers:{...getAuthHeaders(),'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({
+        title:'👋 ¡Bienvenido/a a VetNode!',
+        body:`Estamos muy contentos de tenerte acá. VetNode es una app gratuita para gestionar tu clínica veterinaria — historias clínicas, recordatorios, turnos y estadísticas, todo en un solo lugar.\n\nAlgunos tips para empezar:\n— Agregá tu clínica y veterinarios en el menú de configuración\n— Creá tu primer tutor y mascota desde "Pacientes"\n— Al cerrar una visita, la encuesta genera estadísticas clínicas automáticamente\n\nCualquier duda escribinos a soporte@vetnode.app. ¡Gracias por usar VetNode!`,
+        type:'welcome',
+        global:false
+      })
+    });
+    loadNotifications();
+  }catch(e){console.warn('Welcome notif error',e);}
 }
 // Flush pending ops when connection is restored
 window.addEventListener('online',()=>{flushPending();showToast('Conexión restaurada 📶');});
