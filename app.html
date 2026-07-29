@@ -1775,6 +1775,11 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
         <div class="fg"><label>Nombre de la clínica</label><input class="fi" id="clinic-name-fi" placeholder="Clínica Veterinaria San Marcos"></div>
         <div class="fg"><label>Teléfono</label><input class="fi" id="clinic-phone-fi" placeholder="+54 11 4444-5555" type="tel"></div>
         <div class="fg"><label>Dirección</label><input class="fi" id="clinic-addr-fi" placeholder="Av. Corrientes 1234, Buenos Aires"></div>
+        <div class="fg-row">
+          <div class="fg"><label>País</label><input class="fi" id="clinic-country-fi" placeholder="Argentina"></div>
+          <div class="fg"><label>Provincia / Estado</label><input class="fi" id="clinic-state-fi" placeholder="Buenos Aires"></div>
+        </div>
+        <div class="fg"><label>Ciudad / Localidad</label><input class="fi" id="clinic-city-fi" placeholder="Bahía Blanca"></div>
         <button class="save-btn" onclick="saveClinic()">Guardar</button>
       </div>
     </div>
@@ -2280,6 +2285,9 @@ async function syncFromSupabase(){
       if(profile.clinic_phone)s.clinicPhone=profile.clinic_phone;
       if(profile.clinic_addr)s.clinicAddr=profile.clinic_addr;
       if(profile.clinic_photo)s.clinicPhoto=profile.clinic_photo;
+      if(profile.clinic_country)s.clinicCountry=profile.clinic_country;
+      if(profile.clinic_state)s.clinicState=profile.clinic_state;
+      if(profile.clinic_city)s.clinicCity=profile.clinic_city;
       const av=vets.find(v=>v.is_active);if(av)s.activeVetId=av.id;
       CACHE.set('settings',s);
     }
@@ -2510,6 +2518,9 @@ function openClinicModal(){
   document.getElementById('clinic-name-fi').value=s.clinic||'';
   document.getElementById('clinic-phone-fi').value=s.clinicPhone||'';
   document.getElementById('clinic-addr-fi').value=s.clinicAddr||'';
+  document.getElementById('clinic-country-fi').value=s.clinicCountry||'';
+  document.getElementById('clinic-state-fi').value=s.clinicState||'';
+  document.getElementById('clinic-city-fi').value=s.clinicCity||'';
   const logo=document.getElementById('clinic-modal-logo');
   if(s.clinicPhoto)logo.innerHTML=`<img src="${s.clinicPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
   else logo.innerHTML='+';
@@ -2520,9 +2531,12 @@ function saveClinic(){
   s.clinic=document.getElementById('clinic-name-fi').value.trim();
   s.clinicPhone=document.getElementById('clinic-phone-fi').value.trim();
   s.clinicAddr=document.getElementById('clinic-addr-fi').value.trim();
+  s.clinicCountry=document.getElementById('clinic-country-fi').value.trim();
+  s.clinicState=document.getElementById('clinic-state-fi').value.trim();
+  s.clinicCity=document.getElementById('clinic-city-fi').value.trim();
   CACHE.set('settings',s);
   const uid=getUserId();
-  if(uid)sbUpsert('profiles',{id:uid,clinic_name:s.clinic,clinic_phone:s.clinicPhone,clinic_addr:s.clinicAddr});
+  if(uid)sbUpsert('profiles',{id:uid,clinic_name:s.clinic,clinic_phone:s.clinicPhone,clinic_addr:s.clinicAddr,clinic_country:s.clinicCountry,clinic_state:s.clinicState,clinic_city:s.clinicCity});
   loadSettings();closeModal('m-clinic');showToast('Clínica guardada ✓');
 }
 function triggerClinicPhoto(){document.getElementById('clinic-photo-input').click();}
