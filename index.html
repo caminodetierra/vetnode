@@ -742,16 +742,16 @@ footer span{color:var(--orange);font-weight:700;}
     </div>
     <div class="auth-row">
       <div class="auth-field">
-        <label>País</label>
+        <label>País <span style="color:#f06a6a">*</span></label>
         <input class="auth-input" id="reg-country" type="text" placeholder="Argentina">
       </div>
       <div class="auth-field">
-        <label>Provincia / Estado</label>
+        <label>Provincia / Estado <span style="color:#f06a6a">*</span></label>
         <input class="auth-input" id="reg-state" type="text" placeholder="Buenos Aires">
       </div>
     </div>
     <div class="auth-field">
-      <label>Ciudad</label>
+      <label>Ciudad <span style="color:#f06a6a">*</span></label>
       <input class="auth-input" id="reg-city" type="text" placeholder="Ciudad Autónoma de Buenos Aires">
     </div>
     <div class="auth-field">
@@ -904,6 +904,7 @@ async function handleRegister() {
   const emailNotif = document.getElementById('reg-email-notif').checked;
   hideError('register-error');
   if (!lastname||!firstname||!email||!password) { showError('register-error','Completá todos los campos obligatorios.'); return; }
+  if (!country||!state||!city) { showError('register-error','Completá país, provincia/estado y ciudad.'); return; }
   if (password.length < 8) { showError('register-error','La contraseña debe tener al menos 8 caracteres.'); return; }
   if (password !== password2) { showError('register-error','Las contraseñas no coinciden.'); return; }
   if (!document.getElementById('reg-terms').checked) { showError('register-error','Debés aceptar los Términos y Condiciones para registrarte.'); return; }
