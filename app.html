@@ -2073,16 +2073,16 @@ body.light .screen-header{background:rgba(255,255,255,0.82);}
     <div class="modal-wrap" id="m-collab" onclick="closeIfOutside(event,'m-collab')">
       <div class="modal">
         <div class="modal-handle"></div>
-        <div class="modal-title">❤️ Donar</div>
-        <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px;">
-          <p style="margin-bottom:10px">Esta app es gratuita y va a seguir siéndolo. Si te resulta útil y querés apoyar su desarrollo, cualquier contribución es bienvenida y nos permite seguir mejorándola.</p>
-          <p>Dejanos tu contacto y te enviamos los datos para hacer una transferencia o un link de pago. No hay monto mínimo — lo que puedas y quieras.</p>
+        <div class="modal-title">❤️ Apoyar VetNode</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:20px;">
+          <p style="margin-bottom:10px">Esta app es gratuita y va a seguir siéndolo. Si te resulta útil, cualquier contribución nos ayuda a mantenerla y seguir mejorándola.</p>
+          <p>Podés donar de forma segura desde cualquier país con tarjeta o PayPal, en el monto que quieras.</p>
         </div>
-        <div class="fg"><label>Nombre</label><input class="fi" id="col-name" placeholder="Tu nombre"></div>
-        <div class="fg"><label>Mail</label><input class="fi" id="col-mail" placeholder="tu@mail.com" type="email"></div>
-        <div class="fg"><label>WhatsApp (opcional)</label><input class="fi" id="col-wa" placeholder="+54 11 1234-5678" type="tel"></div>
-        <div class="fg"><label>Mensaje (opcional)</label><textarea class="fi" id="col-msg" rows="2" placeholder="Algo que quieras decirnos…" style="resize:none;min-height:60px"></textarea></div>
-        <button class="save-btn green" onclick="sendCollab()">Enviar mis datos</button>
+        <a href="https://ko-fi.com/vetnode" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#FF5E5B;color:white;border-radius:var(--radius);padding:14px;font-size:15px;font-weight:800;font-family:var(--font);text-decoration:none;margin-bottom:10px;">
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:white;flex-shrink:0;"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg>
+          Donar en Ko-fi
+        </a>
+        <button class="del-btn" style="border-color:var(--border2);color:var(--text3);width:100%;" onclick="closeModal('m-collab')">Cerrar</button>
       </div>
     </div>
 
