@@ -2366,6 +2366,7 @@ async function _sbPostAll(table,rows){
 async function flushPending(){
   const q=getPending();if(!q.length)return;
   const uid=getUserId();if(!uid)return;
+  if(isTokenExpired())await refreshSession();
   const remaining=[];let sent=0;
   for(const item of q){
     const synced=_getSynced(item.table);
@@ -2377,10 +2378,16 @@ async function flushPending(){
   try{localStorage.setItem(PENDING_KEY,JSON.stringify(remaining));}catch(e){}
   if(sent>0)showToast(`${sent} cambio${sent>1?'s':''} sincronizado${sent>1?'s':''} ✓`);
 }
-const _sbSave=async(table,rows,mapper)=>{
-  const uid=getUserId();if(!uid||!rows.length)return;
+// Los guardados se ejecutan en orden (tutor → mascota → visita) para no violar FKs por carreras
+let _sbChain=Promise.resolve();
+const _sbSave=(table,rows,mapper)=>{
+  const uid=getUserId();if(!uid||!rows.length)return Promise.resolve();
+  const mapped=rows.map(r=>mapper(r,uid)); // foto de los datos al momento de guardar
+  _sbChain=_sbChain.then(()=>_sbSendMapped(table,mapped)).catch(e=>console.error('sbSave',table,e));
+  return _sbChain;
+};
+const _sbSendMapped=async(table,mapped)=>{
   if(isTokenExpired())await refreshSession();
-  const mapped=rows.map(r=>mapper(r,uid));
   // Detectar filas con FKs inválidas y avisar al usuario
   if(table==='visits'&&mapped.some(r=>!r.pet_id)){
     showToastLong('⚠️ Algunos datos no pudieron sincronizarse. Contactá a soporte@vetnode.app');
