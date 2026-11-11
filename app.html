@@ -2271,6 +2271,13 @@ async function syncFromSupabase(){
       sbSelect('reminders'),sbSelect('appointments'),
       sbSelect('vets'),sbSelect('contacts'),sbSelect('custom_vaccs'),sbSelectProfile()
     ]);
+    // Marcar lo recibido como ya sincronizado (evita reenviar filas sin cambios)
+    _seedSynced('tutors',tutors,toTutor,fromTutor,uid);
+    _seedSynced('pets',pets,toPet,fromPet,uid);
+    _seedSynced('visits',visits,toVisit,fromVisit,uid);
+    _seedSynced('reminders',rems,toReminder,fromReminder,uid);
+    _seedSynced('appointments',appts,toAppt,fromAppt,uid);
+    _seedSynced('vets',vets,toVet,fromVet,uid);
     if(tutors.length||!CACHE.get('tutors'))CACHE.set('tutors',tutors.map(toTutor));
     if(pets.length||!CACHE.get('pets'))CACHE.set('pets',pets.map(toPet));
     if(visits.length||!CACHE.get('visits'))CACHE.set('visits',visits.map(toVisit));
@@ -2306,23 +2313,69 @@ const PENDING_KEY='vn_pending_sync';
 function getPending(){try{return JSON.parse(localStorage.getItem(PENDING_KEY)||'[]');}catch{return[];}}
 function addPending(table,rows){
   const q=getPending();
-  // merge: replace existing entry for same table
+  // merge por id dentro de la misma tabla (las filas sin id se reemplazan por las más recientes)
   const idx=q.findIndex(x=>x.table===table);
-  if(idx>-1)q[idx].rows=rows;else q.push({table,rows});
-  localStorage.setItem(PENDING_KEY,JSON.stringify(q));
+  if(idx>-1){
+    const byId=new Map();
+    (q[idx].rows||[]).forEach(r=>{if(r.id)byId.set(r.id,r);});
+    rows.forEach(r=>{if(r.id)byId.set(r.id,r);});
+    q[idx].rows=[...byId.values(),...rows.filter(r=>!r.id)];
+  }else q.push({table,rows});
+  try{localStorage.setItem(PENDING_KEY,JSON.stringify(q));}catch(e){console.error('pending quota',e);}
+}
+
+// ── Sync incremental: solo se envían filas nuevas o modificadas ──
+const SB_CHUNK=20;
+function _rowHash(r){
+  const s=JSON.stringify(r);let h1=0xdeadbeef,h2=0x41c6ce57;
+  for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677);}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return (4294967296*(2097151&h2)+(h1>>>0)).toString(36)+'.'+s.length;
+}
+function _syncKey(t){return 'vn_sy_'+(getUserId()||'')+'_'+t;}
+function _getSynced(t){try{return JSON.parse(localStorage.getItem(_syncKey(t))||'{}');}catch(e){return{};}}
+function _setSynced(t,m){try{localStorage.setItem(_syncKey(t),JSON.stringify(m));}catch(e){}}
+function _markSynced(t,rows){const m=_getSynced(t);rows.forEach(r=>{if(r.id)m[r.id]=_rowHash(r);});_setSynced(t,m);}
+// Registra como "ya sincronizado" lo que acaba de llegar desde Supabase
+function _seedSynced(t,dbRows,toFn,fromFn,uid){
+  if(!dbRows||!dbRows.length)return;
+  const m={};
+  dbRows.forEach(r=>{const x=fromFn(toFn(r),uid);if(x.id)m[x.id]=_rowHash(x);});
+  _setSynced(t,m);
+}
+async function _sbPost(table,rows){
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:'POST',headers:{...getAuthHeaders(),'Content-Type':'application/json','Prefer':'return=minimal,resolution=merge-duplicates'},body:JSON.stringify(rows)});
+    if(r.ok){_markSynced(table,rows);return true;}
+  }catch(e){}
+  return false;
+}
+// Envía en lotes chicos (con id y sin id por separado). Devuelve las filas que fallaron.
+async function _sbPostAll(table,rows){
+  const failed=[];
+  const withId=rows.filter(r=>r.id),noId=rows.filter(r=>!r.id);
+  for(const grp of [withId,noId]){
+    for(let i=0;i<grp.length;i+=SB_CHUNK){
+      const chunk=grp.slice(i,i+SB_CHUNK);
+      if(!await _sbPost(table,chunk))failed.push(...chunk);
+    }
+  }
+  return failed;
 }
 async function flushPending(){
   const q=getPending();if(!q.length)return;
   const uid=getUserId();if(!uid)return;
-  const remaining=[];
+  const remaining=[];let sent=0;
   for(const item of q){
-    try{
-      const r=await fetch(`${SUPABASE_URL}/rest/v1/${item.table}`,{method:'POST',headers:{...getAuthHeaders(),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(item.rows)});
-      if(!r.ok)remaining.push(item);
-    }catch{remaining.push(item);}
+    const synced=_getSynced(item.table);
+    const todo=(item.rows||[]).filter(r=>!r.id||synced[r.id]!==_rowHash(r));
+    const failed=await _sbPostAll(item.table,todo);
+    sent+=todo.length-failed.length;
+    if(failed.length)remaining.push({table:item.table,rows:failed});
   }
-  localStorage.setItem(PENDING_KEY,JSON.stringify(remaining));
-  if(remaining.length<q.length)showToast(`${q.length-remaining.length} cambio${q.length-remaining.length>1?'s':''} sincronizado${q.length-remaining.length>1?'s':''} ✓`);
+  try{localStorage.setItem(PENDING_KEY,JSON.stringify(remaining));}catch(e){}
+  if(sent>0)showToast(`${sent} cambio${sent>1?'s':''} sincronizado${sent>1?'s':''} ✓`);
 }
 const _sbSave=async(table,rows,mapper)=>{
   const uid=getUserId();if(!uid||!rows.length)return;
@@ -2335,11 +2388,13 @@ const _sbSave=async(table,rows,mapper)=>{
   if(table==='pets'&&mapped.some(r=>!r.tutor_id)){
     showToastLong('⚠️ Algunos datos no pudieron sincronizarse. Contactá a soporte@vetnode.app');
   }
-  if(!navigator.onLine){addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');return;}
-  try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:'POST',headers:{...getAuthHeaders(),'Content-Type':'application/json','Prefer':'return=minimal,resolution=merge-duplicates'},body:JSON.stringify(mapped)});
-    if(!r.ok){addPending(table,mapped);showToast('Error al guardar — se reintentará al sincronizar');}
-  }catch{addPending(table,mapped);showToast('Sin conexión — se sincronizará al volver 📶');}
+  // Solo filas nuevas o modificadas desde la última sincronización
+  const synced=_getSynced(table);
+  const changed=mapped.filter(r=>!r.id||synced[r.id]!==_rowHash(r));
+  if(!changed.length)return;
+  if(!navigator.onLine){addPending(table,changed);showToast('Sin conexión — se sincronizará al volver 📶');return;}
+  const failed=await _sbPostAll(table,changed);
+  if(failed.length){addPending(table,failed);showToast('Error al guardar — se reintentará al sincronizar');}
 };
 
 // ── DB accessors ──
