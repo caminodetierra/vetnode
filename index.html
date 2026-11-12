@@ -325,6 +325,9 @@ footer span{color:var(--orange);font-weight:700;}
 }
 .auth-switch a{color:var(--cyan2);cursor:pointer;text-decoration:none;font-weight:700;}
 .auth-switch a:hover{text-decoration:underline;}
+.auth-forgot{text-align:right;margin:-4px 0 14px;font-size:12px;font-weight:700;}
+.auth-forgot a{color:var(--cyan2);cursor:pointer;text-decoration:none;}
+.auth-forgot a:hover{text-decoration:underline;}
 .auth-error{
   background:rgba(240,106,106,0.12);border:1px solid rgba(240,106,106,0.3);
   border-radius:10px;padding:10px 13px;
@@ -726,6 +729,7 @@ footer span{color:var(--orange);font-weight:700;}
       <label>Contraseña</label>
       <input class="auth-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
     </div>
+    <p class="auth-forgot"><a onclick="openForgot()">¿Olvidaste tu contraseña?</a></p>
     <button class="auth-btn" id="login-btn" onclick="handleLogin()">Ingresar a VetNode</button>
     <p class="auth-switch">¿No tenés cuenta? <a onclick="switchToRegister()">Registrarse gratis</a></p>
   </div>
@@ -794,6 +798,50 @@ footer span{color:var(--orange);font-weight:700;}
   </div>
 </div>
 
+<!-- FORGOT PASSWORD MODAL -->
+<div class="overlay" id="overlay-forgot" onclick="handleOverlayClick(event,'overlay-forgot')">
+  <div class="auth-card">
+    <button class="auth-close" onclick="closeModal('overlay-forgot')">✕</button>
+    <div class="auth-logo">
+      <img src="/logo-vetnode.jpg" alt="VetNode">
+      <div class="auth-brand"><span class="v">Vet</span><span class="n">Node</span></div>
+    </div>
+    <h2 class="auth-title">Recuperar contraseña</h2>
+    <p class="auth-sub">Te enviamos un enlace a tu email para elegir una contraseña nueva</p>
+    <div class="auth-error" id="forgot-error"></div>
+    <div class="auth-success" id="forgot-success"></div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input class="auth-input" id="forgot-email" type="email" placeholder="tu@email.com" autocomplete="email">
+    </div>
+    <button class="auth-btn" id="forgot-btn" onclick="handleForgot()">Enviar enlace</button>
+    <p class="auth-switch"><a onclick="closeModal('overlay-forgot');setTimeout(openLogin,100)">Volver a iniciar sesión</a></p>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL (llega desde el enlace del email) -->
+<div class="overlay" id="overlay-reset">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="/logo-vetnode.jpg" alt="VetNode">
+      <div class="auth-brand"><span class="v">Vet</span><span class="n">Node</span></div>
+    </div>
+    <h2 class="auth-title">Elegí tu nueva contraseña</h2>
+    <p class="auth-sub">Mínimo 8 caracteres</p>
+    <div class="auth-error" id="reset-error"></div>
+    <div class="auth-success" id="reset-success"></div>
+    <div class="auth-field">
+      <label>Nueva contraseña</label>
+      <input class="auth-input" id="reset-password" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+    </div>
+    <div class="auth-field">
+      <label>Repetir contraseña</label>
+      <input class="auth-input" id="reset-password2" type="password" placeholder="Repetir contraseña" autocomplete="new-password">
+    </div>
+    <button class="auth-btn" id="reset-btn" onclick="handleReset()">Guardar y entrar →</button>
+  </div>
+</div>
+
 <script>
 // ── SUPABASE CONFIG ──
 // Replace with your actual Supabase URL and anon key
@@ -838,6 +886,8 @@ const supabase = {
 
 // ── CHECK SESSION ON LOAD ──
 window.addEventListener('DOMContentLoaded', () => {
+  // Enlace de recuperación de contraseña (llega con tokens en el hash de la URL)
+  if (handleRecoveryHash()) return;
   const session = supabase.auth.getSession();
   if (session?.access_token) {
     // Already logged in — redirect to app
@@ -880,6 +930,120 @@ function showSuccess(id, msg) {
   el.textContent = msg; el.classList.add('show');
 }
 
+// ── RECUPERAR CONTRASEÑA ──
+function openForgot() {
+  const fromLogin = document.getElementById('login-email').value.trim();
+  closeModal('overlay-login');
+  hideError('forgot-error');
+  document.getElementById('forgot-success').classList.remove('show');
+  const inp = document.getElementById('forgot-email');
+  if (fromLogin && !inp.value) inp.value = fromLogin;
+  document.getElementById('overlay-forgot').classList.add('open');
+  setTimeout(() => inp.focus(), 100);
+}
+async function handleForgot() {
+  const email = document.getElementById('forgot-email').value.trim();
+  hideError('forgot-error');
+  document.getElementById('forgot-success').classList.remove('show');
+  if (!email) { showError('forgot-error', 'Ingresá tu email.'); return; }
+  const btn = document.getElementById('forgot-btn');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  let cooldown = false;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ email })
+    });
+    if (r.ok) {
+      showSuccess('forgot-success', 'Si el email está registrado, te enviamos un enlace. Revisá también la carpeta de spam.');
+      cooldown = true;
+    } else {
+      let d = {}; try { d = await r.json(); } catch(e) {}
+      const ec = d.error_code || '';
+      if (r.status === 429 || /rate limit/i.test(ec) || /after \d+ seconds/i.test(String(d.msg || ''))) {
+        showError('forgot-error', 'Ya te enviamos un enlace hace instantes. Esperá un minuto antes de pedir otro y revisá tu bandeja de entrada y spam.');
+      } else {
+        showError('forgot-error', 'No pudimos enviar el enlace. Probá de nuevo en unos minutos o escribinos a soporte@vetnode.app.');
+      }
+    }
+  } catch(e) {
+    showError('forgot-error', 'Error de conexión. Revisá tu internet.');
+  }
+  if (cooldown) {
+    let left = 60;
+    const t = setInterval(() => {
+      left--;
+      if (left <= 0) { clearInterval(t); btn.disabled = false; btn.textContent = 'Enviar enlace'; }
+      else btn.textContent = 'Reenviar en ' + left + 's';
+    }, 1000);
+    btn.textContent = 'Reenviar en 60s';
+  } else {
+    btn.disabled = false; btn.textContent = 'Enviar enlace';
+  }
+}
+// Devuelve true si la URL trae un enlace de recuperación (o un error de enlace vencido)
+function handleRecoveryHash() {
+  const raw = (location.hash || '').replace(/^#/, '');
+  if (!raw) return false;
+  const h = new URLSearchParams(raw);
+  if (h.get('type') === 'recovery' && h.get('access_token')) {
+    window.__recovery = { access_token: h.get('access_token'), refresh_token: h.get('refresh_token') || '', expires_in: h.get('expires_in') || '3600' };
+    history.replaceState(null, '', location.pathname + location.search);
+    document.getElementById('overlay-reset').classList.add('open');
+    setTimeout(() => document.getElementById('reset-password').focus(), 100);
+    return true;
+  }
+  if (h.get('error') || h.get('error_code')) {
+    history.replaceState(null, '', location.pathname + location.search);
+    openForgot();
+    showError('forgot-error', 'El enlace venció o ya fue usado. Pedí uno nuevo.');
+    return true;
+  }
+  return false;
+}
+async function handleReset() {
+  const p1 = document.getElementById('reset-password').value;
+  const p2 = document.getElementById('reset-password2').value;
+  hideError('reset-error');
+  if (p1.length < 8) { showError('reset-error', 'La contraseña debe tener al menos 8 caracteres.'); return; }
+  if (p1 !== p2) { showError('reset-error', 'Las contraseñas no coinciden.'); return; }
+  const rec = window.__recovery;
+  if (!rec) { showError('reset-error', 'El enlace no es válido. Pedí uno nuevo desde "¿Olvidaste tu contraseña?".'); return; }
+  const btn = document.getElementById('reset-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + rec.access_token },
+      body: JSON.stringify({ password: p1 })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const ec = d.error_code || '';
+      let msg;
+      if (ec === 'same_password') msg = 'La nueva contraseña debe ser distinta de la anterior.';
+      else if (ec === 'weak_password') msg = 'La contraseña es muy débil. Probá con una más larga o con números y símbolos.';
+      else msg = 'El enlace venció o no es válido. Pedí uno nuevo desde "¿Olvidaste tu contraseña?".';
+      showError('reset-error', msg);
+      btn.disabled = false; btn.textContent = 'Guardar y entrar →';
+      return;
+    }
+    if (d && d.id) {
+      const exp = Math.floor(Date.now() / 1000) + (parseInt(rec.expires_in, 10) || 3600);
+      supabase.auth.saveSession({ access_token: rec.access_token, token_type: 'bearer', expires_in: parseInt(rec.expires_in, 10) || 3600, expires_at: exp, refresh_token: rec.refresh_token, user: d });
+      showSuccess('reset-success', '✓ Contraseña actualizada. Entrando...');
+      setTimeout(() => { window.location.href = 'app.html'; }, 800);
+    } else {
+      showSuccess('reset-success', '✓ Contraseña actualizada. Ya podés iniciar sesión.');
+      setTimeout(() => { closeModal('overlay-reset'); openLogin(); }, 1200);
+    }
+  } catch(e) {
+    showError('reset-error', 'Error de conexión. Revisá tu internet.');
+    btn.disabled = false; btn.textContent = 'Guardar y entrar →';
+  }
+}
+
 // ── LOGIN ──
 async function handleLogin() {
   const email = document.getElementById('login-email').value.trim();
@@ -891,7 +1055,15 @@ async function handleLogin() {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      showError('login-error', error.message === 'Invalid login credentials' ? 'Email o contraseña incorrectos.' : error.message || 'Error al iniciar sesión.');
+      // Supabase Auth devuelve { code, error_code, msg } (no "message")
+      const raw = String(error.msg || error.message || error.error_description || '');
+      const ec = error.error_code || '';
+      let msg;
+      if (ec === 'invalid_credentials' || /invalid login credentials/i.test(raw)) msg = 'Email o contraseña incorrectos.';
+      else if (ec === 'email_not_confirmed' || /email not confirmed/i.test(raw)) msg = 'Todavía no confirmaste tu email. Revisá tu bandeja de entrada (y spam) y hacé clic en el enlace.';
+      else if (ec === 'over_request_rate_limit' || error.code === 429 || /rate limit/i.test(raw)) msg = 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.';
+      else msg = 'No pudimos iniciar sesión. Si el problema sigue, escribinos a soporte@vetnode.app.';
+      showError('login-error', msg);
       btn.disabled = false; btn.textContent = 'Ingresar a VetNode';
       return;
     }
